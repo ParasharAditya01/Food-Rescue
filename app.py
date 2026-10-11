@@ -213,8 +213,19 @@ def create_session():
     if role == "admin" and (not ADMIN_ACCESS_CODE or not secrets.compare_digest(code, ADMIN_ACCESS_CODE)):
         return error("Admin code is incorrect. Ask the project owner for authorized access.", 403)
 
-    token = secrets.token_urlsafe(32)
     db = get_db()
+    existing_roles = {
+        row["role"] for row in db.execute(
+            "SELECT DISTINCT role FROM sessions WHERE lower(email) = ?", (email,)
+        ).fetchall()
+    }
+    if existing_roles and (len(existing_roles) != 1 or role not in existing_roles):
+        return error(
+            "This email cannot sign in with the selected role. Contact the Host if your role needs to be changed.",
+            403,
+        )
+
+    token = secrets.token_urlsafe(32)
     db.execute(
         "INSERT INTO sessions(token,name,email,role,created_at,last_seen) VALUES(?,?,?,?,?,?)",
         (token, name, email, role, iso_now(), iso_now()),
@@ -267,7 +278,15 @@ def host_overview():
                 "createdAt": u["created_at"], "lastSeen": u["last_seen"],
                 "active": bool(u["last_seen"] and (utc_now() - datetime.fromisoformat(u["last_seen"])).total_seconds() <= 180)
             } for u in users],
-            "listings": [listing_to_dict(row, db) | {"createdBy": row["created_by"]} for row in listings],
+            "listings": [
+                listing_to_dict(row, db) | {
+                    "createdBy": (
+                        "Host" if HOST_EMAIL and row["created_by"].strip().lower() == HOST_EMAIL
+                        else row["created_by"]
+                    )
+                }
+                for row in listings
+            ],
             "reservations": [{
                 "id": r["id"], "listingId": r["listing_id"], "foodName": r["food_name"] or "(deleted listing)",
                 "studentName": r["user_name"],
