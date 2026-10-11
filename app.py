@@ -12,7 +12,7 @@ from flask import Flask, g, jsonify, request, send_from_directory
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = Path(os.environ.get("CAMPUS_FOOD_DB", BASE_DIR / "database.db"))
 # Change this before demoing publicly. Set CAMPUS_ADMIN_CODE in your environment.
-ADMIN_ACCESS_CODE = os.environ.get("CAMPUS_ADMIN_CODE", "CAMPUS-ADMIN-2026")
+ADMIN_ACCESS_CODE = os.environ.get("CAMPUS_ADMIN_CODE", "ONLY-ADMIN")
 
 app = Flask(__name__, static_folder=None)
 app.config["JSON_SORT_KEYS"] = False
@@ -42,6 +42,16 @@ CREATE TABLE IF NOT EXISTS reservations (
 );
 CREATE INDEX IF NOT EXISTS idx_listings_deadline ON listings(deadline);
 CREATE INDEX IF NOT EXISTS idx_reservations_listing ON reservations(listing_id);
+CREATE TABLE IF NOT EXISTS admin_notifications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    listing_id TEXT NOT NULL,
+    food_name TEXT NOT NULL,
+    student_name TEXT NOT NULL,
+    student_email TEXT NOT NULL,
+    reserved_at TEXT NOT NULL,
+    seen_at TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_admin_notifications_seen ON admin_notifications(seen_at);
 CREATE TABLE IF NOT EXISTS sessions (
     token TEXT PRIMARY KEY,
     name TEXT NOT NULL,
@@ -175,6 +185,31 @@ def create_session():
     return jsonify({"token": token, "user": {"name": name, "email": email, "role": role}}), 201
 
 
+@app.get("/api/admin/notifications")
+def get_admin_notifications():
+    session, failure = current_session("admin")
+    if failure:
+        return failure
+    db = get_db()
+    rows = db.execute(
+        "SELECT id, listing_id, food_name, student_name, student_email, reserved_at, seen_at "
+        "FROM admin_notifications ORDER BY id DESC LIMIT 100"
+    ).fetchall()
+    notifications = [{
+        "id": row["id"], "listingId": row["listing_id"], "foodName": row["food_name"],
+        "studentName": row["student_name"], "studentEmail": row["student_email"],
+        "reservedAt": row["reserved_at"], "isNew": row["seen_at"] is None
+    } for row in rows]
+    new_ids = [row["id"] for row in rows if row["seen_at"] is None]
+    if new_ids:
+        placeholders = ",".join("?" for _ in new_ids)
+        db.execute(
+            f"UPDATE admin_notifications SET seen_at = ? WHERE id IN ({placeholders})",
+            [iso_now(), *new_ids],
+        )
+    return jsonify({"notifications": notifications, "newCount": len(new_ids)})
+
+
 @app.get("/api/session")
 def get_session():
     session, failure = current_session()
@@ -265,6 +300,12 @@ def reserve_portion(listing_id: str):
     session, failure = current_session("student")
     if failure:
         return failure
+    data = request.get_json(silent=True) or {}
+    confirmation_email = str(data.get("confirmationEmail", "")).strip().lower()
+    if not confirmation_email or not __import__("re").fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", confirmation_email):
+        return error("Enter a valid confirmation email address.")
+    if not secrets.compare_digest(confirmation_email, session["email"].strip().lower()):
+        return error("The confirmation email does not match the email you registered with. No portion was reserved.", 403)
     db = get_db()
     try:
         # Serialize check-and-decrement so concurrent requests cannot oversell the last portion.
@@ -284,9 +325,15 @@ def reserve_portion(listing_id: str):
         remaining = row["quantity"] - 1
         status = "claimed" if remaining == 0 else "available"
         db.execute("UPDATE listings SET quantity=?,status=? WHERE id=?", (remaining, status, listing_id))
+        reserved_at = iso_now()
         db.execute(
             "INSERT INTO reservations(listing_id,user_email,user_name,reserved_at,status) VALUES(?,?,?,?, 'reserved')",
-            (listing_id, session["email"], session["name"], iso_now()),
+            (listing_id, session["email"], session["name"], reserved_at),
+        )
+        db.execute(
+            "INSERT INTO admin_notifications(listing_id,food_name,student_name,student_email,reserved_at) "
+            "VALUES(?,?,?,?,?)",
+            (listing_id, row["name"], session["name"], session["email"], reserved_at),
         )
         db.commit()
         updated = db.execute("SELECT * FROM listings WHERE id=?", (listing_id,)).fetchone()
