@@ -287,6 +287,65 @@
     try { const data = await api('/api/listings'); listings = Array.isArray(data.listings) ? data.listings : []; render(); }
     catch (err) { $('cards').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Backend connection failed</h3><p>${escapeHtml(err.message)}</p></div>`; updateStats(); }
   }
+  function formatNotificationTime(value) {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? 'Time unavailable' : date.toLocaleString([], {dateStyle:'medium',timeStyle:'short'});
+  }
+  async function refreshAdminNotifications() {
+    const panel = $('adminNotifications');
+    if (!currentUser || currentUser.role !== 'admin') { panel.classList.remove('visible'); return; }
+    panel.classList.add('visible');
+    try {
+      const data = await api('/api/admin/notifications');
+      const notes = Array.isArray(data.notifications) ? data.notifications : [];
+      $('notificationCount').textContent = `${Number(data.newCount)||0} new`;
+      $('notificationList').innerHTML = notes.length ? notes.map(note => `
+        <article class="notification-item">
+          <p><strong>${escapeHtml(note.studentName)}</strong> reserved one portion of <strong>${escapeHtml(note.foodName)}</strong>${note.isNew ? '<span class="notification-new">NEW</span>' : ''}</p>
+          <p>Student email: ${escapeHtml(note.studentEmail)}</p>
+          <small>${escapeHtml(formatNotificationTime(note.reservedAt))}</small>
+        </article>`).join('') : '<div class="notification-empty">No reservations yet. New student reservations will appear here.</div>';
+    } catch (err) {
+      $('notificationList').innerHTML = `<div class="notification-empty">Could not load notifications: ${escapeHtml(err.message)}</div>`;
+    }
+  }
+  function openConfirm(listingId) {
+    pendingListingId = listingId;
+    $('confirmEmail').value = '';
+    $('confirmError').classList.remove('show');
+    $('confirmBackdrop').classList.add('open');
+    setTimeout(() => $('confirmEmail').focus(), 50);
+  }
+  function closeConfirm() {
+    $('confirmBackdrop').classList.remove('open');
+    $('confirmForm').reset();
+    $('confirmError').classList.remove('show');
+    pendingListingId = '';
+  }
+  async function submitReservationConfirmation(e) {
+    e.preventDefault();
+    if (!pendingListingId) return;
+    const email = $('confirmEmail').value.trim().toLowerCase();
+    const errorEl = $('confirmError');
+    errorEl.classList.remove('show');
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errorEl.textContent = 'Enter a valid email address.';
+      errorEl.classList.add('show');
+      return;
+    }
+    const submit = $('confirmSubmit');
+    submit.disabled = true;
+    try {
+      const result = await api(`/api/listings/${encodeURIComponent(pendingListingId)}/reserve`, {method:'POST', body:JSON.stringify({confirmationEmail:email})});
+      closeConfirm();
+      await refreshListings();
+      showToast(result.remaining === 0 ? 'Last portion reserved. No portions remain.' : `One portion reserved. ${result.remaining} portion(s) remain.`);
+    } catch (err) {
+      errorEl.textContent = err.message;
+      errorEl.classList.add('show');
+      await refreshListings();
+    } finally { submit.disabled = false; }
+  }
   async function createListing(e) {
     e.preventDefault();
     if (!currentUser || currentUser.role !== 'admin') { formError('Only admins can publish food listings.'); return; }
