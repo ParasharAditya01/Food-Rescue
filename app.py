@@ -68,7 +68,6 @@ CREATE TABLE IF NOT EXISTS host_sessions (
     created_at TEXT NOT NULL,
     last_seen TEXT NOT NULL
 );
-CREATE INDEX IF NOT EXISTS idx_sessions_last_seen ON sessions(last_seen);
 """
 
 
@@ -113,6 +112,7 @@ def init_db() -> None:
         if "last_seen" not in session_columns:
             conn.execute("ALTER TABLE sessions ADD COLUMN last_seen TEXT NOT NULL DEFAULT ''")
             conn.execute("UPDATE sessions SET last_seen = created_at WHERE last_seen = ''")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_sessions_last_seen ON sessions(last_seen)")
         conn.commit()
     finally:
         conn.close()
