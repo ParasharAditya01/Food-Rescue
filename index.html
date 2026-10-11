@@ -116,8 +116,7 @@
   @media(max-width:650px){.hero{min-height:calc(100svh - 65px);padding:42px 20px 52px}.hero-grid{grid-template-columns:1fr;gap:4px}.hero h1{font-size:clamp(43px,12vw,59px);line-height:1.02;letter-spacing:-.055em;margin:17px 0}.hero p{font-size:13px;line-height:1.7}.hero-art{min-height:330px;transform:none;margin:0 auto;width:min(100%,440px)}.orbit.outer-orbit{width:310px;height:310px}.orbit{width:245px;height:245px}.plate{width:190px;height:190px}.plate-inner{font-size:70px}.steam{top:calc(50% - 125px);scale:.8}.hero-stamp{top:2%;left:1%;font-size:8px;padding:8px 10px}.ingredient.tomato{top:15%;left:4%}.ingredient.leaf{right:3%;bottom:16%}.ingredient.bread{left:8%;bottom:10%}.float-chip{font-size:9px;padding:9px 11px}.float-chip strong{font-size:15px}.chip-one{top:15%;right:-1%}.chip-two{bottom:5%;left:-1%}.hero-scroll{bottom:12px}.hero-note{font-size:10px}.hero-buttons{margin-top:20px}.btn-primary,.btn-secondary{padding:13px 15px}}
   @media(prefers-reduced-motion:reduce){.hero-copy,.plate,.plate:after,.steam i,.ingredient,.hero-stamp,.hero-scroll:after{animation:none!important}.hero-copy{opacity:1;transform:none}}
 
-</style>
-</head>
+  .host-link{margin-top:14px;width:100%;background:transparent;border:1px solid #dbe4d8;color:#246b4b;border-radius:10px;padding:11px;font-weight:700}.host-overlay{display:none;position:fixed;inset:0;z-index:1000;background:#101b16d9;backdrop-filter:blur(8px);padding:20px;overflow:auto}.host-card{background:#f7f8f2;color:#17231c;border-radius:20px;max-width:1050px;margin:4vh auto;padding:clamp(18px,3vw,32px);box-shadow:0 24px 80px #0005}.host-card.login{max-width:440px;margin:10vh auto}.host-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.host-head h2{margin:0;font:800 25px Manrope,sans-serif}.host-actions{display:flex;gap:8px;flex-wrap:wrap}.host-btn{border:0;border-radius:9px;padding:10px 13px;font-weight:700;background:#246b4b;color:white}.host-btn.secondary{background:#e5ebdf;color:#17231c}.host-btn.danger{background:#a93232;color:white}.host-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:22px 0}.host-stat,.host-section{background:white;border:1px solid #e2e8de;border-radius:13px;padding:15px}.host-stat small{display:block;color:#728076}.host-stat strong{display:block;font:800 25px Manrope,sans-serif;margin-top:5px}.host-section{margin:12px 0;overflow-x:auto}.host-section h3{margin:0 0 12px;font:800 17px Manrope,sans-serif}.host-table{width:100%;border-collapse:collapse;font-size:13px;min-width:620px}.host-table th,.host-table td{text-align:left;padding:10px 8px;border-bottom:1px solid #e9eee6;vertical-align:top}.host-table th{color:#66766a;font-size:11px;text-transform:uppercase;letter-spacing:.6px}.host-table select{padding:7px;border:1px solid #d5dfd1;border-radius:8px}.host-field{display:grid;gap:6px;margin:12px 0}.host-field input{width:100%;padding:12px;border:1px solid #d5dfd1;border-radius:9px;background:white}.host-error{color:#a93232;font-size:13px;margin:8px 0;white-space:pre-wrap}.host-note{color:#728076;font-size:12px;line-height:1.5}.host-status{font-size:11px;font-weight:800;padding:4px 7px;border-radius:999px;background:#e5ebdf}.host-status.active{background:#e0f4d6;color:#23623c}@media(max-width:600px){.host-overlay{padding:8px}.host-card{margin:8px auto}.host-table{font-size:12px}}\n</style>\n</head>
 <body>
 <div class="auth-backdrop" id="authBackdrop" role="dialog" aria-modal="true" aria-labelledby="authTitle">
   <div class="auth-card">
@@ -133,6 +132,29 @@
       <button class="auth-submit" id="authSubmit" type="submit">Continue ↗</button>
     </form>
     <div class="auth-footnote">Email verification is disabled for this local prototype. Enter your details to continue. Admins must still provide the admin access code.</div>
+    <button class="host-link" id="openHostLogin">Host control panel</button>
+  </div>
+</div>
+<div class="host-overlay" id="hostLoginOverlay" role="dialog" aria-modal="true" aria-labelledby="hostLoginTitle">
+  <div class="host-card login">
+    <div class="host-head"><h2 id="hostLoginTitle">Host access</h2><button class="host-btn secondary" id="closeHostLogin" type="button">Close</button></div>
+    <p class="host-note">Restricted owner access. Use the designated Host email and the secret code configured on the backend.</p>
+    <form id="hostLoginForm">
+      <label class="host-field">Host email<input id="hostEmail" type="email" autocomplete="username" required value="adityaparashar0107@gmail.com"></label>
+      <label class="host-field">Host access code<input id="hostCode" type="password" autocomplete="current-password" required></label>
+      <div class="host-error" id="hostLoginError" role="alert"></div>
+      <button class="host-btn" type="submit" id="hostLoginSubmit">Sign in as Host</button>
+    </form>
+  </div>
+</div>
+<div class="host-overlay" id="hostDashboardOverlay" role="dialog" aria-modal="true" aria-labelledby="hostDashboardTitle">
+  <div class="host-card">
+    <div class="host-head"><div><h2 id="hostDashboardTitle">Host Control Panel</h2><p class="host-note" id="hostDashboardSub">Full website overview</p></div><div class="host-actions"><button class="host-btn secondary" id="hostRefresh">Refresh data</button><button class="host-btn danger" id="hostSignOut">Host sign out</button></div></div>
+    <div class="host-error" id="hostDashboardError" role="alert"></div>
+    <div class="host-grid" id="hostStats"></div>
+    <section class="host-section"><h3>Accounts & live activity</h3><p class="host-note">“Active” means the browser has checked in within the last 3 minutes. The app is a prototype and does not verify student identity by email.</p><div id="hostUsers"></div></section>
+    <section class="host-section"><h3>Published food listings</h3><div id="hostListings"></div></section>
+    <section class="host-section"><h3>Food reservations</h3><div id="hostReservations"></div></section>
   </div>
 </div>
 <div class="app auth-locked" id="mainApp">
@@ -428,8 +450,62 @@
       $('mainApp').classList.add('auth-locked'); $('authBackdrop').style.display='flex'; updateRoleUI(); await refreshListings();
     }
   }
+  let hostToken = sessionStorage.getItem('cfr_host_token') || '';
+  async function hostApi(path, options = {}) {
+    const headers = {'Content-Type':'application/json', ...(options.headers||{})};
+    if (hostToken) headers.Authorization = `Bearer ${hostToken}`;
+    let response;
+    try { response = await fetch(path, {...options, headers}); }
+    catch (_) { throw new Error('Cannot reach the backend. Check the deployment and try again.'); }
+    const data = await response.json().catch(()=>({}));
+    if (!response.ok) throw new Error(data.error || `Request failed (${response.status}).`);
+    return data;
+  }
+  function hostEscape(v){return escapeHtml(v == null ? '' : v);}
+  function hostTime(v){const d=new Date(v);return Number.isNaN(d.getTime())?'—':d.toLocaleString();}
+  function hostTable(headers, rows){return rows.length ? `<table class="host-table"><thead><tr>${headers.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table>` : '<p class="host-note">No records yet.</p>';}
+  async function loadHostDashboard(){
+    $('hostDashboardError').textContent='';
+    try{
+      const d=await hostApi('/api/host/overview');
+      const stats=[['Active now',d.summary.activeUsers],['Registered sessions',d.summary.users],['Admins',d.summary.admins],['Students',d.summary.students],['Food listings',d.summary.listings],['Reservations',d.summary.reservations]];
+      $('hostStats').innerHTML=stats.map(x=>`<div class="host-stat"><small>${x[0]}</small><strong>${Number(x[1])||0}</strong></div>`).join('');
+      $('hostUsers').innerHTML=hostTable(['Account','Role','Activity','Created','Controls'],d.users.map(u=>`<tr><td><strong>${hostEscape(u.name)}</strong><br>${hostEscape(u.email)}</td><td><select data-role-email="${hostEscape(u.email)}"><option value="student" ${u.role==='student'?'selected':''}>Student</option><option value="admin" ${u.role==='admin'?'selected':''}>Admin</option></select></td><td><span class="host-status ${u.active?'active':''}">${u.active?'ACTIVE':'INACTIVE'}</span><br><small>${hostEscape(hostTime(u.lastSeen))}</small></td><td>${hostEscape(hostTime(u.createdAt))}</td><td><button class="host-btn danger" data-revoke-email="${hostEscape(u.email)}">Sign out sessions</button></td></tr>`));
+      $('hostListings').innerHTML=hostTable(['Food','Status / quantity','Deadline','Published by','Action'],d.listings.map(x=>`<tr><td>${hostEscape(x.emoji)} <strong>${hostEscape(x.name)}</strong><br><small>${hostEscape(x.location)}</small><br><small>${hostEscape(x.contactNumber||'No contact')}</small></td><td>${hostEscape(x.status)} / ${Number(x.quantity)||0}</td><td>${hostEscape(hostTime(x.deadline))}</td><td>${hostEscape(x.createdBy)}</td><td><button class="host-btn danger" data-close-listing="${hostEscape(x.id)}">Close listing</button></td></tr>`));
+      $('hostReservations').innerHTML=hostTable(['Student','Food','Reserved at','Status'],d.reservations.map(r=>`<tr><td>${hostEscape(r.studentName)}<br><small>${hostEscape(r.studentEmail)}</small></td><td>${hostEscape(r.foodName)}</td><td>${hostEscape(hostTime(r.reservedAt))}</td><td>${hostEscape(r.status)}</td></tr>`));
+      $('hostDashboardSub').textContent=`Signed in as ${d.users.find(u=>u.email.toLowerCase()==='adityaparashar0107@gmail.com')?.email || 'authorized Host'} • refreshed ${new Date().toLocaleTimeString()}`;
+    }catch(e){$('hostDashboardError').textContent=e.message;}
+  }
+  async function openHostDashboard(){ $('hostDashboardOverlay').style.display='block'; $('hostLoginOverlay').style.display='none'; await loadHostDashboard(); }
+  $('openHostLogin').addEventListener('click',()=>{$('hostLoginError').textContent='';$('hostLoginOverlay').style.display='block';});
+  $('closeHostLogin').addEventListener('click',()=>{$('hostLoginOverlay').style.display='none';});
+  $('hostLoginForm').addEventListener('submit',async e=>{
+    e.preventDefault();$('hostLoginError').textContent='';$('hostLoginSubmit').disabled=true;
+    try{
+      const d=await fetch('/api/host/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:$('hostEmail').value.trim(),hostCode:$('hostCode').value})});
+      const data=await d.json().catch(()=>({}));
+      if(!d.ok)throw new Error(data.error||'Host login failed.');
+      hostToken=data.token;sessionStorage.setItem('cfr_host_token',hostToken);$('hostCode').value='';await openHostDashboard();
+    }catch(err){$('hostLoginError').textContent=err.message;}
+    finally{$('hostLoginSubmit').disabled=false;}
+  });
+  $('hostRefresh').addEventListener('click',loadHostDashboard);
+  $('hostSignOut').addEventListener('click',async()=>{try{await hostApi('/api/host/session',{method:'DELETE'});}catch(_){}hostToken='';sessionStorage.removeItem('cfr_host_token');$('hostDashboardOverlay').style.display='none';});
+  $('hostDashboardOverlay').addEventListener('click',async e=>{
+    const role=e.target.closest('select[data-role-email]');
+    const revoke=e.target.closest('button[data-revoke-email]');
+    const close=e.target.closest('button[data-close-listing]');
+    try{
+      if(role){await hostApi('/api/host/users/role',{method:'PATCH',body:JSON.stringify({email:role.dataset.roleEmail,role:role.value})});await loadHostDashboard();}
+      if(revoke){if(confirm('Sign out all sessions for '+revoke.dataset.revokeEmail+'?')){await hostApi('/api/host/users/sessions',{method:'DELETE',body:JSON.stringify({email:revoke.dataset.revokeEmail})});await loadHostDashboard();}}
+      if(close){if(confirm('Close this food listing? Reservation history will be preserved.')){await hostApi('/api/host/listings/'+encodeURIComponent(close.dataset.closeListing),{method:'DELETE'});await loadHostDashboard();await refreshListings();}}
+    }catch(err){$('hostDashboardError').textContent=err.message;}
+  });
+  // Restore a Host session on reload if its token is still valid.
+  if(hostToken){openHostDashboard().catch(()=>{});}
   // The API is the source of truth; refresh periodically so deadline changes are reflected.
-  restoreSession(); setInterval(()=>{if(document.visibilityState==='visible')refreshListings();},30000);
+  restoreSession();
+  setInterval(()=>{if(document.visibilityState==='visible'){refreshListings();if(sessionToken)api('/api/session').catch(()=>{});if(hostToken&&$('hostDashboardOverlay').style.display==='block')loadHostDashboard();}},30000);
 })();
 
 </script>
