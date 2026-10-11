@@ -214,10 +214,160 @@
     }
   }
 
+
+  /* Premium registration experience: editorial split layout, layered artwork, and purposeful micro-interactions. */
+  .auth-backdrop{padding:clamp(14px,3vw,38px);background:radial-gradient(ellipse at 12% 18%,#25483188,transparent 38%),rgba(5,13,8,.88);backdrop-filter:blur(18px);overflow-y:auto}
+  .auth-layout{width:min(100%,1060px);min-height:min(690px,calc(100svh - 60px));display:grid;grid-template-columns:1.02fr .98fr;border:1px solid #ffffff25;border-radius:30px;overflow:hidden;background:#fff;box-shadow:0 40px 130px #0007;animation:auth-layout-enter .8s cubic-bezier(.2,.8,.2,1) both;position:relative;isolation:isolate}
+  .auth-showcase{position:relative;overflow:hidden;isolation:isolate;display:flex;flex-direction:column;justify-content:space-between;min-height:690px;padding:30px 34px 25px;background:radial-gradient(ellipse at 52% 58%,#2e5a3a 0%,#183522 42%,#101e15 100%);color:#f5f8ef}
+  .auth-showcase:before{content:"";position:absolute;inset:0;z-index:-1;opacity:.17;background-image:radial-gradient(#d8f4bd 1px,transparent 1px);background-size:19px 19px;mask-image:linear-gradient(145deg,#000,transparent 85%)}
+  .auth-showcase:after{content:"";position:absolute;left:-35%;bottom:6%;width:170%;height:42%;border:1px solid #d4f4a11c;border-radius:50%;transform:rotate(-17deg);z-index:-1}
+  .showcase-top,.showcase-bottom{display:flex;align-items:center;justify-content:space-between;gap:10px;position:relative;z-index:2}
+  .showcase-top{font-size:9px;letter-spacing:1.6px;font-weight:800;color:#d9e8d5}
+  .showcase-symbol{width:35px;height:35px;display:grid;place-items:center;background:#c8f169;color:#153323;border-radius:12px;font-size:21px;box-shadow:0 0 30px #c8f16930}
+  .showcase-live{display:flex;align-items:center;gap:7px;padding:8px 10px;border:1px solid #ffffff26;border-radius:999px;background:#ffffff0a;font-size:8px;letter-spacing:1px}
+  .showcase-live i{width:6px;height:6px;border-radius:50%;background:#c8f169;box-shadow:0 0 0 4px #c8f16922;animation:showcase-pulse 1.8s infinite}
+  .showcase-copy{position:relative;z-index:2;margin-top:35px;animation:auth-copy-enter .8s .12s both}
+  .showcase-kicker{font-size:9px;letter-spacing:2.3px;font-weight:800;color:#c8f169}
+  .showcase-copy h2{font:800 clamp(37px,4vw,55px)/1.02 Manrope,sans-serif;letter-spacing:-2.8px;margin:15px 0 13px}
+  .showcase-copy h2 em{font-style:normal;color:#c8f169;text-shadow:0 0 30px #c8f16940}
+  .showcase-copy p{font-size:12px;line-height:1.8;color:#c2d1c2;max-width:290px;margin:0}
+  .showcase-art{position:relative;flex:1;min-height:260px;display:grid;place-items:center;margin:0 -10px;isolation:isolate}
+  .showcase-ring{position:absolute;width:245px;height:245px;border:1px solid #d7f4a139;border-radius:50%;animation:showcase-orbit 24s linear infinite}
+  .showcase-ring:before,.showcase-ring:after{content:"";position:absolute;width:9px;height:9px;border-radius:50%;background:#c8f169;box-shadow:0 0 18px #c8f1698a;top:35px;left:28px}
+  .showcase-ring:after{width:6px;height:6px;top:auto;left:auto;right:18px;bottom:48px;background:#f4a261}
+  .ring-b{width:310px;height:310px;border-color:#ffffff18;animation-direction:reverse;animation-duration:34s}
+  .ring-b:before{width:5px;height:5px;background:#fff;top:auto;left:50%;bottom:12px}
+  .showcase-plate{width:clamp(145px,17vw,190px);height:clamp(145px,17vw,190px);border-radius:50%;display:grid;place-items:center;background:linear-gradient(145deg,#fffde9,#d8e7ba 55%,#a3c879);border:10px solid #ffffff4f;box-shadow:inset 0 0 0 2px #fff9,0 28px 70px #0005,0 0 55px #c8f16923;animation:showcase-plate-float 4.2s ease-in-out infinite;position:relative}
+  .showcase-plate:after{content:"";position:absolute;inset:10px;border:1px dashed #7e9c5b80;border-radius:50%;animation:showcase-orbit 40s linear infinite}
+  .showcase-plate span{font-size:clamp(67px,7vw,88px);filter:drop-shadow(0 12px 8px #293b1b25);animation:showcase-food-pop 1.2s .4s both}
+  .showcase-food{position:absolute;display:grid;place-items:center;width:43px;height:43px;border:1px solid #ffffff38;border-radius:50%;background:#ffffff12;backdrop-filter:blur(10px);font-size:23px;box-shadow:0 12px 35px #0002;animation:showcase-float 5s ease-in-out infinite}
+  .food-tomato{left:14%;top:18%}.food-leaf{right:13%;bottom:17%;animation-delay:-2s}.food-bread{left:23%;bottom:12%;animation-delay:-3.2s}
+  .showcase-float{position:absolute;z-index:3;display:flex;align-items:center;gap:10px;padding:11px 13px;border:1px solid #ffffff30;border-radius:15px;background:#f8fbf1ed;color:#1c3322;box-shadow:0 18px 40px #0003;backdrop-filter:blur(12px);animation:showcase-float 5s ease-in-out infinite}
+  .float-top{right:0;top:14%}.float-bottom{left:0;bottom:11%;animation-delay:-2.5s}
+  .float-icon{width:29px;height:29px;display:grid;place-items:center;border-radius:10px;background:#e2f1cd;color:#2a633d;font-size:16px;font-weight:900}
+  .showcase-float b,.showcase-float small{display:block}.showcase-float b{font-size:10px}.showcase-float small{font-size:8px;color:#728071;margin-top:4px}
+  .showcase-bottom{font-size:8px;letter-spacing:1.5px;color:#a9bba8;font-weight:700}.showcase-dots{display:flex;gap:5px}.showcase-dots i{width:5px;height:5px;border-radius:50%;background:#c8f169}.showcase-dots i:nth-child(2){opacity:.55}.showcase-dots i:nth-child(3){opacity:.25}
+  .auth-card{width:auto;max-width:none;min-width:0;align-self:stretch;border-radius:0;padding:clamp(28px,4vw,48px) clamp(25px,4vw,52px);box-shadow:none;animation:auth-form-enter .8s .08s cubic-bezier(.2,.8,.2,1) both;display:flex;flex-direction:column;justify-content:center;position:relative}
+  .auth-card:before{content:"";position:absolute;top:0;right:0;width:190px;height:190px;background:radial-gradient(circle at top right,#c8f16922,transparent 70%);pointer-events:none}
+  .auth-brand{position:relative;gap:10px;margin-bottom:23px;font-size:12px;letter-spacing:.15px}
+  .auth-brand-mark{width:40px;height:40px;border-radius:14px;box-shadow:0 7px 20px #c8f1693b;animation:brand-pop 4s ease-in-out infinite}
+  .auth-step{display:flex;align-items:center;justify-content:space-between;margin:0 0 15px;font-size:8px;letter-spacing:1.4px;font-weight:900;color:#7c897e}
+  .auth-step span:last-child{display:flex;align-items:center;gap:7px;color:#315b3d;letter-spacing:.8px}
+  .auth-step i{display:inline-block;width:24px;height:3px;background:#c8f169;border-radius:99px}
+  .auth-card h1{font-size:clamp(27px,3vw,36px);line-height:1.1;letter-spacing:-1.7px;margin:0 0 10px;position:relative}
+  .auth-card h1 span{color:#33764d}
+  .auth-card>p{font-size:12px;line-height:1.75;color:#7a877b;margin:0 0 21px;max-width:370px}
+  #authForm{position:relative}
+  .auth-field{gap:8px;margin:14px 0}
+  .auth-field label{font-size:9px;letter-spacing:.8px;color:#4a5c4d}
+  .auth-field input,.auth-field select{min-height:47px;padding:13px 14px;border:1px solid #e0e7dc;border-radius:12px;background:#f9fbf7;font-size:12px;transition:border-color .25s,box-shadow .25s,background .25s,transform .25s}
+  .auth-field input:hover,.auth-field select:hover{border-color:#b8cdb1}
+  .auth-field input:focus,.auth-field select:focus{background:#fff;border-color:#6da87a;box-shadow:0 0 0 4px #6da87a1c,0 8px 20px #204c2a0c;transform:translateY(-1px)}
+  .auth-field input::placeholder{color:#a4afa4}
+  #authForm .auth-field:nth-child(1){animation:auth-field-enter .55s .12s both}
+  #authForm .auth-field:nth-child(2){animation:auth-field-enter .55s .2s both}
+  #authForm .auth-field:nth-child(3){animation:auth-field-enter .55s .28s both}
+  #authForm .auth-field:nth-child(4){animation:auth-field-enter .55s .36s both}
+  .auth-submit{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:51px;padding:0 17px;border-radius:13px;background:linear-gradient(105deg,#225b3b,#347a4c 55%,#225b3b);background-size:200% 100%;box-shadow:0 10px 24px #225b3b28;margin-top:18px;transition:transform .25s,box-shadow .25s,background-position .5s;position:relative;overflow:hidden}
+  .auth-submit span{font-size:12px;letter-spacing:.2px}.auth-submit b{display:grid;place-items:center;width:28px;height:28px;border-radius:9px;background:#ffffff1b;font-size:18px;transition:transform .25s}
+  .auth-submit:after{content:"";position:absolute;top:-80%;left:-50%;height:250%;width:30%;transform:rotate(25deg);background:linear-gradient(90deg,transparent,#ffffff60,transparent);animation:auth-button-shine 4s 1s infinite}
+  .auth-submit:hover{transform:translateY(-3px);box-shadow:0 16px 30px #225b3b35;background-position:100% 0}
+  .auth-submit:hover b{transform:translate(3px,-2px)}
+  .auth-submit:active{transform:translateY(0) scale(.99)}
+  .auth-submit:disabled{opacity:.7;cursor:wait;transform:none}
+  .auth-trust{display:flex;gap:10px;align-items:flex-start;padding:12px;margin-top:16px;border:1px solid #e8eee4;border-radius:12px;background:#fbfcf9}
+  .trust-check{display:grid;place-items:center;flex:0 0 20px;height:20px;border-radius:7px;background:#e4f3d5;color:#2c7044;font-size:11px;font-weight:900}
+  .auth-trust b,.auth-trust small{display:block}.auth-trust b{font-size:10px;color:#415744}.auth-trust small{font-size:9px;color:#8a958a;line-height:1.5;margin-top:3px}
+  .auth-footnote{font-size:9px;line-height:1.6;margin-top:10px;color:#8b968b}
+  .host-link{display:flex;align-items:center;justify-content:space-between;width:100%;padding:12px 0 0;margin-top:12px;border:0;border-top:1px solid #edf0e9;background:transparent;color:#3c7049;font-size:10px;font-weight:800;text-align:left;transition:color .2s}
+  .host-link span{font-size:14px;transition:transform .2s}.host-link:hover{color:#1b4d2d}.host-link:hover span{transform:translate(2px,-2px)}
+  @keyframes auth-layout-enter{from{opacity:0;transform:translateY(22px) scale(.985);filter:blur(8px)}to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+  @keyframes auth-copy-enter{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes auth-form-enter{from{opacity:0;transform:translateX(15px)}to{opacity:1;transform:translateX(0)}}
+  @keyframes auth-field-enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes showcase-orbit{to{transform:rotate(360deg)}}
+  @keyframes showcase-plate-float{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-10px) rotate(2deg)}}
+  @keyframes showcase-food-pop{from{opacity:0;transform:scale(.65) rotate(-15deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+  @keyframes showcase-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  @keyframes showcase-pulse{0%,100%{box-shadow:0 0 0 3px #c8f16918}50%{box-shadow:0 0 0 7px #c8f1690a}}
+  @media(max-width:850px){
+    .auth-backdrop{align-items:flex-start;padding:14px}
+    .auth-layout{grid-template-columns:1fr;width:min(100%,560px);min-height:0;max-height:none;margin:auto;border-radius:25px}
+    .auth-showcase{min-height:0;padding:20px 24px 0}
+    .showcase-top{justify-content:flex-start}.showcase-top>span:nth-child(2){margin-right:auto}
+    .showcase-copy{margin-top:25px}.showcase-copy h2{font-size:38px}
+    .showcase-copy p{max-width:390px}
+    .showcase-art{min-height:220px;margin-top:-5px}
+    .showcase-plate{width:145px;height:145px}.showcase-plate span{font-size:65px}
+    .showcase-ring{width:200px;height:200px}.ring-b{width:250px;height:250px}
+    .float-top{right:2%;top:9%}.float-bottom{left:1%;bottom:8%}
+    .showcase-bottom{padding:15px 0 18px}
+    .auth-card{padding:29px clamp(24px,6vw,42px) 27px}
+  }
+  @media(max-width:480px){
+    .auth-backdrop{padding:8px}
+    .auth-layout{border-radius:21px}
+    .auth-showcase{padding:17px 18px 0}
+    .showcase-symbol{width:31px;height:31px}.showcase-top{font-size:8px;letter-spacing:1px}
+    .showcase-live{font-size:7px;padding:7px 8px}
+    .showcase-copy{margin-top:22px}.showcase-copy h2{font-size:34px;letter-spacing:-1.8px}
+    .showcase-art{min-height:185px}
+    .showcase-plate{width:126px;height:126px;border-width:7px}.showcase-plate span{font-size:56px}
+    .showcase-ring{width:170px;height:170px}.ring-b{width:215px;height:215px}
+    .showcase-food{width:34px;height:34px;font-size:18px}
+    .showcase-float{padding:8px 9px;gap:7px;border-radius:12px}.showcase-float b{font-size:9px}.showcase-float small{font-size:7px}
+    .float-icon{width:24px;height:24px;font-size:13px}
+    .auth-card{padding:25px 21px 22px}
+    .auth-brand{margin-bottom:20px}.auth-card h1{font-size:29px}
+    .auth-trust{padding:10px}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .auth-layout,.showcase-live i,.showcase-ring,.showcase-plate,.showcase-plate span,.showcase-food,.showcase-float,.auth-brand-mark,
+    .auth-card,.auth-card h1,#authForm .auth-field,.auth-submit,.auth-submit:after,.host-link,.host-link span{
+      animation:none!important;transition:none!important;filter:none!important;transform:none!important
+    }
+  }
+
 </style>\n</head>
 <body>
 <div class="auth-backdrop" id="authBackdrop" role="dialog" aria-modal="true" aria-labelledby="authTitle">
-  <div class="auth-card">
+  <div class="auth-layout">
+    <aside class="auth-showcase" aria-label="Campus Food Rescue introduction">
+      <div class="showcase-orb orb-one"></div><div class="showcase-orb orb-two"></div>
+      <div class="showcase-top"><span class="showcase-symbol">✳</span><span>GOOD FOOD. GOOD PEOPLE.</span><span class="showcase-live"><i></i> LIVE NETWORK</span></div>
+      <div class="showcase-copy">
+        <span class="showcase-kicker">THE CAMPUS MOVEMENT</span>
+        <h2>Make surplus<br>mean <em>something.</em></h2>
+        <p>One campus. Less waste. More people getting the food they need.</p>
+      </div>
+      <div class="showcase-art" aria-hidden="true">
+        <div class="showcase-ring ring-a"></div><div class="showcase-ring ring-b"></div>
+        <div class="showcase-plate"><span>🥗</span></div>
+        <span class="showcase-food food-tomato">🍅</span><span class="showcase-food food-leaf">🌿</span><span class="showcase-food food-bread">🥖</span>
+        <div class="showcase-float float-top"><span class="float-icon">↗</span><span><b>Rescue a meal</b><small>Give good food a second chance</small></span></div>
+        <div class="showcase-float float-bottom"><span class="float-icon">✦</span><span><b>Make an impact</b><small>Every portion counts</small></span></div>
+      </div>
+      <div class="showcase-bottom"><span>BUILT FOR CAMPUS COMMUNITIES</span><span class="showcase-dots"><i></i><i></i><i></i></span></div>
+    </aside>
+    <div class="auth-card">
+    <div class="auth-brand"><span class="auth-brand-mark">♧</span><span>CAMPUS FOOD RESCUE<br><small style="font:500 10px 'DM Sans';letter-spacing:1.5px;color:#7b887d">COMMUNITY ACCESS</small></span></div>
+    <div class="auth-step"><span>CREATE YOUR ACCESS</span><span>01 <i></i> 01</span></div>
+    <h1 id="authTitle">Your campus.<br><span>Your community.</span></h1>
+    <p>Join the network to discover surplus food or share meals with students nearby.</p>
+    <form id="authForm" novalidate>
+      <div class="auth-field"><label for="authName">FULL NAME</label><input id="authName" maxlength="80" autocomplete="name" placeholder="e.g. Alex Morgan" required></div>
+      <div class="auth-field"><label for="authEmail">COLLEGE EMAIL</label><input id="authEmail" type="email" maxlength="254" autocomplete="email" placeholder="you@college.edu" required></div>
+      <div class="auth-field"><label for="authRole">HOW WILL YOU USE THE NETWORK?</label><select id="authRole"><option value="student">🎓  Student — find and reserve food</option><option value="admin">🍱  Admin / food provider — publish listings</option></select></div>
+      <div class="auth-field" id="adminCodeField" hidden><label for="adminCode">ADMIN ACCESS CODE</label><input id="adminCode" type="password" autocomplete="off" placeholder="Enter the admin code"></div>
+      <div class="auth-error" id="authError" role="alert"></div>
+      <button class="auth-submit" id="authSubmit" type="submit"><span>Join the network</span><b>↗</b></button>
+    </form>
+    <div class="auth-trust"><span class="trust-check">✓</span><span><b>Your details stay within the prototype</b><small>Use an email you can identify later. Email ownership is not verified.</small></span></div>
+    <div class="auth-footnote">Admin registration also requires a valid access code.</div>
+    <button class="host-link" id="openHostLogin">Host control panel <span>↗</span></button>
+    </div>
+  </div>
+</div>
     <div class="auth-brand"><span class="auth-brand-mark">♧</span><span>CAMPUS FOOD RESCUE<br><small style="font:500 10px 'DM Sans';letter-spacing:1.5px;color:#7b887d">COMMUNITY ACCESS</small></span></div>
     <h1 id="authTitle">Welcome to the campus.</h1>
     <p>Register to continue. Admins can publish food listings; students can browse and reserve food for pickup at the listed venue.</p>
@@ -230,7 +380,8 @@
       <button class="auth-submit" id="authSubmit" type="submit">Continue ↗</button>
     </form>
     <div class="auth-footnote">Email verification is disabled for this local prototype. Enter your details to continue. Admins must still provide the admin access code.</div>
-    <button class="host-link" id="openHostLogin">Host control panel</button>
+    <button class="host-link" id="openHostLogin">Host control panel <span>↗</span></button>
+    </div>
   </div>
 </div>
 <div class="host-overlay" id="hostLoginOverlay" role="dialog" aria-modal="true" aria-labelledby="hostLoginTitle">
