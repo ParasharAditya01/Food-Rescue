@@ -140,7 +140,7 @@
     <div class="host-head"><h2 id="hostLoginTitle">Host access</h2><button class="host-btn secondary" id="closeHostLogin" type="button">Close</button></div>
     <p class="host-note">Restricted owner access. Use the designated Host email and the secret code configured on the backend.</p>
     <form id="hostLoginForm">
-      <label class="host-field">Host email<input id="hostEmail" type="email" autocomplete="username" required value="adityaparashar0107@gmail.com"></label>
+      <label class="host-field">Host email<input id="hostEmail" type="email" autocomplete="off" placeholder="Enter Host email" required></label>
       <label class="host-field">Host access code<input id="hostCode" type="password" autocomplete="current-password" required></label>
       <div class="host-error" id="hostLoginError" role="alert"></div>
       <button class="host-btn" type="submit" id="hostLoginSubmit">Sign in as Host</button>
@@ -324,7 +324,6 @@
       $('notificationList').innerHTML = notes.length ? notes.map(note => `
         <article class="notification-item">
           <p><strong>${escapeHtml(note.studentName)}</strong> reserved one portion of <strong>${escapeHtml(note.foodName)}</strong>${note.isNew ? '<span class="notification-new">NEW</span>' : ''}</p>
-          <p>Student email: ${escapeHtml(note.studentEmail)}</p>
           <small>${escapeHtml(formatNotificationTime(note.reservedAt))}</small>
         </article>`).join('') : '<div class="notification-empty">No reservations yet. New student reservations will appear here.</div>';
     } catch (err) {
@@ -473,7 +472,7 @@
       $('hostUsers').innerHTML=hostTable(['Account','Role','Activity','Created','Controls'],d.users.map(u=>`<tr><td><strong>${hostEscape(u.name)}</strong><br>${hostEscape(u.email)}</td><td><select data-role-email="${hostEscape(u.email)}"><option value="student" ${u.role==='student'?'selected':''}>Student</option><option value="admin" ${u.role==='admin'?'selected':''}>Admin</option></select></td><td><span class="host-status ${u.active?'active':''}">${u.active?'ACTIVE':'INACTIVE'}</span><br><small>${hostEscape(hostTime(u.lastSeen))}</small></td><td>${hostEscape(hostTime(u.createdAt))}</td><td><button class="host-btn danger" data-revoke-email="${hostEscape(u.email)}">Sign out sessions</button></td></tr>`));
       $('hostListings').innerHTML=hostTable(['Food','Status / quantity','Deadline','Published by','Action'],d.listings.map(x=>`<tr><td>${hostEscape(x.emoji)} <strong>${hostEscape(x.name)}</strong><br><small>${hostEscape(x.location)}</small><br><small>${hostEscape(x.contactNumber||'No contact')}</small></td><td>${hostEscape(x.status)} / ${Number(x.quantity)||0}</td><td>${hostEscape(hostTime(x.deadline))}</td><td>${hostEscape(x.createdBy)}</td><td><button class="host-btn danger" data-close-listing="${hostEscape(x.id)}">Close listing</button></td></tr>`));
       $('hostReservations').innerHTML=hostTable(['Student','Food','Reserved at','Status'],d.reservations.map(r=>`<tr><td>${hostEscape(r.studentName)}<br><small>${hostEscape(r.studentEmail)}</small></td><td>${hostEscape(r.foodName)}</td><td>${hostEscape(hostTime(r.reservedAt))}</td><td>${hostEscape(r.status)}</td></tr>`));
-      $('hostDashboardSub').textContent=`Signed in as ${d.users.find(u=>u.email.toLowerCase()==='adityaparashar0107@gmail.com')?.email || 'authorized Host'} • refreshed ${new Date().toLocaleTimeString()}`;
+      $('hostDashboardSub').textContent=`Host control panel • refreshed ${new Date().toLocaleTimeString()}`;
     }catch(e){$('hostDashboardError').textContent=e.message;}
   }
   async function openHostDashboard(){ $('hostDashboardOverlay').style.display='block'; $('hostLoginOverlay').style.display='none'; await loadHostDashboard(); }
