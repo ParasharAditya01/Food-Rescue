@@ -168,7 +168,7 @@
       <div class="field"><label for="foodType">Food category</label><select id="foodType"><option value="🍱">Rice & meals</option><option value="🥪">Sandwiches</option><option value="🥗">Salads</option><option value="🍎">Fruit</option><option value="🥐">Bakery</option><option value="🍲">Other hot food</option></select></div>
       <div class="field full"><label for="location">Pickup location *</label><input id="location" maxlength="100" placeholder="e.g. Main canteen counter" required></div>
       <div class="field"><label for="contactNumber">Contact number (optional)</label><input id="contactNumber" type="tel" inputmode="tel" maxlength="25" placeholder="e.g. +91 98765 43210"></div>
-      <div class="field"><label for="pricePerPortion">Price per portion in ₹ (optional)</label><input id="pricePerPortion" type="number" min="0" max="1000000" step="0.01" placeholder="e.g. 25.00"><small>Leave blank if not applicable or free.</small></div>
+      <div class="field"><label for="pricePerPortion">Price per portion in ₹ (optional)</label><input id="pricePerPortion" type="number" min="0" max="1000000" step="0.01" placeholder="e.g. 25.00"><small>Leave blank to hide the price; enter 0 for free food.</small></div>
       <div class="field full"><label for="deadline">Collect before *</label><input id="deadline" type="datetime-local" required><small>Deadline must be in the future.</small></div>
     </div><div class="form-error" id="formError" role="alert"></div><button class="submit-listing" type="submit">Publish food listing ↗</button></form>
   </div>
