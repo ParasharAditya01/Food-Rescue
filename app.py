@@ -13,6 +13,8 @@ BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = Path(os.environ.get("CAMPUS_FOOD_DB", BASE_DIR / "database.db"))
 # Change this before demoing publicly. Set CAMPUS_ADMIN_CODE in your environment.
 ADMIN_ACCESS_CODE = os.environ.get("CAMPUS_ADMIN_CODE", "ONLY-ADMIN")
+HOST_ACCESS_CODE = os.environ.get("CAMPUS_HOST_CODE", "")
+HOST_EMAIL = os.environ.get("CAMPUS_HOST_EMAIL", "adityaparashar0107@gmail.com").strip().lower()
 
 app = Flask(__name__, static_folder=None)
 app.config["JSON_SORT_KEYS"] = False
