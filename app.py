@@ -62,6 +62,11 @@ CREATE TABLE IF NOT EXISTS sessions (
     created_at TEXT NOT NULL,
     last_seen TEXT NOT NULL DEFAULT ''
 );
+CREATE TABLE IF NOT EXISTS account_roles (
+    email TEXT PRIMARY KEY,
+    role TEXT NOT NULL CHECK (role IN ('admin','student')),
+    created_at TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS host_sessions (
     token TEXT PRIMARY KEY,
     email TEXT NOT NULL,
@@ -113,6 +118,18 @@ def init_db() -> None:
             conn.execute("ALTER TABLE sessions ADD COLUMN last_seen TEXT NOT NULL DEFAULT ''")
             conn.execute("UPDATE sessions SET last_seen = created_at WHERE last_seen = ''")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_sessions_last_seen ON sessions(last_seen)")
+        # Preserve account roles even after a user signs out and their session row is deleted.
+        conn.execute(
+            """
+            INSERT OR IGNORE INTO account_roles(email, role, created_at)
+            SELECT lower(email), MIN(role), MIN(created_at)
+            FROM sessions
+            WHERE lower(email) != ?
+            GROUP BY lower(email)
+            HAVING COUNT(DISTINCT role) = 1
+            """,
+            (HOST_EMAIL,),
+        )
         conn.commit()
     finally:
         conn.close()
@@ -214,16 +231,34 @@ def create_session():
         return error("Admin code is incorrect. Ask the project owner for authorized access.", 403)
 
     db = get_db()
-    existing_roles = {
-        row["role"] for row in db.execute(
-            "SELECT DISTINCT role FROM sessions WHERE lower(email) = ?", (email,)
-        ).fetchall()
-    }
-    if existing_roles and (len(existing_roles) != 1 or role not in existing_roles):
+    account = db.execute("SELECT role FROM account_roles WHERE email = ?", (email,)).fetchone()
+    if account is not None and account["role"] != role:
         return error(
             "This email cannot sign in with the selected role. Contact the Host if your role needs to be changed.",
             403,
         )
+    if account is None:
+        # Handle older databases that may already contain session rows but not account_roles.
+        existing_roles = {
+            row["role"] for row in db.execute(
+                "SELECT DISTINCT role FROM sessions WHERE lower(email) = ?", (email,)
+            ).fetchall()
+        }
+        if existing_roles and (len(existing_roles) != 1 or role not in existing_roles):
+            return error(
+                "This email cannot sign in with the selected role. Contact the Host if your role needs to be changed.",
+                403,
+            )
+        db.execute(
+            "INSERT OR IGNORE INTO account_roles(email,role,created_at) VALUES(?,?,?)",
+            (email, role, iso_now()),
+        )
+        account = db.execute("SELECT role FROM account_roles WHERE email = ?", (email,)).fetchone()
+        if account is None or account["role"] != role:
+            return error(
+                "This email cannot sign in with the selected role. Contact the Host if your role needs to be changed.",
+                403,
+            )
 
     token = secrets.token_urlsafe(32)
     db.execute(
@@ -323,9 +358,18 @@ def host_change_role():
     if not email or email == HOST_EMAIL:
         return error("That account cannot be changed.")
     db = get_db()
+    known_account = db.execute(
+        "SELECT email FROM account_roles WHERE email = ? UNION SELECT email FROM sessions WHERE lower(email) = ? LIMIT 1",
+        (email, email),
+    ).fetchone()
+    if known_account is None:
+        return error("No account was found for that email.", 404)
+    db.execute(
+        "INSERT INTO account_roles(email,role,created_at) VALUES(?,?,?) "
+        "ON CONFLICT(email) DO UPDATE SET role=excluded.role",
+        (email, role, iso_now()),
+    )
     cursor = db.execute("UPDATE sessions SET role = ? WHERE lower(email) = ?", (role, email))
-    if cursor.rowcount == 0:
-        return error("No registered sessions were found for that email.", 404)
     return jsonify({"ok": True, "updatedSessions": cursor.rowcount, "email": email, "role": role})
 
 
