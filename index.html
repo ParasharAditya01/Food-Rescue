@@ -334,6 +334,14 @@
   #openRegistration{background:var(--lime);color:#163322}
   #openRegistration:hover{box-shadow:0 8px 24px #c8f16935;transform:translateY(-2px)}
 
+
+  /* Reduce excess right-side whitespace while keeping a comfortable screen-edge inset. */
+  @media(min-width:651px){
+    .topbar{padding-right:clamp(18px,2.5vw,40px)}
+    .hero{padding-right:clamp(18px,2.5vw,40px)}
+    .main{max-width:1400px;padding-right:clamp(18px,2.5vw,40px)}
+    footer{padding-right:clamp(18px,2.5vw,40px)}
+  }
 </style>
 </head>
 <body>
