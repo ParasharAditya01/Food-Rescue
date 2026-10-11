@@ -24,6 +24,8 @@ CREATE TABLE IF NOT EXISTS listings (
     name TEXT NOT NULL,
     quantity INTEGER NOT NULL CHECK (quantity >= 0),
     location TEXT NOT NULL,
+    contact_number TEXT NOT NULL DEFAULT '',
+    price_per_portion REAL,
     deadline TEXT NOT NULL,
     emoji TEXT NOT NULL DEFAULT '🍽️',
     status TEXT NOT NULL DEFAULT 'available' CHECK (status IN ('available','claimed','expired')),
@@ -81,6 +83,12 @@ def init_db() -> None:
     conn = sqlite3.connect(DB_PATH)
     try:
         conn.executescript(SCHEMA)
+        # Safely upgrade databases created before contact/price fields existed.
+        columns = {row[1] for row in conn.execute("PRAGMA table_info(listings)")}
+        if "contact_number" not in columns:
+            conn.execute("ALTER TABLE listings ADD COLUMN contact_number TEXT NOT NULL DEFAULT ''")
+        if "price_per_portion" not in columns:
+            conn.execute("ALTER TABLE listings ADD COLUMN price_per_portion REAL")
         conn.commit()
     finally:
         conn.close()
@@ -102,7 +110,10 @@ def listing_to_dict(row: sqlite3.Row, db: sqlite3.Connection) -> dict[str, Any]:
     # Keep reserving students' names and email addresses private in the public listing API.
     return {
         "id": row["id"], "name": row["name"], "quantity": row["quantity"],
-        "location": row["location"], "deadline": row["deadline"],
+        "location": row["location"],
+        "contactNumber": row["contact_number"],
+        "pricePerPortion": row["price_per_portion"],
+        "deadline": row["deadline"],
         "emoji": row["emoji"], "status": row["status"],
         "createdAt": row["created_at"], "createdBy": row["created_by"],
         "reservationCount": reservation_count,
@@ -204,6 +215,8 @@ def create_listing():
     data = request.get_json(silent=True) or {}
     name = str(data.get("name", "")).strip()
     location = str(data.get("location", "")).strip()
+    contact_number = str(data.get("contactNumber", "")).strip()
+    raw_price = data.get("pricePerPortion")
     emoji = str(data.get("emoji", "🍽️")).strip()[:16] or "🍽️"
     quantity = data.get("quantity")
     deadline_raw = str(data.get("deadline", "")).strip()
@@ -211,6 +224,19 @@ def create_listing():
         return error("Food name is required and must be at most 120 characters.")
     if not location or len(location) > 100:
         return error("Pickup location is required and must be at most 100 characters.")
+    if len(contact_number) > 25 or (contact_number and not __import__("re").fullmatch(r"[+0-9() .-]{7,25}", contact_number)):
+        return error("Enter a valid contact number (7–25 characters), or leave it blank.")
+    price_per_portion = None
+    if raw_price is not None and str(raw_price).strip() != "":
+        if isinstance(raw_price, bool):
+            return error("Price must be a non-negative amount up to ₹1,000,000 per portion.")
+        try:
+            price_per_portion = float(raw_price)
+        except (TypeError, ValueError):
+            return error("Enter a valid price per portion, or leave it blank.")
+        import math
+        if not math.isfinite(price_per_portion) or not 0 <= price_per_portion <= 1_000_000 or round(price_per_portion, 2) != price_per_portion:
+            return error("Price must be ₹0–₹1,000,000 per portion, with up to 2 decimal places.")
     if isinstance(quantity, bool) or not isinstance(quantity, int) or not 1 <= quantity <= 500:
         return error("Enter a whole number of portions between 1 and 500.")
     try:
@@ -225,10 +251,10 @@ def create_listing():
     listing_id = secrets.token_urlsafe(12)
     db = get_db()
     db.execute(
-        "INSERT INTO listings(id,name,quantity,location,deadline,emoji,status,created_by,created_at) "
-        "VALUES(?,?,?,?,?,?,'available',?,?)",
-        (listing_id, name, quantity, location, deadline.isoformat(timespec="seconds"), emoji,
-         session["email"], iso_now()),
+        "INSERT INTO listings(id,name,quantity,location,contact_number,price_per_portion,deadline,emoji,status,created_by,created_at) "
+        "VALUES(?,?,?,?,?,?,?,?, 'available',?,?)",
+        (listing_id, name, quantity, location, contact_number, price_per_portion,
+         deadline.isoformat(timespec="seconds"), emoji, session["email"], iso_now()),
     )
     row = db.execute("SELECT * FROM listings WHERE id = ?", (listing_id,)).fetchone()
     return jsonify({"listing": listing_to_dict(row, db)}), 201
