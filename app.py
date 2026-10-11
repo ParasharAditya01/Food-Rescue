@@ -14,7 +14,7 @@ DB_PATH = Path(os.environ.get("CAMPUS_FOOD_DB", BASE_DIR / "database.db"))
 # Change this before demoing publicly. Set CAMPUS_ADMIN_CODE in your environment.
 ADMIN_ACCESS_CODE = os.environ.get("CAMPUS_ADMIN_CODE", "ONLY-ADMIN")
 HOST_ACCESS_CODE = os.environ.get("CAMPUS_HOST_CODE", "")
-HOST_EMAIL = os.environ.get("CAMPUS_HOST_EMAIL", "adityaparashar0107@gmail.com").strip().lower()
+HOST_EMAIL = os.environ.get("CAMPUS_HOST_EMAIL", "").strip().lower()
 
 app = Flask(__name__, static_folder=None)
 app.config["JSON_SORT_KEYS"] = False
@@ -131,7 +131,14 @@ def listing_to_dict(row: sqlite3.Row, db: sqlite3.Connection) -> dict[str, Any]:
     reservation_count = db.execute(
         "SELECT COUNT(*) FROM reservations WHERE listing_id = ?", (row["id"],)
     ).fetchone()[0]
-    # Keep reserving students' names and email addresses private in the public listing API.
+    # Public listings show the publisher's display name, never their email.
+    creator = db.execute(
+        "SELECT name FROM sessions WHERE lower(email) = lower(?) ORDER BY created_at DESC LIMIT 1",
+        (row["created_by"],),
+    ).fetchone()
+    created_by_display = "Host" if row["created_by"].strip().lower() == HOST_EMAIL and HOST_EMAIL else (
+        creator["name"] if creator else "Campus Admin"
+    )
     return {
         "id": row["id"], "name": row["name"], "quantity": row["quantity"],
         "location": row["location"],
@@ -139,7 +146,7 @@ def listing_to_dict(row: sqlite3.Row, db: sqlite3.Connection) -> dict[str, Any]:
         "pricePerPortion": row["price_per_portion"],
         "deadline": row["deadline"],
         "emoji": row["emoji"], "status": row["status"],
-        "createdAt": row["created_at"], "createdBy": row["created_by"],
+        "createdAt": row["created_at"], "createdBy": created_by_display,
         "reservationCount": reservation_count,
     }
 
@@ -199,6 +206,8 @@ def create_session():
         return error("Enter a name between 2 and 100 characters.")
     if len(email) > 254 or not __import__("re").fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email):
         return error("Enter a valid email address.")
+    if HOST_EMAIL and secrets.compare_digest(email, HOST_EMAIL):
+        return error("That email is reserved for Host access.")
     if role not in ("student", "admin"):
         return error("Choose student or admin.")
     if role == "admin" and (not ADMIN_ACCESS_CODE or not secrets.compare_digest(code, ADMIN_ACCESS_CODE)):
@@ -218,6 +227,8 @@ def create_host_session():
     data = request.get_json(silent=True) or {}
     email = str(data.get("email", "")).strip().lower()
     code = str(data.get("hostCode", ""))
+    if not HOST_EMAIL:
+        return error("Host email is not configured. Set CAMPUS_HOST_EMAIL on the backend.", 503)
     if not HOST_ACCESS_CODE:
         return error("Host access is not configured. Set CAMPUS_HOST_CODE on the backend.", 503)
     if not secrets.compare_digest(email, HOST_EMAIL) or not secrets.compare_digest(code, HOST_ACCESS_CODE):
@@ -228,7 +239,7 @@ def create_host_session():
         "INSERT INTO host_sessions(token,email,created_at,last_seen) VALUES(?,?,?,?)",
         (token, HOST_EMAIL, now, now),
     )
-    return jsonify({"token": token, "host": {"email": HOST_EMAIL}}), 201
+    return jsonify({"token": token, "host": {"name": "Host"}}), 201
 
 
 @app.get("/api/host/overview")
@@ -242,7 +253,9 @@ def host_overview():
         expire_listings(db)
         listings = db.execute("SELECT * FROM listings ORDER BY created_at DESC").fetchall()
         users = db.execute(
-            "SELECT name,email,role,created_at,last_seen FROM sessions ORDER BY last_seen DESC"
+            "SELECT name,email,role,created_at,last_seen FROM sessions "
+            "WHERE lower(email) != ? ORDER BY last_seen DESC",
+            (HOST_EMAIL,),
         ).fetchall()
         reservations = db.execute(
             "SELECT r.id,r.listing_id,r.user_email,r.user_name,r.reserved_at,r.status,l.name AS food_name "
@@ -257,7 +270,8 @@ def host_overview():
             "listings": [listing_to_dict(row, db) | {"createdBy": row["created_by"]} for row in listings],
             "reservations": [{
                 "id": r["id"], "listingId": r["listing_id"], "foodName": r["food_name"] or "(deleted listing)",
-                "studentName": r["user_name"], "studentEmail": r["user_email"],
+                "studentName": r["user_name"],
+                "studentEmail": "" if r["user_email"].strip().lower() == HOST_EMAIL else r["user_email"],
                 "reservedAt": r["reserved_at"], "status": r["status"]
             } for r in reservations],
             "summary": {
@@ -344,7 +358,7 @@ def get_admin_notifications():
     ).fetchall()
     notifications = [{
         "id": row["id"], "listingId": row["listing_id"], "foodName": row["food_name"],
-        "studentName": row["student_name"], "studentEmail": row["student_email"],
+        "studentName": row["student_name"],
         "reservedAt": row["reserved_at"], "isNew": row["seen_at"] is None
     } for row in rows]
     new_ids = [row["id"] for row in rows if row["seen_at"] is None]
@@ -362,7 +376,11 @@ def get_session():
     session, failure = current_session()
     if failure:
         return failure
-    return jsonify({"user": {"name": session["name"], "email": session["email"], "role": session["role"]}})
+    return jsonify({"user": {
+        "name": session["name"],
+        "email": "" if session["email"].strip().lower() == HOST_EMAIL else session["email"],
+        "role": session["role"]
+    }})
 
 
 @app.delete("/api/session")
