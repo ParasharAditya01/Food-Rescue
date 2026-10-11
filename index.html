@@ -374,17 +374,12 @@
     if (action !== 'reserve') return;
     if (!currentUser) { showToast('Register to continue.'); return; }
     if (currentUser.role !== 'student') { showToast('Switch to a student session to reserve food.'); return; }
-    button.disabled = true;
-    try {
-      const result = await api(`/api/listings/${encodeURIComponent(button.dataset.id)}/reserve`, {method:'POST', body:'{}'});
-      await refreshListings();
-      showToast(result.remaining === 0 ? 'Last portion reserved. No portions remain.' : `One portion reserved. ${result.remaining} portion(s) remain.`);
-    } catch (err) { showToast(err.message); await refreshListings(); }
-    finally { button.disabled = false; }
+    openConfirm(button.dataset.id);
   }
   function updateRoleUI() {
     const isAdmin = !!currentUser && currentUser.role === 'admin';
     ['navAdd','heroAdd','addListing'].forEach(id => { const el=$(id); if(el) el.hidden=!isAdmin; });
+    $('adminNotifications').classList.toggle('visible', isAdmin);
     $('sessionBar').style.display = currentUser ? 'flex' : 'none';
     if (currentUser) { $('sessionName').textContent=currentUser.name; $('sessionRole').textContent=isAdmin?'ADMIN':'STUDENT'; }
   }
@@ -403,10 +398,15 @@
       const name=$('authName').value.trim(), email=$('authEmail').value.trim(), role=$('authRole').value, adminCode=$('adminCode').value;
       const data = await api('/api/session',{method:'POST',body:JSON.stringify({name,email,role,adminCode})});
       sessionToken=data.token; currentUser=data.user; sessionStorage.setItem('cfr_session_token',sessionToken); sessionStorage.setItem('cfr_session_user',JSON.stringify(currentUser));
-      $('authBackdrop').style.display='none'; $('mainApp').classList.remove('auth-locked'); updateRoleUI(); await refreshListings(); showToast(currentUser.role==='admin'?'Admin access granted.':'You can now browse and reserve food.');
+      $('authBackdrop').style.display='none'; $('mainApp').classList.remove('auth-locked'); updateRoleUI(); await refreshListings();
+      if (currentUser.role === 'admin') await refreshAdminNotifications();
+      showToast(currentUser.role==='admin'?'Admin access granted.':'You can now browse and reserve food.');
     } catch (error) { err.textContent=error.message; err.classList.add('show'); }
     finally { $('authSubmit').disabled = false; }
   });
+  $('confirmForm').addEventListener('submit', submitReservationConfirmation);
+  $('cancelConfirm').addEventListener('click', closeConfirm);
+  $('confirmBackdrop').addEventListener('click', e => { if (e.target === $('confirmBackdrop')) closeConfirm(); });
   $('signOut').addEventListener('click',showRegistration);
   $('navAdd').addEventListener('click',openModal); $('heroAdd').addEventListener('click',openModal); $('addListing').addEventListener('click',openModal);
   $('findFood').addEventListener('click',()=>$('listings').scrollIntoView({behavior:'smooth'}));
@@ -422,6 +422,7 @@
       currentUser = data.user; sessionStorage.setItem('cfr_session_user', JSON.stringify(currentUser));
       $('authBackdrop').style.display='none'; $('mainApp').classList.remove('auth-locked'); updateRoleUI();
       await refreshListings();
+      if (currentUser.role === 'admin') await refreshAdminNotifications();
     } catch (_) {
       sessionToken=''; currentUser=null; sessionStorage.removeItem('cfr_session_token'); sessionStorage.removeItem('cfr_session_user');
       $('mainApp').classList.add('auth-locked'); $('authBackdrop').style.display='flex'; updateRoleUI(); await refreshListings();
