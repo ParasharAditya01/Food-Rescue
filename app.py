@@ -59,8 +59,16 @@ CREATE TABLE IF NOT EXISTS sessions (
     name TEXT NOT NULL,
     email TEXT NOT NULL,
     role TEXT NOT NULL CHECK (role IN ('admin','student')),
-    created_at TEXT NOT NULL
+    created_at TEXT NOT NULL,
+    last_seen TEXT NOT NULL DEFAULT ''
 );
+CREATE TABLE IF NOT EXISTS host_sessions (
+    token TEXT PRIMARY KEY,
+    email TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    last_seen TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_sessions_last_seen ON sessions(last_seen);
 """
 
 
@@ -101,6 +109,10 @@ def init_db() -> None:
             conn.execute("ALTER TABLE listings ADD COLUMN contact_number TEXT NOT NULL DEFAULT ''")
         if "price_per_portion" not in columns:
             conn.execute("ALTER TABLE listings ADD COLUMN price_per_portion REAL")
+        session_columns = {row[1] for row in conn.execute("PRAGMA table_info(sessions)")}
+        if "last_seen" not in session_columns:
+            conn.execute("ALTER TABLE sessions ADD COLUMN last_seen TEXT NOT NULL DEFAULT ''")
+            conn.execute("UPDATE sessions SET last_seen = created_at WHERE last_seen = ''")
         conn.commit()
     finally:
         conn.close()
@@ -145,8 +157,22 @@ def current_session(required_role: str | None = None):
     session = db.execute("SELECT * FROM sessions WHERE token = ?", (token,)).fetchone()
     if session is None:
         return None, error("Your session is no longer valid. Register again.", 401)
+    db.execute("UPDATE sessions SET last_seen = ? WHERE token = ?", (iso_now(), token))
     if required_role and session["role"] != required_role:
         return None, error(f"Only {required_role}s can perform this action.", 403)
+    return session, None
+
+
+def current_host():
+    header = request.headers.get("Authorization", "")
+    token = header[7:].strip() if header.lower().startswith("bearer ") else ""
+    if not token:
+        return None, error("Host login required.", 401)
+    db = get_db()
+    session = db.execute("SELECT * FROM host_sessions WHERE token = ?", (token,)).fetchone()
+    if session is None or session["email"].lower() != HOST_EMAIL:
+        return None, error("Host session is invalid. Sign in again.", 401)
+    db.execute("UPDATE host_sessions SET last_seen = ? WHERE token = ?", (iso_now(), token))
     return session, None
 
 
@@ -181,10 +207,129 @@ def create_session():
     token = secrets.token_urlsafe(32)
     db = get_db()
     db.execute(
-        "INSERT INTO sessions(token,name,email,role,created_at) VALUES(?,?,?,?,?)",
-        (token, name, email, role, iso_now()),
+        "INSERT INTO sessions(token,name,email,role,created_at,last_seen) VALUES(?,?,?,?,?,?)",
+        (token, name, email, role, iso_now(), iso_now()),
     )
     return jsonify({"token": token, "user": {"name": name, "email": email, "role": role}}), 201
+
+
+@app.post("/api/host/session")
+def create_host_session():
+    data = request.get_json(silent=True) or {}
+    email = str(data.get("email", "")).strip().lower()
+    code = str(data.get("hostCode", ""))
+    if not HOST_ACCESS_CODE:
+        return error("Host access is not configured. Set CAMPUS_HOST_CODE on the backend.", 503)
+    if not secrets.compare_digest(email, HOST_EMAIL) or not secrets.compare_digest(code, HOST_ACCESS_CODE):
+        return error("Host email or access code is incorrect.", 403)
+    token = secrets.token_urlsafe(40)
+    now = iso_now()
+    get_db().execute(
+        "INSERT INTO host_sessions(token,email,created_at,last_seen) VALUES(?,?,?,?)",
+        (token, HOST_EMAIL, now, now),
+    )
+    return jsonify({"token": token, "host": {"email": HOST_EMAIL}}), 201
+
+
+@app.get("/api/host/overview")
+def host_overview():
+    host, failure = current_host()
+    if failure:
+        return failure
+    db = get_db()
+    db.execute("BEGIN IMMEDIATE")
+    try:
+        expire_listings(db)
+        listings = db.execute("SELECT * FROM listings ORDER BY created_at DESC").fetchall()
+        users = db.execute(
+            "SELECT name,email,role,created_at,last_seen FROM sessions ORDER BY last_seen DESC"
+        ).fetchall()
+        reservations = db.execute(
+            "SELECT r.id,r.listing_id,r.user_email,r.user_name,r.reserved_at,r.status,l.name AS food_name "
+            "FROM reservations r LEFT JOIN listings l ON l.id=r.listing_id ORDER BY r.id DESC LIMIT 500"
+        ).fetchall()
+        result = {
+            "users": [{
+                "name": u["name"], "email": u["email"], "role": u["role"],
+                "createdAt": u["created_at"], "lastSeen": u["last_seen"],
+                "active": bool(u["last_seen"] and (utc_now() - datetime.fromisoformat(u["last_seen"])).total_seconds() <= 180)
+            } for u in users],
+            "listings": [listing_to_dict(row, db) | {"createdBy": row["created_by"]} for row in listings],
+            "reservations": [{
+                "id": r["id"], "listingId": r["listing_id"], "foodName": r["food_name"] or "(deleted listing)",
+                "studentName": r["user_name"], "studentEmail": r["user_email"],
+                "reservedAt": r["reserved_at"], "status": r["status"]
+            } for r in reservations],
+            "summary": {
+                "users": len(users),
+                "activeUsers": sum(1 for u in users if u["last_seen"] and (utc_now() - datetime.fromisoformat(u["last_seen"])).total_seconds() <= 180),
+                "admins": sum(1 for u in users if u["role"] == "admin"),
+                "students": sum(1 for u in users if u["role"] == "student"),
+                "listings": len(listings),
+                "reservations": db.execute("SELECT COUNT(*) FROM reservations").fetchone()[0]
+            }
+        }
+        db.commit()
+        return jsonify(result)
+    except Exception:
+        db.rollback()
+        app.logger.exception("Host overview failed")
+        return error("Could not load the Host dashboard.", 500)
+
+
+@app.patch("/api/host/users/role")
+def host_change_role():
+    host, failure = current_host()
+    if failure:
+        return failure
+    data = request.get_json(silent=True) or {}
+    email = str(data.get("email", "")).strip().lower()
+    role = str(data.get("role", "")).strip().lower()
+    if role not in ("admin", "student"):
+        return error("Role must be admin or student.")
+    if not email or email == HOST_EMAIL:
+        return error("That account cannot be changed.")
+    db = get_db()
+    cursor = db.execute("UPDATE sessions SET role = ? WHERE lower(email) = ?", (role, email))
+    if cursor.rowcount == 0:
+        return error("No registered sessions were found for that email.", 404)
+    return jsonify({"ok": True, "updatedSessions": cursor.rowcount, "email": email, "role": role})
+
+
+@app.delete("/api/host/users/sessions")
+def host_revoke_sessions():
+    host, failure = current_host()
+    if failure:
+        return failure
+    data = request.get_json(silent=True) or {}
+    email = str(data.get("email", "")).strip().lower()
+    if not email or email == HOST_EMAIL:
+        return error("That account cannot be signed out by this action.")
+    cursor = get_db().execute("DELETE FROM sessions WHERE lower(email) = ?", (email,))
+    return jsonify({"ok": True, "revokedSessions": cursor.rowcount})
+
+
+@app.delete("/api/host/listings/<listing_id>")
+def host_delete_listing(listing_id: str):
+    host, failure = current_host()
+    if failure:
+        return failure
+    db = get_db()
+    exists = db.execute("SELECT id FROM listings WHERE id = ?", (listing_id,)).fetchone()
+    if exists is None:
+        return error("Listing not found.", 404)
+    # Preserve reservation history; listing rows are retained, but hidden from public browsing.
+    db.execute("UPDATE listings SET quantity=0,status='claimed' WHERE id=?", (listing_id,))
+    return jsonify({"ok": True, "message": "Listing closed and removed from availability."})
+
+
+@app.delete("/api/host/session")
+def delete_host_session():
+    header = request.headers.get("Authorization", "")
+    token = header[7:].strip() if header.lower().startswith("bearer ") else ""
+    if token:
+        get_db().execute("DELETE FROM host_sessions WHERE token = ?", (token,))
+    return jsonify({"ok": True})
 
 
 @app.get("/api/admin/notifications")
