@@ -182,6 +182,7 @@
   try { currentUser = JSON.parse(sessionStorage.getItem('cfr_session_user') || 'null'); } catch (_) { currentUser = null; }
   let listings = [];
   let toastTimer;
+  let pendingListingId = "";
   const $ = id => document.getElementById(id);
 
   async function api(path, options = {}) {
