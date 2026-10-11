@@ -328,6 +328,11 @@
     }
   }
 
+  /* Registration opens on request; the public homepage remains the default view. */
+  .auth-backdrop{display:none}
+  #openRegistration{background:var(--lime);color:#163322}
+  #openRegistration:hover{box-shadow:0 8px 24px #c8f16935;transform:translateY(-2px)}
+
 </style>\n</head>
 <body>
 <div class="auth-backdrop" id="authBackdrop" role="dialog" aria-modal="true" aria-labelledby="authTitle">
@@ -368,22 +373,6 @@
     </div>
   </div>
 </div>
-    <div class="auth-brand"><span class="auth-brand-mark">♧</span><span>CAMPUS FOOD RESCUE<br><small style="font:500 10px 'DM Sans';letter-spacing:1.5px;color:#7b887d">COMMUNITY ACCESS</small></span></div>
-    <h1 id="authTitle">Welcome to the campus.</h1>
-    <p>Register to continue. Admins can publish food listings; students can browse and reserve food for pickup at the listed venue.</p>
-    <form id="authForm" novalidate>
-      <div class="auth-field"><label for="authName">Full name</label><input id="authName" maxlength="80" autocomplete="name" placeholder="Enter your name" required></div>
-      <div class="auth-field"><label for="authEmail">Email address</label><input id="authEmail" type="email" maxlength="254" autocomplete="email" placeholder="you@example.com" required></div>
-      <div class="auth-field"><label for="authRole">Register as</label><select id="authRole"><option value="student">Student</option><option value="admin">Admin / Food provider</option></select></div>
-      <div class="auth-field" id="adminCodeField" hidden><label for="adminCode">Admin access code</label><input id="adminCode" type="password" autocomplete="off" placeholder="Enter the admin code"></div>
-      <div class="auth-error" id="authError" role="alert"></div>
-      <button class="auth-submit" id="authSubmit" type="submit">Continue ↗</button>
-    </form>
-    <div class="auth-footnote">Email verification is disabled for this local prototype. Enter your details to continue. Admins must still provide the admin access code.</div>
-    <button class="host-link" id="openHostLogin">Host control panel <span>↗</span></button>
-    </div>
-  </div>
-</div>
 <div class="host-overlay" id="hostLoginOverlay" role="dialog" aria-modal="true" aria-labelledby="hostLoginTitle">
   <div class="host-card login">
     <div class="host-head"><h2 id="hostLoginTitle">Host access</h2><button class="host-btn secondary" id="closeHostLogin" type="button">Close</button></div>
@@ -406,11 +395,11 @@
     <section class="host-section"><h3>Food reservations</h3><div id="hostReservations"></div></section>
   </div>
 </div>
-<div class="app auth-locked" id="mainApp">
+<div class="app" id="mainApp">
   <header class="topbar">
     <a href="#home" class="brand" style="text-decoration:none;color:inherit"><div class="brand-mark">✳</div><span>campus<span><small>FOOD RESCUE NETWORK</small></span></span></a>
     <nav class="nav"><a href="#listings">Find food</a><a href="#how-it-works">How it works</a><a href="#safety">Food safety</a></nav>
-    <div class="session-bar" id="sessionBar"><span>Signed in as <strong id="sessionName"></strong><span class="role-chip" id="sessionRole"></span></span><button class="signout-btn" id="signOut">Sign out</button></div><button class="top-action" id="navAdd">+ Post surplus</button><button class="top-action" id="openHostLoginMain" style="margin-left:8px;background:#fff;color:#173323">Host</button>
+    <div class="session-bar" id="sessionBar"><span>Signed in as <strong id="sessionName"></strong><span class="role-chip" id="sessionRole"></span></span><button class="signout-btn" id="signOut">Sign out</button></div><button class="top-action" id="navAdd">+ Post surplus</button><button class="top-action" id="openRegistration" type="button" style="margin-left:8px">Join network ↗</button><button class="top-action" id="openHostLoginMain" style="margin-left:8px;background:#fff;color:#173323">Host</button>
   </header>
   <section class="hero" id="home">
     <div class="hero-grid">
@@ -642,7 +631,7 @@
     const action = button.dataset.action;
     if (action === 'add-from-empty') { openModal(); return; }
     if (action !== 'reserve') return;
-    if (!currentUser) { showToast('Register to continue.'); return; }
+    if (!currentUser) { showRegistration(); return; }
     if (currentUser.role !== 'student') { showToast('Switch to a student session to reserve food.'); return; }
     openConfirm(button.dataset.id);
   }
@@ -651,12 +640,14 @@
     ['navAdd','heroAdd','addListing'].forEach(id => { const el=$(id); if(el) el.hidden=!isAdmin; });
     $('adminNotifications').classList.toggle('visible', isAdmin);
     $('sessionBar').style.display = currentUser ? 'flex' : 'none';
+    $('openRegistration').style.display = currentUser ? 'none' : 'inline-flex';
     if (currentUser) { $('sessionName').textContent=currentUser.name; $('sessionRole').textContent=isAdmin?'ADMIN':'STUDENT'; }
   }
-  async function showRegistration() {
-    if (sessionToken) { try { await api('/api/session',{method:'DELETE'}); } catch (_) {} }
-    sessionToken=''; currentUser=null; sessionStorage.removeItem('cfr_session_token'); sessionStorage.removeItem('cfr_session_user'); $('mainApp').classList.add('auth-locked'); $('authBackdrop').style.display='flex';
-    $('authForm').reset(); $('authEmail').readOnly=false; $('authName').readOnly=false; $('authRole').disabled=false; $('authSubmit').textContent='Continue ↗'; $('adminCodeField').hidden=true; $('authError').classList.remove('show'); updateRoleUI();
+  function showRegistration() {
+    $('authBackdrop').style.display='flex';
+    $('authForm').reset(); $('authEmail').readOnly=false; $('authName').readOnly=false; $('authRole').disabled=false;
+    $('authSubmit').disabled=false; $('authSubmit').innerHTML='<span>Join the network</span><b>↗</b>';
+    $('adminCodeField').hidden=true; $('authError').classList.remove('show'); $('authError').style.background=''; $('authError').style.color='';
     setTimeout(()=>$('authName').focus(),50);
   }
   $('authRole').addEventListener('change',()=>{$('adminCodeField').hidden=$('authRole').value!=='admin';$('authError').classList.remove('show');});
@@ -677,7 +668,12 @@
   $('confirmForm').addEventListener('submit', submitReservationConfirmation);
   $('cancelConfirm').addEventListener('click', closeConfirm);
   $('confirmBackdrop').addEventListener('click', e => { if (e.target === $('confirmBackdrop')) closeConfirm(); });
-  $('signOut').addEventListener('click',showRegistration);
+  $('signOut').addEventListener('click',async()=>{
+    if(sessionToken){try{await api('/api/session',{method:'DELETE'});}catch(_){}}
+    sessionToken='';currentUser=null;sessionStorage.removeItem('cfr_session_token');sessionStorage.removeItem('cfr_session_user');
+    $('authBackdrop').style.display='none';$('mainApp').classList.remove('auth-locked');updateRoleUI();await refreshListings();showToast('You have signed out.');
+  });
+  $('openRegistration').addEventListener('click',showRegistration);
   $('navAdd').addEventListener('click',openModal); $('heroAdd').addEventListener('click',openModal); $('addListing').addEventListener('click',openModal);
   $('findFood').addEventListener('click',()=>$('listings').scrollIntoView({behavior:'smooth'}));
   $('closeModal').addEventListener('click',closeModal); $('modalBackdrop').addEventListener('click',e=>{if(e.target===$('modalBackdrop'))closeModal();});
@@ -686,7 +682,7 @@
   document.addEventListener('pointermove',e=>{if(e.pointerType==='touch')return;document.documentElement.style.setProperty('--pointer-x',e.clientX+'px');document.documentElement.style.setProperty('--pointer-y',e.clientY+'px');},{passive:true});
   // Restore a valid login after refresh. sessionStorage is cleared when the tab/browser session ends.
   async function restoreSession() {
-    if (!sessionToken || !currentUser) { await showRegistration(); await refreshListings(); return; }
+    if (!sessionToken || !currentUser) { $('authBackdrop').style.display='none'; $('mainApp').classList.remove('auth-locked'); updateRoleUI(); await refreshListings(); return; }
     try {
       const data = await api('/api/session');
       currentUser = data.user; sessionStorage.setItem('cfr_session_user', JSON.stringify(currentUser));
@@ -695,7 +691,7 @@
       if (currentUser.role === 'admin') await refreshAdminNotifications();
     } catch (_) {
       sessionToken=''; currentUser=null; sessionStorage.removeItem('cfr_session_token'); sessionStorage.removeItem('cfr_session_user');
-      $('mainApp').classList.add('auth-locked'); $('authBackdrop').style.display='flex'; updateRoleUI(); await refreshListings();
+      $('mainApp').classList.remove('auth-locked'); $('authBackdrop').style.display='none'; updateRoleUI(); await refreshListings();
     }
   }
   let hostToken = sessionStorage.getItem('cfr_host_token') || '';
