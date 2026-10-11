@@ -342,6 +342,28 @@
     .main{max-width:1400px;padding-right:clamp(18px,2.5vw,40px)}
     footer{padding-right:clamp(18px,2.5vw,40px)}
   }
+
+  /* Keep the hero artwork and text inside the viewport instead of clipping at the right edge. */
+  @media(min-width:651px) and (max-width:1100px){
+    .hero{padding-left:clamp(18px,3vw,32px);padding-right:clamp(18px,3vw,32px)}
+    .hero-grid{grid-template-columns:minmax(0,1fr) minmax(0,.85fr);gap:clamp(12px,2vw,24px)}
+    .hero-copy,.hero-art{min-width:0}
+    .hero-art{transform:scale(.78);transform-origin:center center}
+    .hero h1{font-size:clamp(42px,5.4vw,62px);letter-spacing:-.055em;overflow-wrap:anywhere}
+    .orbit.outer-orbit{width:340px;height:340px}
+    .orbit{width:275px;height:275px}
+    .chip-one{right:2%}.chip-two{left:2%}
+  }
+  @media(min-width:1101px){
+    .hero-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+    .hero-copy,.hero-art{min-width:0}
+    .hero-art{overflow:hidden}
+    .chip-one{right:2%}.chip-two{left:2%}
+  }
+  @media(max-width:650px){
+    .hero-art{overflow:hidden}
+    .hero-grid{min-width:0}
+  }
 </style>
 </head>
 <body>
