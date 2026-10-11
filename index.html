@@ -161,7 +161,7 @@
   <header class="topbar">
     <a href="#home" class="brand" style="text-decoration:none;color:inherit"><div class="brand-mark">✳</div><span>campus<span><small>FOOD RESCUE NETWORK</small></span></span></a>
     <nav class="nav"><a href="#listings">Find food</a><a href="#how-it-works">How it works</a><a href="#safety">Food safety</a></nav>
-    <div class="session-bar" id="sessionBar"><span>Signed in as <strong id="sessionName"></strong><span class="role-chip" id="sessionRole"></span></span><button class="signout-btn" id="signOut">Sign out</button></div><button class="top-action" id="navAdd">+ Post surplus</button>
+    <div class="session-bar" id="sessionBar"><span>Signed in as <strong id="sessionName"></strong><span class="role-chip" id="sessionRole"></span></span><button class="signout-btn" id="signOut">Sign out</button></div><button class="top-action" id="navAdd">+ Post surplus</button><button class="top-action" id="openHostLoginMain" style="margin-left:8px;background:#fff;color:#173323">Host</button>
   </header>
   <section class="hero" id="home">
     <div class="hero-grid">
@@ -477,7 +477,9 @@
     }catch(e){$('hostDashboardError').textContent=e.message;}
   }
   async function openHostDashboard(){ $('hostDashboardOverlay').style.display='block'; $('hostLoginOverlay').style.display='none'; await loadHostDashboard(); }
-  $('openHostLogin').addEventListener('click',()=>{$('hostLoginError').textContent='';$('hostLoginOverlay').style.display='block';});
+  function showHostLogin(){ $('hostLoginError').textContent=''; $('hostLoginOverlay').style.display='block'; }
+  $('openHostLogin').addEventListener('click',showHostLogin);
+  $('openHostLoginMain').addEventListener('click',showHostLogin);
   $('closeHostLogin').addEventListener('click',()=>{$('hostLoginOverlay').style.display='none';});
   $('hostLoginForm').addEventListener('submit',async e=>{
     e.preventDefault();$('hostLoginError').textContent='';$('hostLoginSubmit').disabled=true;
