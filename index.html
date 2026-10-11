@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#101b16" />
+<title>Campus Food Rescue</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+  :root{--bg:#f4f6ef;--ink:#17231c;--muted:#728076;--green:#246b4b;--lime:#c8f169;--line:#e2e8de;--white:#fff;--orange:#f4a261;--shadow:0 18px 45px rgba(22,47,32,.08)}
+  *{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif} button,input,select{font:inherit} button{cursor:pointer} .app{min-height:100vh;overflow:hidden}
+  .topbar{height:76px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(18px,5vw,72px);background:#101b16;color:#fff;position:sticky;top:0;z-index:20;border-bottom:1px solid rgba(255,255,255,.08)}
+  .brand{display:flex;align-items:center;gap:11px;font-family:Manrope,sans-serif;font-weight:800;letter-spacing:-.5px}.brand-mark{width:39px;height:39px;border-radius:13px;background:var(--lime);display:grid;place-items:center;color:#153523;font-size:21px;box-shadow:0 0 0 5px rgba(200,241,105,.08)}.brand span small{display:block;font:500 10px 'DM Sans';letter-spacing:1.8px;color:#a9b9ad;text-transform:uppercase;margin-top:2px}
+  .nav{display:flex;gap:26px;align-items:center;color:#c6d1c8;font-size:13px}.nav a{color:inherit;text-decoration:none}.nav a:hover{color:var(--lime)}.top-action{border:0;background:var(--lime);color:#163322;border-radius:999px;padding:11px 17px;font-weight:700;font-size:13px;transition:transform .2s,box-shadow .2s}.top-action:hover{transform:translateY(-2px);box-shadow:0 8px 24px #c8f16935}
+  .hero{background:#101b16;color:white;padding:64px clamp(18px,5vw,72px) 76px;position:relative;isolation:isolate}.hero:before{content:"";position:absolute;width:450px;height:450px;border-radius:50%;background:radial-gradient(circle,#8bcf6a20,transparent 68%);right:-80px;top:-180px;z-index:-1}.hero-grid{max-width:1250px;margin:auto;display:grid;grid-template-columns:1.1fr .9fr;align-items:center;gap:40px}.eyebrow{display:inline-flex;align-items:center;gap:8px;color:var(--lime);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.7px}.pulse{height:7px;width:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 0 5px #c8f16920;animation:pulse 1.8s infinite}.hero h1{font-family:Manrope,sans-serif;font-size:clamp(42px,6vw,76px);line-height:1.02;letter-spacing:-4px;margin:20px 0 20px;max-width:690px}.hero h1 em{font-style:normal;color:var(--lime)}.hero p{max-width:520px;line-height:1.75;color:#b8c5bc;font-size:15px}.hero-buttons{display:flex;gap:12px;flex-wrap:wrap;margin-top:27px}.btn-primary,.btn-secondary{padding:14px 19px;border-radius:12px;border:1px solid transparent;font-weight:700;font-size:13px;transition:all .2s}.btn-primary{background:var(--lime);color:#173323}.btn-primary:hover{transform:translateY(-3px);box-shadow:0 12px 25px #c8f16925}.btn-secondary{background:#ffffff0b;border-color:#ffffff24;color:white}.btn-secondary:hover{background:#ffffff17}.hero-note{display:flex;align-items:center;gap:12px;margin-top:26px;color:#9eafa3;font-size:11px}.avatar-stack{display:flex}.avatar{width:27px;height:27px;border-radius:50%;border:2px solid #101b16;background:#dce9d5;display:grid;place-items:center;font-size:12px;margin-left:-6px}.avatar:first-child{margin-left:0}
+  .hero-art{min-height:360px;position:relative;display:grid;place-items:center;isolation:isolate}.hero-art:before{content:"";position:absolute;width:430px;height:430px;border-radius:50%;background:radial-gradient(circle,#b7ed6a13 0%,#b7ed6a05 45%,transparent 70%);animation:hero-glow 5s ease-in-out infinite;z-index:-2}.orbit{position:absolute;border:1px solid #c8f16955;border-radius:50%;width:310px;height:310px;animation:spin 16s linear infinite;box-shadow:0 0 28px #c8f16912}.orbit.outer-orbit{width:390px;height:390px;border-color:#c8f16935;animation-duration:24s;animation-direction:reverse;box-shadow:0 0 35px #c8f16910}.orbit:before,.orbit:after{animation:orbit-dot 3s ease-in-out infinite}.plate{animation:plate-float 4.8s ease-in-out infinite;transform-origin:center}.plate-inner{animation:food-wiggle 6s ease-in-out infinite;position:relative}.plate-inner:after{content:"✦";position:absolute;right:12px;top:10px;font-size:15px;color:#b6d85d;animation:sparkle 2.2s ease-in-out infinite}.hero-spark,.hero-food{position:absolute;z-index:3;pointer-events:none}.hero-spark{color:var(--lime);font-size:22px;animation:sparkle 2.8s ease-in-out infinite}.spark-a{left:12%;top:22%}.spark-b{right:12%;bottom:20%;animation-delay:-1.3s}.hero-food{font-size:22px;filter:drop-shadow(0 5px 8px #0002);animation:chip-drift 5s ease-in-out infinite}.food-a{left:8%;bottom:27%;animation-delay:-2s}.food-b{right:13%;top:24%;color:#f4a261;animation-delay:-.8s}.orbit:before,.orbit:after{content:"";position:absolute;width:10px;height:10px;background:var(--lime);border-radius:50%;top:30px;left:48px;box-shadow:0 0 22px #c8f16970}.orbit:after{top:auto;left:auto;bottom:42px;right:28px;width:6px;height:6px;background:#f4a261}.plate{width:220px;height:220px;border-radius:50%;background:linear-gradient(145deg,#e9f4d9,#a7d47a);display:grid;place-items:center;box-shadow:inset 0 0 0 12px #ffffff55,0 25px 90px #8bd46c45;animation:plate-float 2.8s ease-in-out infinite;position:relative}.plate-inner{width:150px;height:150px;border-radius:50%;background:#faf8e8;display:grid;place-items:center;box-shadow:inset 0 0 0 2px #d6e2c7;font-size:75px}.float-chip{position:absolute;background:#fff;color:#203a2a;padding:12px 15px;border-radius:22px;box-shadow:0 20px 55px #0002;font-size:11px;font-weight:700;animation:chip-drift 4.5s ease-in-out infinite;transition:transform .3s,box-shadow .3s}.float-chip:hover{transform:translateY(-7px) scale(1.03);box-shadow:0 25px 60px #0003}.float-chip strong{display:block;font-size:19px;font-family:Manrope}.chip-one{top:36px;right:0}.chip-two{bottom:24px;left:0;animation-delay:-2s}.chip-icon{display:inline-grid;place-items:center;background:#eaf6dc;border-radius:8px;width:26px;height:26px;margin-right:5px}
+  .main{max-width:1250px;margin:auto;padding:40px clamp(18px,5vw,72px) 70px}.impact-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:-32px;position:relative;z-index:2}.impact{background:#fff;border:1px solid var(--line);border-radius:17px;padding:21px 23px;box-shadow:var(--shadow);display:flex;align-items:center;gap:15px;animation:rise .6s both}.impact:nth-child(2){animation-delay:.1s}.impact:nth-child(3){animation-delay:.2s}.impact-icon{width:46px;height:46px;border-radius:14px;background:#eef6e7;display:grid;place-items:center;font-size:21px}.impact strong{font:800 27px Manrope;letter-spacing:-1px;display:block}.impact span{font-size:12px;color:var(--muted)}
+  .section-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin:54px 0 22px}.section-kicker{color:var(--green);font-size:11px;font-weight:800;letter-spacing:1.7px;text-transform:uppercase}.section-head h2{font:800 clamp(27px,3vw,38px) Manrope;letter-spacing:-1.7px;margin:8px 0 0}.section-head p{font-size:13px;color:var(--muted);margin:8px 0 0;line-height:1.6}.listing-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:22px}.search-wrap{position:relative;flex:1;min-width:210px}.search-wrap span{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#849187}.search-wrap input{width:100%;padding:13px 14px 13px 40px;border:1px solid var(--line);background:#fff;border-radius:12px;outline:none;color:var(--ink)}.search-wrap input:focus,input:focus,select:focus{border-color:#72a87b;box-shadow:0 0 0 3px #246b4b12}.filter-select{padding:13px 36px 13px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;color:#435247;outline:none}.add-button{border:0;background:var(--green);color:white;padding:13px 17px;border-radius:12px;font-weight:700;font-size:13px;transition:all .2s}.add-button:hover{background:#184e35;transform:translateY(-2px)}
+  .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:17px}.food-card{background:#fff;border:1px solid var(--line);border-radius:19px;overflow:hidden;transition:transform .25s,box-shadow .25s;animation:rise .5s both;min-width:0}.food-card:hover{transform:translateY(-8px) scale(1.015);box-shadow:0 22px 55px rgba(22,47,32,.16)}.card-visual{height:146px;position:relative;display:grid;place-items:center;background:linear-gradient(135deg,#e8f3dd,#d5e9bf);overflow:hidden}.card-visual:before{content:"";position:absolute;width:170px;height:170px;border:1px solid #fff9;border-radius:50%;left:-45px;top:-80px}.card-visual:after{content:"";position:absolute;width:130px;height:130px;border:1px solid #ffffffa8;border-radius:50%;right:-20px;bottom:-75px}.food-emoji{font-size:69px;filter:drop-shadow(0 12px 9px #314c2520);z-index:1;transition:transform .3s}.food-card:hover .food-emoji{transform:scale(1.1) rotate(-4deg)}.status-pill{position:absolute;left:13px;top:13px;background:#ffffffdf;backdrop-filter:blur(8px);padding:7px 10px;border-radius:999px;font-size:10px;font-weight:800;display:flex;align-items:center;gap:6px;z-index:2}.status-dot{width:6px;height:6px;background:#39855a;border-radius:50%}.status-pill.reserved .status-dot{background:#db9a36}.status-pill.claimed .status-dot,.status-pill.expired .status-dot{background:#9aa49b}.card-body{padding:17px}.card-top{display:flex;justify-content:space-between;gap:12px;align-items:start}.food-title{font:800 17px Manrope;letter-spacing:-.4px;margin:0 0 6px}.food-location{color:var(--muted);font-size:11px;display:flex;gap:5px;align-items:center}.quantity{background:#f0f6e9;color:#315a3e;border-radius:9px;padding:7px 8px;font-size:10px;font-weight:800;white-space:nowrap}.card-meta{display:flex;justify-content:space-between;gap:10px;border-top:1px solid #edf0e9;margin-top:16px;padding-top:13px;color:#68786c;font-size:11px}.deadline{display:flex;align-items:center;gap:6px}.deadline.urgent{color:#c56c32;font-weight:700}.card-actions{display:flex;gap:8px;margin-top:15px}.card-actions button{flex:1;border-radius:10px;padding:10px 8px;font-size:11px;font-weight:800;border:1px solid var(--line);background:#fff;color:#3e5345;transition:all .2s}.card-actions button.primary{background:var(--green);color:white;border-color:var(--green)}.card-actions button.primary:hover{background:#194b33}.card-actions button:disabled{cursor:not-allowed;background:#f2f4f0;color:#9aa49b;border-color:#e7ebe4}.empty-state{grid-column:1/-1;text-align:center;padding:52px 20px;background:#fff;border:1px dashed #d3ddcf;border-radius:18px}.empty-state .empty-icon{font-size:42px}.empty-state h3{font-family:Manrope;margin:10px 0 5px}.empty-state p{color:var(--muted);font-size:13px}
+  .how-section{margin-top:66px;background:#e8f0df;border-radius:23px;padding:30px;position:relative;overflow:hidden}.how-section:after{content:"✳";position:absolute;font-size:170px;right:4%;top:-40px;color:#d8e7ca;transform:rotate(15deg)}.how-section h2{font:800 29px Manrope;letter-spacing:-1.2px;margin:8px 0 24px;position:relative;z-index:1}.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;position:relative;z-index:1}.step{background:#ffffffb8;border:1px solid #ffffff;border-radius:15px;padding:18px}.step-num{height:32px;width:32px;border-radius:10px;background:var(--green);color:white;display:grid;place-items:center;font-size:12px;font-weight:800}.step h3{font:800 14px Manrope;margin:14px 0 7px}.step p{font-size:12px;line-height:1.65;color:#6b796e;margin:0}.safety{display:flex;gap:12px;align-items:start;background:#fff9e9;border:1px solid #f3e7c8;border-radius:14px;padding:16px;margin-top:17px;font-size:11px;line-height:1.6;color:#796642}.safety strong{display:block;color:#66512c;font-size:12px;margin-bottom:3px}
+  footer{background:#101b16;color:#b2c1b6;padding:26px clamp(18px,5vw,72px);display:flex;justify-content:space-between;align-items:center;gap:15px;font-size:11px}.footer-brand{color:#fff;font-family:Manrope;font-weight:800}.footer-brand span{color:var(--lime)}
+  .modal-backdrop{position:fixed;inset:0;background:#0b1710a8;backdrop-filter:blur(6px);z-index:50;display:none;align-items:center;justify-content:center;padding:18px}.modal-backdrop.open{display:flex;animation:fade .2s}.modal{background:#fff;width:min(100%,520px);border-radius:22px;padding:27px;box-shadow:0 30px 100px #0004;animation:modal-in .25s both;max-height:92vh;overflow:auto}.modal-head{display:flex;align-items:start;justify-content:space-between;gap:15px;margin-bottom:20px}.modal-head h2{font:800 26px Manrope;letter-spacing:-1px;margin:0}.modal-head p{font-size:12px;color:var(--muted);margin:7px 0 0}.close-btn{border:0;background:#f0f3ed;border-radius:10px;width:36px;height:36px;font-size:19px;color:#4e5b51}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{display:flex;flex-direction:column;gap:7px}.field.full{grid-column:1/-1}.field label{font-size:11px;font-weight:800;color:#48584c}.field input,.field select{border:1px solid #dfe6dc;background:#fbfcfa;border-radius:10px;padding:12px;outline:none;width:100%;font-size:13px}.field small{font-size:10px;color:var(--muted)}.form-error{display:none;background:#fff0ec;color:#a3432e;padding:10px 12px;border-radius:9px;font-size:12px;margin-top:13px}.form-error.show{display:block}.submit-listing{width:100%;margin-top:18px;padding:14px;border:0;border-radius:11px;background:var(--green);color:#fff;font-weight:800}.toast{position:fixed;right:22px;bottom:22px;background:#14271b;color:#fff;padding:14px 18px;border-radius:13px;box-shadow:0 15px 40px #10201733;z-index:80;display:flex;gap:10px;align-items:center;font-size:12px;transform:translateY(120px);opacity:0;transition:all .35s}.toast.show{transform:translateY(0);opacity:1}.toast-mark{color:var(--lime);font-size:17px}
+  /* Gen-Z inspired live motion: ambient cursor glow, glossy cards, and soft neon accents */
+  body:after{content:"";position:fixed;inset:0;pointer-events:none;z-index:90;opacity:.9;background:radial-gradient(460px circle at var(--pointer-x,50%) var(--pointer-y,30%),rgba(200,241,105,.20),transparent 65%);mix-blend-mode:screen;transition:background .05s linear}
+  .hero{background:radial-gradient(ellipse at 78% 30%,#1d3827 0%,#101b16 55%);}
+  .brand-mark{animation:brand-pop 4s ease-in-out infinite}
+  .top-action,.btn-primary,.add-button,.submit-listing{position:relative;overflow:hidden}
+  .top-action:after,.btn-primary:after,.add-button:after,.submit-listing:after{content:"";position:absolute;top:-60%;left:-80%;width:45%;height:220%;background:linear-gradient(90deg,transparent,#ffffff75,transparent);transform:rotate(22deg);transition:left .65s ease}
+  .top-action:hover:after,.btn-primary:hover:after,.add-button:hover:after,.submit-listing:hover:after{left:140%}
+  .cards .food-card{position:relative;isolation:isolate}
+  .food-card:before{content:"";position:absolute;inset:0;pointer-events:none;z-index:3;border-radius:inherit;opacity:0;background:linear-gradient(115deg,transparent 20%,#c8f16922 45%,#fff7 50%,transparent 72%);background-size:220% 100%;transition:opacity .25s}
+  .food-card:hover:before{opacity:1;animation:card-glint 1.1s ease forwards}
+  .card-visual{background:linear-gradient(135deg,#e8f3dd,#d5e9bf,#edf5df);background-size:180% 180%;animation:visual-shift 9s ease infinite}
+  .food-emoji{animation:emoji-bob 4.4s ease-in-out infinite;transform-origin:50% 70%}
+  .food-card:nth-child(3n+2) .food-emoji{animation-delay:-1.4s}.food-card:nth-child(3n) .food-emoji{animation-delay:-2.6s}
+  .status-pill:has(.status-dot){box-shadow:0 3px 16px #203a2a0c}
+  .live-ribbon{display:flex;align-items:center;justify-content:center;gap:10px;min-height:43px;padding:10px 18px;background:linear-gradient(100deg,#dff0ca,#f1ffd9,#dff0ca);background-size:200% 100%;animation:ribbon-shimmer 4s linear infinite;color:#234a31;border-bottom:1px solid #cfe3bd;font-size:11px;font-weight:800;letter-spacing:.45px;overflow:hidden}
+  .live-ping{width:7px;height:7px;border-radius:50%;background:#2f8b57;box-shadow:0 0 0 0 #2f8b5755;animation:live-ping 1.7s infinite;flex:0 0 auto}
+  .ribbon-text{white-space:nowrap}.ribbon-spark{color:#6c963a;animation:sparkle 2s ease-in-out infinite}
+  .hero h1 em{text-shadow:0 0 28px #c8f16965;animation:text-neon 2.4s ease-in-out infinite}.eyebrow{animation:eyebrow-glow 3s ease-in-out infinite}.hero-art:after{content:'✦  LIVE';position:absolute;right:3%;top:4%;font-size:10px;font-weight:900;letter-spacing:2px;color:var(--lime);padding:9px 12px;border:1px solid #c8f16955;border-radius:999px;background:#c8f16912;animation:live-ping 1.7s infinite}
+  .impact{transition:transform .25s,box-shadow .25s}.impact:hover{transform:translateY(-5px) rotate(-.4deg);box-shadow:0 22px 48px #183a2420}
+  .impact-icon{animation:icon-breathe 4s ease-in-out infinite}
+  .food-card:nth-child(2n) .impact-icon{animation-delay:-1.5s}
+  @keyframes text-neon{0%,100%{text-shadow:0 0 10px #c8f16925}50%{text-shadow:0 0 30px #c8f169a0}}
+  @keyframes eyebrow-glow{0%,100%{filter:brightness(1)}50%{filter:brightness(1.45)}}
+  @keyframes ribbon-shimmer{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+  @keyframes card-glint{0%{background-position:120% 0}100%{background-position:-20% 0}}
+  @keyframes visual-shift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+  @keyframes emoji-bob{0%,100%{translate:0 0;rotate:0deg}50%{translate:0 -5px;rotate:2deg}}
+  @keyframes live-ping{0%{box-shadow:0 0 0 0 #2f8b5755}70%{box-shadow:0 0 0 8px #2f8b5700}100%{box-shadow:0 0 0 0 #2f8b5700}}
+  @keyframes brand-pop{0%,90%,100%{transform:rotate(0) scale(1)}94%{transform:rotate(-8deg) scale(1.08)}97%{transform:rotate(7deg) scale(1.08)}}
+  @keyframes icon-breathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 5px #c8f16920}50%{box-shadow:0 0 0 9px #c8f16908}}@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-11px)}}@keyframes plate-float{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-13px) rotate(1.5deg)}}@keyframes food-wiggle{0%,88%,100%{transform:rotate(0) scale(1)}92%{transform:rotate(-7deg) scale(1.06)}96%{transform:rotate(6deg) scale(1.06)}}@keyframes chip-drift{0%,100%{translate:0 0}50%{translate:0 -12px}}@keyframes hero-glow{0%,100%{opacity:.55;scale:.94}50%{opacity:1;scale:1.08}}@keyframes orbit-dot{0%,100%{box-shadow:0 0 15px #c8f16950}50%{box-shadow:0 0 30px #c8f169b0}}@keyframes sparkle{0%,100%{opacity:.3;transform:scale(.7) rotate(0)}50%{opacity:1;transform:scale(1.2) rotate(30deg)}}@keyframes spin{to{transform:rotate(360deg)}}@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}@keyframes fade{from{opacity:0}to{opacity:1}}@keyframes modal-in{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+  @media(max-width:900px){.hero-grid{grid-template-columns:1fr .75fr;gap:10px}.hero h1{letter-spacing:-2.5px}.hero-art{transform:scale(.85)}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.nav{gap:14px}}
+  @media(max-width:650px){.topbar{height:65px}.nav{display:none}.hero{padding-top:45px;padding-bottom:64px}.hero-grid{grid-template-columns:1fr}.hero h1{font-size:48px;letter-spacing:-2.5px}.hero-art{min-height:255px;transform:scale(.85);margin-top:-10px}.hero-grid{gap:0}.impact-row{grid-template-columns:1fr;gap:9px;margin-top:-25px}.impact{padding:14px 17px}.impact strong{font-size:23px}.section-head{align-items:start;flex-direction:column;margin-top:43px}.cards{grid-template-columns:1fr}.card-visual{height:155px}.steps{grid-template-columns:1fr}.how-section{padding:22px}.how-section:after{font-size:100px;right:-8px;top:-15px}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}footer{flex-direction:column;align-items:start}.filter-select{flex:1}.add-button{white-space:nowrap}}
+  @media(prefers-reduced-motion:reduce){.orbit{animation-duration:36s!important}.orbit.outer-orbit{animation-duration:48s!important}.plate,.food-emoji,.live-ping,.brand-mark{animation-duration:4s!important}html{scroll-behavior:auto!important}}
+
+  .app.auth-locked{visibility:hidden;pointer-events:none;height:100vh;overflow:hidden}.auth-backdrop{position:fixed;inset:0;background:rgba(8,18,12,.88);backdrop-filter:blur(10px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}.auth-card{width:min(100%,460px);background:#fff;border-radius:24px;padding:30px;box-shadow:0 35px 100px #0005;animation:modal-in .3s both}.auth-brand{display:flex;align-items:center;gap:10px;font:800 14px Manrope;margin-bottom:24px}.auth-brand-mark{width:38px;height:38px;border-radius:12px;background:var(--lime);display:grid;place-items:center;font-size:20px}.auth-card h1{font:800 29px Manrope;letter-spacing:-1.2px;margin:0 0 8px}.auth-card>p{font-size:13px;color:var(--muted);line-height:1.6;margin:0 0 22px}.auth-field{display:flex;flex-direction:column;gap:7px;margin:13px 0}.auth-field[hidden]{display:none}.auth-field label{font-size:11px;font-weight:800;color:#48584c}.auth-field input,.auth-field select{border:1px solid #dfe6dc;background:#fbfcfa;border-radius:11px;padding:13px;outline:none;width:100%;font-size:13px}.auth-submit{width:100%;padding:14px;border:0;border-radius:12px;background:var(--green);color:white;font-weight:800;margin-top:9px}.auth-error{display:none;background:#fff0ec;color:#a3432e;padding:11px;border-radius:9px;font-size:12px;margin-top:12px}.auth-error.show{display:block}.auth-footnote{font-size:10px;color:#7d887e;line-height:1.5;margin-top:15px}.role-chip{display:inline-block;background:#edf5e5;color:#315a3e;padding:5px 8px;border-radius:999px;font-size:10px;font-weight:800;margin-left:8px}.session-bar{display:none;color:#cbd8ce;font-size:11px;align-items:center;gap:10px}.session-bar strong{color:var(--lime)}.signout-btn{border:1px solid #ffffff30;background:transparent;color:#fff;border-radius:999px;padding:8px 10px;font-size:11px}
+
+
+  /* Full-screen restaurant-style hero: keep the same page and all existing app behavior. */
+  .hero{
+    min-height:calc(100vh - 76px);min-height:calc(100svh - 76px);
+    display:flex;align-items:center;overflow:hidden;
+    padding:clamp(28px,4vh,54px) clamp(20px,5vw,88px) clamp(42px,5vh,66px);
+    background:radial-gradient(ellipse at 76% 44%,#294c32 0%,#15271c 34%,#101b16 72%);
+  }
+  .hero:after{content:"";position:absolute;inset:0;pointer-events:none;z-index:-1;opacity:.22;background-image:radial-gradient(#d6f4c0 0.65px,transparent .65px);background-size:25px 25px;mask-image:linear-gradient(90deg,transparent,#000 60%,#000)}
+  .hero-grid{width:100%;max-width:1600px;grid-template-columns:minmax(0,1fr) minmax(440px,1fr);gap:clamp(24px,4vw,72px)}
+  .hero-copy{position:relative;z-index:4;animation:hero-copy-in .85s cubic-bezier(.2,.75,.25,1) both}
+  .hero h1{font-size:clamp(48px,6.3vw,94px);max-width:780px;letter-spacing:-.065em}
+  .hero p{font-size:clamp(14px,1.15vw,17px);max-width:590px}
+  .hero-art{min-height:min(68vh,650px);width:100%;transform:scale(1.02)}
+  .plate{width:clamp(230px,22vw,310px);height:clamp(230px,22vw,310px);background:linear-gradient(145deg,#fff8df,#e6e8c5 42%,#94c86c);box-shadow:inset 0 0 0 13px #ffffff78, inset 0 0 0 19px #9fbd7a33,0 35px 100px #020a055e,0 0 75px #c8f1691e;animation:plate-float 4s ease-in-out infinite, plate-arrive 1s .15s both}
+  .plate:before{content:"";position:absolute;inset:14px;border-radius:50%;border:1px solid #ffffffb0;box-shadow:inset 0 0 22px #ffffff75}
+  .plate:after{content:"";position:absolute;inset:-12px;border-radius:50%;border:1px solid #c8f16940;animation:plate-ring 4s ease-in-out infinite}
+  .plate-inner{width:69%;height:69%;font-size:clamp(76px,8vw,112px);background:radial-gradient(circle at 35% 28%,#fffef4,#f5f0d8 75%);box-shadow:inset 0 0 0 2px #d6e2c7,0 8px 22px #6d7c4c17}
+  .plate-inner:before{content:"";position:absolute;inset:9px;border-radius:50%;border:1px dashed #a5bb7b70;animation:spin 42s linear infinite}
+  .orbit{width:clamp(290px,31vw,430px);height:clamp(290px,31vw,430px);border-color:#c8f16940}
+  .orbit.outer-orbit{width:clamp(360px,40vw,550px);height:clamp(360px,40vw,550px);border-color:#ffffff1e}
+  .float-chip{backdrop-filter:blur(14px);background:linear-gradient(145deg,#ffffff,#f4f8ee);border:1px solid #ffffffb8;box-shadow:0 22px 65px #0003;z-index:5}
+  .chip-one{top:12%;right:-1%}.chip-two{bottom:12%;left:-1%}
+  .steam{position:absolute;left:50%;top:calc(50% - clamp(155px,15vw,205px));width:110px;height:115px;transform:translateX(-50%);z-index:4;pointer-events:none}
+  .steam i{position:absolute;bottom:0;width:18px;height:88px;border-left:2px solid #fff8;border-radius:50%;filter:blur(.2px);animation:steam-rise 2.8s ease-in-out infinite}
+  .steam i:nth-child(1){left:24px;height:72px;animation-delay:-1.1s}.steam i:nth-child(2){left:49px;height:96px;animation-delay:-.2s}.steam i:nth-child(3){left:73px;height:65px;animation-delay:-1.7s}
+  .ingredient{position:absolute;z-index:5;display:grid;place-items:center;width:clamp(48px,5vw,66px);height:clamp(48px,5vw,66px);border:1px solid #ffffff6b;border-radius:50%;background:linear-gradient(145deg,#ffffff24,#ffffff0a);backdrop-filter:blur(9px);box-shadow:0 15px 35px #0002;font-size:clamp(23px,2.5vw,32px);animation:ingredient-float 5s ease-in-out infinite}
+  .ingredient.tomato{top:17%;left:10%;animation-delay:-1.4s}.ingredient.leaf{right:8%;bottom:22%;animation-delay:-3s}.ingredient.bread{left:17%;bottom:14%;animation-delay:-.5s}
+  .hero-stamp{position:absolute;left:5%;top:7%;z-index:5;display:flex;align-items:center;gap:8px;padding:10px 13px;border:1px solid #ffffff27;border-radius:999px;background:#0b170e80;color:#e8f5dc;font-size:10px;font-weight:800;letter-spacing:1.2px;backdrop-filter:blur(10px);animation:stamp-arrive .7s .3s both}
+  .hero-stamp span{color:var(--lime);font-size:15px}
+  .hero-note{font-size:12px}
+  .btn-primary,.btn-secondary{padding:15px 21px;border-radius:14px}
+  .hero-scroll{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:9px;color:#b6c7b7a8;font-size:9px;letter-spacing:2px;text-transform:uppercase;white-space:nowrap}
+  .hero-scroll:before{content:"";width:28px;height:1px;background:#c8f16980}
+  .hero-scroll:after{content:"↓";color:var(--lime);animation:scroll-nudge 1.6s ease-in-out infinite}
+  @keyframes hero-copy-in{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes plate-arrive{from{opacity:0;scale:.78;rotate:-12deg}to{opacity:1;scale:1;rotate:0deg}}
+  @keyframes plate-ring{0%,100%{transform:scale(.98);opacity:.35}50%{transform:scale(1.035);opacity:.9}}
+  @keyframes steam-rise{0%{transform:translateY(15px) scaleX(.7);opacity:0}25%{opacity:.75}75%{opacity:.45}100%{transform:translateY(-26px) scaleX(1.25);opacity:0}}
+  @keyframes ingredient-float{0%,100%{transform:translate3d(0,0,0) rotate(-5deg)}50%{transform:translate3d(5px,-17px,0) rotate(8deg)}}
+  @keyframes stamp-arrive{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes scroll-nudge{0%,100%{transform:translateY(-2px);opacity:.55}50%{transform:translateY(4px);opacity:1}}
+  @media(min-width:1500px){.hero-grid{max-width:1700px}.hero h1{font-size:100px}.hero-art{min-height:700px}}
+  @media(max-width:900px){.hero{min-height:calc(100svh - 76px);padding-top:34px;padding-bottom:52px}.hero-grid{grid-template-columns:1fr .9fr;gap:12px}.hero-art{min-height:480px;transform:scale(.9)}.hero h1{font-size:clamp(44px,6vw,68px)}.orbit.outer-orbit{width:340px;height:340px}.orbit{width:275px;height:275px}.plate{width:215px;height:215px}.plate-inner{font-size:78px}.steam{top:calc(50% - 145px)}.float-chip{padding:10px 12px}.chip-one{right:-4%}.chip-two{left:-5%}}
+  @media(max-width:650px){.hero{min-height:calc(100svh - 65px);padding:42px 20px 52px}.hero-grid{grid-template-columns:1fr;gap:4px}.hero h1{font-size:clamp(43px,12vw,59px);line-height:1.02;letter-spacing:-.055em;margin:17px 0}.hero p{font-size:13px;line-height:1.7}.hero-art{min-height:330px;transform:none;margin:0 auto;width:min(100%,440px)}.orbit.outer-orbit{width:310px;height:310px}.orbit{width:245px;height:245px}.plate{width:190px;height:190px}.plate-inner{font-size:70px}.steam{top:calc(50% - 125px);scale:.8}.hero-stamp{top:2%;left:1%;font-size:8px;padding:8px 10px}.ingredient.tomato{top:15%;left:4%}.ingredient.leaf{right:3%;bottom:16%}.ingredient.bread{left:8%;bottom:10%}.float-chip{font-size:9px;padding:9px 11px}.float-chip strong{font-size:15px}.chip-one{top:15%;right:-1%}.chip-two{bottom:5%;left:-1%}.hero-scroll{bottom:12px}.hero-note{font-size:10px}.hero-buttons{margin-top:20px}.btn-primary,.btn-secondary{padding:13px 15px}}
+  @media(prefers-reduced-motion:reduce){.hero-copy,.plate,.plate:after,.steam i,.ingredient,.hero-stamp,.hero-scroll:after{animation:none!important}.hero-copy{opacity:1;transform:none}}
+
+</style>
+</head>
+<body>
+<div class="auth-backdrop" id="authBackdrop" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+  <div class="auth-card">
+    <div class="auth-brand"><span class="auth-brand-mark">♧</span><span>CAMPUS FOOD RESCUE<br><small style="font:500 10px 'DM Sans';letter-spacing:1.5px;color:#7b887d">COMMUNITY ACCESS</small></span></div>
+    <h1 id="authTitle">Welcome to the campus.</h1>
+    <p>Register to continue. Admins can publish food listings; students can browse and reserve food for pickup at the listed venue.</p>
+    <form id="authForm" novalidate>
+      <div class="auth-field"><label for="authName">Full name</label><input id="authName" maxlength="80" autocomplete="name" placeholder="Enter your name" required></div>
+      <div class="auth-field"><label for="authEmail">Email address</label><input id="authEmail" type="email" maxlength="254" autocomplete="email" placeholder="you@example.com" required></div>
+      <div class="auth-field"><label for="authRole">Register as</label><select id="authRole"><option value="student">Student</option><option value="admin">Admin / Food provider</option></select></div>
+      <div class="auth-field" id="adminCodeField" hidden><label for="adminCode">Admin access code</label><input id="adminCode" type="password" autocomplete="off" placeholder="Enter the admin code"></div>
+      <div class="auth-error" id="authError" role="alert"></div>
+      <button class="auth-submit" id="authSubmit" type="submit">Continue ↗</button>
+    </form>
+    <div class="auth-footnote">Email verification is disabled for this local prototype. Enter your details to continue. Admins must still provide the admin access code.</div>
+  </div>
+</div>
+<div class="app auth-locked" id="mainApp">
+  <header class="topbar">
+    <a href="#home" class="brand" style="text-decoration:none;color:inherit"><div class="brand-mark">✳</div><span>campus<span><small>FOOD RESCUE NETWORK</small></span></span></a>
+    <nav class="nav"><a href="#listings">Find food</a><a href="#how-it-works">How it works</a><a href="#safety">Food safety</a></nav>
+    <div class="session-bar" id="sessionBar"><span>Signed in as <strong id="sessionName"></strong><span class="role-chip" id="sessionRole"></span></span><button class="signout-btn" id="signOut">Sign out</button></div><button class="top-action" id="navAdd">+ Post surplus</button>
+  </header>
+  <section class="hero" id="home">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow"><span class="pulse"></span> Small actions. Less waste.</div>
+        <h1>Good food<br>deserves a <em>second</em><br>chance.</h1>
+        <p>A campus-powered network that connects surplus meals with people nearby. Share what is available, claim what you need, and help good food find a home.</p>
+        <div class="hero-buttons"><button class="btn-primary" id="findFood">Explore available food ↗</button><button class="btn-secondary" id="heroAdd">I'm sharing food +</button></div>
+        <div class="hero-note"><div class="avatar-stack"><span class="avatar">🥗</span><span class="avatar">🍱</span><span class="avatar">🍎</span></div><span>Made for a campus that looks out for one another.</span></div>
+      </div>
+      <div class="hero-art" aria-hidden="true"><div class="hero-stamp"><span>✦</span> FRESH FOOD, SHARED WITH CARE</div><div class="orbit outer-orbit"></div><div class="orbit"></div><span class="hero-spark spark-a">✦</span><span class="hero-spark spark-b">✧</span><span class="hero-food food-a">🍃</span><span class="hero-food food-b">✦</span><div class="ingredient tomato">🍅</div><div class="ingredient leaf">🌿</div><div class="ingredient bread">🥖</div><div class="steam"><i></i><i></i><i></i></div><div class="plate"><div class="plate-inner">🥙</div></div><div class="float-chip chip-one"><span class="chip-icon">♻</span><strong>Less waste</strong>More shared meals</div><div class="float-chip chip-two"><strong>One campus.</strong>Many helping hands.</div></div>
+    </div>
+    <div class="hero-scroll" aria-hidden="true">Scroll to discover</div>
+  </section>
+  <div class="live-ribbon" aria-label="Live demo status"><span class="live-ping"></span><span class="ribbon-text">CAMPUS FOOD DROPS</span><span class="ribbon-spark">✦</span><span class="ribbon-text">GOOD FOOD. GOOD VIBES. LESS WASTE.</span><span class="ribbon-spark">✦</span><span class="ribbon-text">FRESH FINDS, NOT FOOD WASTE</span></div>
+  <main class="main">
+    <div class="impact-row">
+      <div class="impact"><div class="impact-icon">🍽️</div><div><strong id="availableCount">0</strong><span>Available listings</span></div></div>
+      <div class="impact"><div class="impact-icon">🤝</div><div><strong id="claimedCount">0</strong><span>Meals claimed</span></div></div>
+      <div class="impact"><div class="impact-icon">🌱</div><div><strong id="portionsCount">0</strong><span>Portions listed</span></div></div>
+    </div>
+    <section id="listings">
+      <div class="section-head"><div><div class="section-kicker">The community board</div><h2>Find your next good meal.</h2><p>Browse what's been shared around campus. Reserve what you need before the pickup deadline.</p></div></div>
+      <div class="listing-controls"><div class="search-wrap"><span>⌕</span><input id="searchInput" type="search" placeholder="Search food or pickup location…" aria-label="Search listings"></div><select id="statusFilter" class="filter-select" aria-label="Filter by status"><option value="all">All listings</option><option value="available">Available</option><option value="claimed">Fully reserved</option><option value="expired">Expired</option></select><button class="add-button" id="addListing">+ Add listing</button></div>
+      <div class="cards" id="cards" aria-live="polite"></div>
+    </section>
+    <section class="how-section" id="how-it-works"><div class="section-kicker">Simple by design</div><h2>Good food moves in three steps.</h2><div class="steps"><article class="step"><div class="step-num">01</div><h3>Share the surplus</h3><p>Canteen staff add a food listing with portions, pickup location, and a clear collection deadline.</p></article><article class="step"><div class="step-num">02</div><h3>Find what you need</h3><p>Students and campus community members browse available food and check the pickup details.</p></article><article class="step"><div class="step-num">03</div><h3>Reserve. Collect. Repeat.</h3><p>Reserve a listing, collect it on time, and help make better use of food already prepared.</p></article></div></section>
+    <div class="safety" id="safety"><span style="font-size:21px">ⓘ</span><div><strong>Food safety comes first.</strong>This prototype coordinates listings only. Food providers are responsible for safe preparation, storage, allergen information, and suitability for distribution. Only share food that has been handled and stored appropriately, and follow campus policies.</div></div>
+  </main>
+  <footer><div class="footer-brand">campus<span>✳</span> food rescue</div><div>-Made By Aditya Parashar</div></footer>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal"><div class="modal-head"><div><h2 id="modalTitle">Share surplus food</h2><p>Give your listing the details someone needs to collect it.</p></div><button class="close-btn" id="closeModal" aria-label="Close form">×</button></div>
+    <form id="listingForm" novalidate><div class="form-grid">
+      <div class="field full"><label for="foodName">Food name *</label><input id="foodName" maxlength="70" placeholder="e.g. Vegetable pulao" required></div>
+      <div class="field"><label for="quantity">Portions available *</label><input id="quantity" type="number" min="1" max="500" step="1" placeholder="e.g. 12" required></div>
+      <div class="field"><label for="foodType">Food category</label><select id="foodType"><option value="🍱">Rice & meals</option><option value="🥪">Sandwiches</option><option value="🥗">Salads</option><option value="🍎">Fruit</option><option value="🥐">Bakery</option><option value="🍲">Other hot food</option></select></div>
+      <div class="field full"><label for="location">Pickup location *</label><input id="location" maxlength="100" placeholder="e.g. Main canteen counter" required></div>
+      <div class="field full"><label for="deadline">Collect before *</label><input id="deadline" type="datetime-local" required><small>Deadline must be in the future.</small></div>
+    </div><div class="form-error" id="formError" role="alert"></div><button class="submit-listing" type="submit">Publish food listing ↗</button></form>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"><span class="toast-mark">✓</span><span id="toastText">Done</span></div>
+<script>
+(() => {
+  let currentUser = null;
+  // sessionStorage survives page refreshes but is cleared when this tab's browsing session ends.
+  let sessionToken = sessionStorage.getItem('cfr_session_token') || '';
+  try { currentUser = JSON.parse(sessionStorage.getItem('cfr_session_user') || 'null'); } catch (_) { currentUser = null; }
+  let listings = [];
+  let toastTimer;
+  const $ = id => document.getElementById(id);
+
+  async function api(path, options = {}) {
+    const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+    if (sessionToken) headers.Authorization = `Bearer ${sessionToken}`;
+    let response;
+    try {
+      response = await fetch(path, { ...options, headers });
+    } catch (_) {
+      throw new Error('Cannot reach the Flask server. Start it with `python app.py` and open http://127.0.0.1:5000.');
+    }
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || `Request failed (${response.status}).`);
+    return data;
+  }
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function formatDeadline(value) {
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? 'Unknown deadline' : d.toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+  }
+  function timeLeft(value) {
+    const mins = Math.ceil((new Date(value).getTime() - Date.now()) / 60000);
+    if (mins <= 0) return 'Deadline passed';
+    if (mins < 60) return `${mins} min left`;
+    const h = Math.floor(mins / 60), m = mins % 60;
+    return m ? `${h}h ${m}m left` : `${h}h left`;
+  }
+  function effectiveStatus(item) {
+    if (item.status === 'expired' || new Date(item.deadline).getTime() <= Date.now()) return 'expired';
+    if (Number(item.quantity) <= 0 || item.status === 'claimed') return 'claimed';
+    return 'available';
+  }
+  function render() {
+    const query = $('searchInput').value.trim().toLowerCase(), filter = $('statusFilter').value;
+    const visible = listings.filter(item => {
+      const status = effectiveStatus(item);
+      return (filter === 'all' || status === filter) && (item.name + ' ' + item.location).toLowerCase().includes(query);
+    }).sort((a,b) => new Date(a.deadline) - new Date(b.deadline));
+    $('cards').innerHTML = visible.length ? visible.map((item,index) => {
+      const status = effectiveStatus(item);
+      const label = {available:'Available',claimed:'Fully reserved',expired:'Expired'}[status];
+      const urgent = status === 'available' && (new Date(item.deadline) - Date.now() < 1000 * 60 * 45);
+      const action = status === 'available'
+        ? `<button class="primary" data-action="reserve" data-id="${escapeHtml(item.id)}">Reserve 1 portion ↗</button>`
+        : `<button disabled>${status === 'claimed' ? 'No portions left' : 'Deadline passed'}</button>`;
+      return `<article class="food-card" style="animation-delay:${Math.min(index*70,280)}ms"><div class="card-visual"><div class="status-pill ${status}"><span class="status-dot"></span>${label}</div><div class="food-emoji">${escapeHtml(item.emoji||'🍽️')}</div></div><div class="card-body"><div class="card-top"><div><h3 class="food-title">${escapeHtml(item.name)}</h3><div class="food-location"><span>⌖</span>${escapeHtml(item.location)}</div></div><div class="quantity">${Number(item.quantity)} portions left</div></div><div class="card-meta"><span class="deadline ${urgent?'urgent':''}">◷ ${escapeHtml(timeLeft(item.deadline))}</span><span>By ${escapeHtml(formatDeadline(item.deadline))}</span></div><div class="card-actions">${action}</div></div></article>`;
+    }).join('') : `<div class="empty-state"><div class="empty-icon">🥬</div><h3>${listings.length ? 'No listings found' : 'No food listings yet'}</h3><p>${listings.length ? 'Try another search or filter.' : 'Be the first to share surplus food with your campus.'}</p>${currentUser && currentUser.role==='admin' ? '<button class="add-button" data-action="add-from-empty">+ Add a listing</button>' : ''}</div>`;
+    updateStats();
+  }
+  function updateStats() {
+    $('availableCount').textContent = listings.filter(x => effectiveStatus(x) === 'available').length;
+    $('claimedCount').textContent = listings.reduce((sum,x) => sum + ((Number(x.reservationCount) || 0)), 0);
+    $('portionsCount').textContent = listings.reduce((sum,x) => sum + (effectiveStatus(x) === 'expired' ? 0 : (Number(x.quantity)||0)), 0);
+  }
+  function showToast(message) {
+    $('toastText').textContent = message; $('toast').classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(()=>$('toast').classList.remove('show'), 4200);
+  }
+  function openModal() {
+    if (!currentUser || currentUser.role !== 'admin') { showToast('Only registered admins can add food listings.'); return; }
+    $('modalBackdrop').classList.add('open'); $('formError').classList.remove('show'); setMinDeadline();
+    setTimeout(()=>$('foodName').focus(),80);
+  }
+  function closeModal() { $('modalBackdrop').classList.remove('open'); $('listingForm').reset(); $('formError').classList.remove('show'); }
+  function setMinDeadline() {
+    const d = new Date(Date.now()+15*60000); d.setMinutes(d.getMinutes()-d.getTimezoneOffset());
+    $('deadline').min = d.toISOString().slice(0,16); if (!$('deadline').value) $('deadline').value = d.toISOString().slice(0,16);
+  }
+  function formError(message) { $('formError').textContent = message; $('formError').classList.add('show'); }
+  async function refreshListings() {
+    try { const data = await api('/api/listings'); listings = Array.isArray(data.listings) ? data.listings : []; render(); }
+    catch (err) { $('cards').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Backend connection failed</h3><p>${escapeHtml(err.message)}</p></div>`; updateStats(); }
+  }
+  async function createListing(e) {
+    e.preventDefault();
+    if (!currentUser || currentUser.role !== 'admin') { formError('Only admins can publish food listings.'); return; }
+    const name = $('foodName').value.trim(), quantity = Number($('quantity').value), location = $('location').value.trim();
+    const deadlineValue = $('deadline').value, deadline = new Date(deadlineValue);
+    if (!name || !location) { formError('Please enter both a food name and pickup location.'); return; }
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 500) { formError('Enter a whole number of portions between 1 and 500.'); return; }
+    if (!deadlineValue || Number.isNaN(deadline.getTime()) || deadline.getTime() <= Date.now()) { formError('Choose a collection deadline in the future.'); return; }
+    const submit = $('listingForm').querySelector('button[type="submit"]'); submit.disabled = true;
+    try {
+      await api('/api/listings', {method:'POST', body:JSON.stringify({name,quantity,location,deadline:deadline.toISOString(),emoji:$('foodType').value})});
+      closeModal(); $('searchInput').value=''; $('statusFilter').value='all'; await refreshListings();
+      $('listings').scrollIntoView({behavior:'smooth'}); showToast('Your food listing is saved to the database.');
+    } catch (err) { formError(err.message); }
+    finally { submit.disabled = false; }
+  }
+  async function handleCardAction(e) {
+    const button = e.target.closest('button[data-action]'); if (!button) return;
+    const action = button.dataset.action;
+    if (action === 'add-from-empty') { openModal(); return; }
+    if (action !== 'reserve') return;
+    if (!currentUser) { showToast('Register to continue.'); return; }
+    if (currentUser.role !== 'student') { showToast('Switch to a student session to reserve food.'); return; }
+    button.disabled = true;
+    try {
+      const result = await api(`/api/listings/${encodeURIComponent(button.dataset.id)}/reserve`, {method:'POST', body:'{}'});
+      await refreshListings();
+      showToast(result.remaining === 0 ? 'Last portion reserved. No portions remain.' : `One portion reserved. ${result.remaining} portion(s) remain.`);
+    } catch (err) { showToast(err.message); await refreshListings(); }
+    finally { button.disabled = false; }
+  }
+  function updateRoleUI() {
+    const isAdmin = !!currentUser && currentUser.role === 'admin';
+    ['navAdd','heroAdd','addListing'].forEach(id => { const el=$(id); if(el) el.hidden=!isAdmin; });
+    $('sessionBar').style.display = currentUser ? 'flex' : 'none';
+    if (currentUser) { $('sessionName').textContent=currentUser.name; $('sessionRole').textContent=isAdmin?'ADMIN':'STUDENT'; }
+  }
+  async function showRegistration() {
+    if (sessionToken) { try { await api('/api/session',{method:'DELETE'}); } catch (_) {} }
+    sessionToken=''; currentUser=null; sessionStorage.removeItem('cfr_session_token'); sessionStorage.removeItem('cfr_session_user'); $('mainApp').classList.add('auth-locked'); $('authBackdrop').style.display='flex';
+    $('authForm').reset(); $('authEmail').readOnly=false; $('authName').readOnly=false; $('authRole').disabled=false; $('authSubmit').textContent='Continue ↗'; $('adminCodeField').hidden=true; $('authError').classList.remove('show'); updateRoleUI();
+    setTimeout(()=>$('authName').focus(),50);
+  }
+  $('authRole').addEventListener('change',()=>{$('adminCodeField').hidden=$('authRole').value!=='admin';$('authError').classList.remove('show');});
+  $('authForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const err=$('authError'); err.classList.remove('show'); err.style.background=''; err.style.color='';
+    $('authSubmit').disabled = true;
+    try {
+      const name=$('authName').value.trim(), email=$('authEmail').value.trim(), role=$('authRole').value, adminCode=$('adminCode').value;
+      const data = await api('/api/session',{method:'POST',body:JSON.stringify({name,email,role,adminCode})});
+      sessionToken=data.token; currentUser=data.user; sessionStorage.setItem('cfr_session_token',sessionToken); sessionStorage.setItem('cfr_session_user',JSON.stringify(currentUser));
+      $('authBackdrop').style.display='none'; $('mainApp').classList.remove('auth-locked'); updateRoleUI(); await refreshListings(); showToast(currentUser.role==='admin'?'Admin access granted.':'You can now browse and reserve food.');
+    } catch (error) { err.textContent=error.message; err.classList.add('show'); }
+    finally { $('authSubmit').disabled = false; }
+  });
+  $('signOut').addEventListener('click',showRegistration);
+  $('navAdd').addEventListener('click',openModal); $('heroAdd').addEventListener('click',openModal); $('addListing').addEventListener('click',openModal);
+  $('findFood').addEventListener('click',()=>$('listings').scrollIntoView({behavior:'smooth'}));
+  $('closeModal').addEventListener('click',closeModal); $('modalBackdrop').addEventListener('click',e=>{if(e.target===$('modalBackdrop'))closeModal();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();}); $('listingForm').addEventListener('submit',createListing);
+  $('cards').addEventListener('click',handleCardAction); $('searchInput').addEventListener('input',render); $('statusFilter').addEventListener('change',render);
+  document.addEventListener('pointermove',e=>{if(e.pointerType==='touch')return;document.documentElement.style.setProperty('--pointer-x',e.clientX+'px');document.documentElement.style.setProperty('--pointer-y',e.clientY+'px');},{passive:true});
+  // Restore a valid login after refresh. sessionStorage is cleared when the tab/browser session ends.
+  async function restoreSession() {
+    if (!sessionToken || !currentUser) { await showRegistration(); await refreshListings(); return; }
+    try {
+      const data = await api('/api/session');
+      currentUser = data.user; sessionStorage.setItem('cfr_session_user', JSON.stringify(currentUser));
+      $('authBackdrop').style.display='none'; $('mainApp').classList.remove('auth-locked'); updateRoleUI();
+      await refreshListings();
+    } catch (_) {
+      sessionToken=''; currentUser=null; sessionStorage.removeItem('cfr_session_token'); sessionStorage.removeItem('cfr_session_user');
+      $('mainApp').classList.add('auth-locked'); $('authBackdrop').style.display='flex'; updateRoleUI(); await refreshListings();
+    }
+  }
+  // The API is the source of truth; refresh periodically so deadline changes are reflected.
+  restoreSession(); setInterval(()=>{if(document.visibilityState==='visible')refreshListings();},30000);
+})();
+
+</script>
+</body>
+</html>
