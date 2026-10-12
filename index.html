@@ -364,6 +364,81 @@
     .hero-art{overflow:hidden}
     .hero-grid{min-width:0}
   }
+
+  /* Editorial campus-food redesign: inspired by premium fashion-site spacing and photography, without copying brand assets. */
+  :root{--bg:#f8f6f1;--ink:#211f1a;--muted:#746f65;--green:#3c4a35;--lime:#d7c29a;--line:#e7e0d5;--white:#fff;--orange:#bd7650;--shadow:0 16px 42px rgba(45,38,27,.08)}
+  body{background:#fff;color:var(--ink);font-family:'DM Sans',sans-serif}
+  .topbar{height:78px;background:#fff;color:#201f1b;border-bottom:1px solid #e8e3da;padding:0 clamp(18px,5.2vw,84px)}
+  .brand{color:#201f1b!important;font-family:Georgia,'Times New Roman',serif;font-weight:600;letter-spacing:.2px;font-size:21px;gap:12px}
+  .brand-mark{width:34px;height:34px;border-radius:50%;background:#283326;color:#f4ead8;box-shadow:none;font-size:17px}
+  .brand span small{color:#81796c;letter-spacing:1.9px;font-size:9px}
+  .nav{color:#4e4b43;gap:29px;font-size:12px;letter-spacing:.2px}
+  .nav a:hover{color:#94754a}
+  .top-action{background:#292b24;color:#fff;border-radius:2px;padding:12px 18px;font-weight:600;letter-spacing:.2px}
+  .top-action:hover{background:#4b5944;box-shadow:none}
+  .hero{background:#f4f0e8;color:#201f1b;padding:54px clamp(18px,5.2vw,84px) 62px;min-height:590px;display:flex;align-items:center}
+  .hero:before{display:none}
+  .hero-grid{width:100%;max-width:1440px;grid-template-columns:.88fr 1.12fr;gap:clamp(28px,5vw,82px)}
+  .eyebrow{color:#7e6b4d;font-size:10px;letter-spacing:2.1px}
+  .pulse{background:#9a7e4e;box-shadow:0 0 0 5px #9a7e4e1b}
+  .hero h1{font-family:Georgia,'Times New Roman',serif;font-size:clamp(48px,5.3vw,78px);line-height:.99;letter-spacing:-2.6px;font-weight:400;margin:23px 0 22px;max-width:620px}
+  .hero h1 em{color:#81724f;font-style:italic}
+  .hero p{color:#615d54;font-size:14px;line-height:1.9;max-width:470px}
+  .hero-buttons{margin-top:30px;gap:10px}
+  .btn-primary,.btn-secondary{border-radius:2px;padding:15px 20px;font-size:12px;letter-spacing:.2px}
+  .btn-primary{background:#292b24;color:white}.btn-primary:hover{background:#4b5944;box-shadow:none}
+  .btn-secondary{background:transparent;border-color:#bdb4a5;color:#302e28}.btn-secondary:hover{background:#e9e2d6}
+  .hero-note{color:#777064;font-size:11px}
+  .avatar{border-color:#f4f0e8;background:#e5dccb}
+  .hero-art{min-height:470px;border-radius:2px;overflow:hidden;background:linear-gradient(180deg,rgba(24,25,19,.02),rgba(24,25,19,.2)),url('https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1500&q=85') center/cover no-repeat;box-shadow:0 20px 60px #3e34221a;transform:none}
+  .hero-art:before{display:none}
+  .hero-art .orbit,.hero-art .hero-spark,.hero-art .hero-food,.hero-art .ingredient,.hero-art .steam,.hero-art .plate,.hero-art .float-chip{display:none!important}
+  .hero-stamp{left:22px;top:auto;bottom:22px;border:1px solid #ffffff75;border-radius:0;background:#24251ed9;color:#fff;padding:13px 16px;font-size:9px;letter-spacing:1.7px;animation:none}
+  .hero-stamp span{color:#d7c29a}
+  .hero-scroll{color:#817b70;letter-spacing:1.6px}.hero-scroll:before{background:#b9a47e}.hero-scroll:after{color:#8d754c}
+  .live-ribbon{background:#292b24;color:#e9e1d3;border-color:#292b24;letter-spacing:1.8px}
+  .main{max-width:1440px;padding:42px clamp(18px,5.2vw,84px) 80px}
+  .impact-row{margin-top:-20px;gap:0;box-shadow:var(--shadow);border:1px solid var(--line);background:white}
+  .impact{border:0;border-right:1px solid var(--line);border-radius:0;box-shadow:none;padding:23px 25px;animation:none}.impact:last-child{border-right:0}
+  .impact-icon{border-radius:50%;background:#f2ede3;color:#5d614b}
+  .impact strong{font-family:Georgia,'Times New Roman',serif;font-weight:400;letter-spacing:-.4px;font-size:31px}
+  .impact span{font-size:11px;letter-spacing:.2px}
+  .section-head{margin:68px 0 24px}.section-kicker{color:#8c754e;font-size:10px;letter-spacing:2px}
+  .section-head h2{font-family:Georgia,'Times New Roman',serif;font-size:clamp(32px,3.5vw,48px);font-weight:400;letter-spacing:-1.3px;margin-top:10px}
+  .section-head p{color:#716b60;font-size:13px}
+  .listing-controls{margin:28px 0 22px}.search-wrap input,.filter-select{border-radius:2px;border-color:#dcd5c9;background:#fff;min-height:45px}.add-button{border-radius:2px;background:#292b24;padding:14px 18px}.add-button:hover{background:#4b5944}
+  .category-section{margin-top:66px}
+  .category-heading{display:flex;justify-content:space-between;align-items:end;gap:18px;margin-bottom:23px}
+  .category-heading h2{font:400 clamp(31px,3.5vw,46px)/1.05 Georgia,'Times New Roman',serif;letter-spacing:-1.2px;margin:9px 0 0}
+  .category-heading p{font-size:12px;color:#746f65;line-height:1.7;max-width:390px;margin:0}
+  .category-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}
+  .category-tile{position:relative;isolation:isolate;display:flex;align-items:end;justify-content:space-between;gap:8px;min-height:190px;padding:17px;border:0;text-align:left;color:white;overflow:hidden;background:#5c594e;cursor:pointer;transition:transform .25s,box-shadow .25s;box-shadow:0 8px 22px #2d281c0c}
+  .category-tile:before{content:"";position:absolute;inset:0;z-index:-2;background-image:var(--tile-image);background-size:cover;background-position:center;transition:transform .6s}
+  .category-tile:after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,#17171108 15%,#171711b8 100%)}
+  .category-tile:hover,.category-tile.active{transform:translateY(-4px);box-shadow:0 16px 34px #2d281c24}
+  .category-tile:hover:before{transform:scale(1.06)}
+  .category-tile.active{outline:2px solid #9b8055;outline-offset:-5px}
+  .category-tile strong{font:400 25px/1.05 Georgia,'Times New Roman',serif;letter-spacing:-.4px}
+  .category-tile small{display:block;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;margin-top:7px;color:#f2e9d8}
+  .category-arrow{display:grid;place-items:center;flex:0 0 31px;width:31px;height:31px;border:1px solid #ffffff80;border-radius:50%;font-size:16px;transition:transform .2s}
+  .category-tile:hover .category-arrow{transform:translate(2px,-2px)}
+  .category-reset{border:1px solid #d8d0c2;background:white;color:#3e3c34;border-radius:2px;padding:10px 14px;font-size:11px;font-weight:700}
+  .category-reset:hover{background:#f2ede3}
+  .food-category-label{display:inline-block;margin-bottom:9px;color:#8c754e;font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}
+  .cards{gap:16px}.food-card{border-radius:2px;border-color:#e8e2d8;box-shadow:none;animation:none}.food-card:hover{transform:translateY(-4px);box-shadow:0 16px 35px #2d281c12}
+  .card-visual{height:155px;background:linear-gradient(135deg,#eee7d9,#ddd3c1)}
+  .card-visual:before,.card-visual:after{border-color:#ffffff7a}
+  .food-emoji{font-size:65px}
+  .status-pill{border-radius:0;font-size:9px;letter-spacing:.4px}.quantity{border-radius:0;background:#f3eee4;color:#4e5c43}
+  .food-title{font-family:Georgia,'Times New Roman',serif;font-size:21px;font-weight:400;letter-spacing:-.3px}
+  .card-body{padding:19px}.card-meta{border-top-color:#eee8de}.listing-price{border-radius:0;background:#f2ede3;color:#4e5c43}.card-actions button{border-radius:0}.card-actions button.primary{background:#343a2d;border-color:#343a2d}.card-actions button.primary:hover{background:#56644b}
+  .how-section{background:#f0ece3;border-radius:0;padding:36px;margin-top:76px}.how-section:after{color:#e5ddcf}.how-section h2{font:400 clamp(30px,3vw,42px) Georgia,'Times New Roman',serif;letter-spacing:-1px}.step{border-radius:0;border-color:#e8e1d5;background:#fffdf9}.step-num{border-radius:50%;background:#4b5941}.step h3{font:600 14px 'DM Sans',sans-serif}
+  .safety{border-radius:0;background:#faf8f3;border-color:#e8e1d5}
+  footer{background:#292b24;color:#e7dfd1;padding:32px clamp(18px,5.2vw,84px)}.footer-brand{font-family:Georgia,'Times New Roman',serif}
+  .modal,.confirm-card{border-radius:2px}.submit-listing{border-radius:2px;background:#343a2d}.close-btn{border-radius:2px}
+  @media(max-width:900px){.hero{min-height:0}.hero-grid{grid-template-columns:1fr 1fr;gap:25px}.hero-art{min-height:410px}.category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.category-tile{min-height:175px}}
+  @media(max-width:650px){.topbar{height:auto;min-height:65px;gap:12px;flex-wrap:wrap;padding:13px 18px}.top-action{padding:10px 12px}.hero{padding:37px 20px 55px}.hero-grid{grid-template-columns:1fr;gap:26px}.hero h1{font-size:clamp(44px,12vw,62px);letter-spacing:-1.8px}.hero-art{min-height:300px;width:100%;transform:none}.hero-stamp{left:13px;bottom:13px}.main{padding:30px 18px 60px}.impact-row{grid-template-columns:1fr;margin-top:-15px}.impact{border-right:0;border-bottom:1px solid var(--line);padding:15px 17px}.impact:last-child{border-bottom:0}.category-section{margin-top:48px}.category-heading{align-items:start;flex-direction:column}.category-grid{gap:9px}.category-tile{min-height:145px;padding:12px}.category-tile strong{font-size:21px}.category-arrow{width:27px;height:27px;flex-basis:27px}.section-head{margin-top:48px}.how-section{padding:23px;margin-top:50px}.category-reset{align-self:flex-start}}
+
 </style>
 </head>
 <body>
@@ -453,6 +528,20 @@
       <div class="impact"><div class="impact-icon">🤝</div><div><strong id="claimedCount">0</strong><span>Meals claimed</span></div></div>
       <div class="impact"><div class="impact-icon">🌱</div><div><strong id="portionsCount">0</strong><span>Portions listed</span></div></div>
     </div>
+    <section class="category-section" id="food-categories" aria-labelledby="categoryTitle">
+      <div class="category-heading"><div><div class="section-kicker">Explore by craving</div><h2 id="categoryTitle">What are you in the mood for?</h2></div><p>Choose a food collection to find available portions around campus. Every category shows current listings and pickup details.</p></div>
+      <div class="category-grid" id="categoryGrid">
+        <button class="category-tile" type="button" data-category="Breakfast" style="--tile-image:url('https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80')"><span><strong>Breakfast</strong><small>Start the day</small></span><span class="category-arrow">↗</span></button>
+        <button class="category-tile" type="button" data-category="Lunch" style="--tile-image:url('https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=800&q=80')"><span><strong>Lunch</strong><small>Midday favourites</small></span><span class="category-arrow">↗</span></button>
+        <button class="category-tile" type="button" data-category="Dinner" style="--tile-image:url('https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=800&q=80')"><span><strong>Dinner</strong><small>Evening plates</small></span><span class="category-arrow">↗</span></button>
+        <button class="category-tile" type="button" data-category="Snacks" style="--tile-image:url('https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=800&q=80')"><span><strong>Snacks</strong><small>Small bites</small></span><span class="category-arrow">↗</span></button>
+        <button class="category-tile" type="button" data-category="Sweets & Desserts" style="--tile-image:url('https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=800&q=80')"><span><strong>Sweets &amp; Desserts</strong><small>A little treat</small></span><span class="category-arrow">↗</span></button>
+        <button class="category-tile" type="button" data-category="Drinks" style="--tile-image:url('https://images.unsplash.com/photo-1513558161293-cdaf765edfd7?auto=format&fit=crop&w=800&q=80')"><span><strong>Drinks</strong><small>Freshen up</small></span><span class="category-arrow">↗</span></button>
+        <button class="category-tile" type="button" data-category="Bakery" style="--tile-image:url('https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80')"><span><strong>Bakery</strong><small>Freshly baked</small></span><span class="category-arrow">↗</span></button>
+        <button class="category-tile" type="button" data-category="Fruits" style="--tile-image:url('https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=800&q=80')"><span><strong>Fruits</strong><small>Fresh picks</small></span><span class="category-arrow">↗</span></button>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:13px"><button class="category-reset" id="clearCategory" type="button">View all food ↗</button></div>
+    </section>
     <section class="admin-notifications" id="adminNotifications" aria-live="polite">
       <div class="notification-head"><h2>Reservation notifications</h2><span class="notification-count" id="notificationCount">0 new</span></div>
       <div class="notification-list" id="notificationList"><div class="notification-empty">Notifications appear here when students reserve portions.</div></div>
@@ -473,7 +562,8 @@
     <form id="listingForm" novalidate><div class="form-grid">
       <div class="field full"><label for="foodName">Food name *</label><input id="foodName" maxlength="70" placeholder="e.g. Vegetable pulao" required></div>
       <div class="field"><label for="quantity">Portions available *</label><input id="quantity" type="number" min="1" max="500" step="1" placeholder="e.g. 12" required></div>
-      <div class="field"><label for="foodType">Food category</label><select id="foodType"><option value="🍱">Rice & meals</option><option value="🥪">Sandwiches</option><option value="🥗">Salads</option><option value="🍎">Fruit</option><option value="🥐">Bakery</option><option value="🍲">Other hot food</option></select></div>
+      <div class="field"><label for="foodCategory">Meal category *</label><select id="foodCategory" required><option value="Breakfast">Breakfast</option><option value="Lunch" selected>Lunch</option><option value="Dinner">Dinner</option><option value="Snacks">Snacks</option><option value="Sweets & Desserts">Sweets &amp; Desserts</option><option value="Drinks">Drinks</option><option value="Bakery">Bakery</option><option value="Fruits">Fruits</option><option value="Other">Other</option></select></div>
+      <div class="field"><label for="foodType">Food icon</label><select id="foodType"><option value="🍱">Rice / meal</option><option value="🥪">Sandwich</option><option value="🥗">Salad</option><option value="🍎">Fruit</option><option value="🥐">Bakery</option><option value="🍲">Hot food</option><option value="🍰">Dessert</option><option value="🥤">Drink</option><option value="🍿">Snack</option></select></div>
       <div class="field full"><label for="location">Pickup location *</label><input id="location" maxlength="100" placeholder="e.g. Main canteen counter" required></div>
       <div class="field"><label for="contactNumber">Contact number (optional)</label><input id="contactNumber" type="tel" inputmode="tel" maxlength="25" placeholder="e.g. +91 98765 43210"></div>
       <div class="field"><label for="pricePerPortion">Price per portion in ₹ (optional)</label><input id="pricePerPortion" type="number" min="0" max="1000000" step="0.01" placeholder="e.g. 25.00"><small>Leave blank to hide the price; enter 0 for free food.</small></div>
@@ -501,6 +591,7 @@
   let sessionToken = sessionStorage.getItem('cfr_session_token') || '';
   try { currentUser = JSON.parse(sessionStorage.getItem('cfr_session_user') || 'null'); } catch (_) { currentUser = null; }
   let listings = [];
+  let selectedCategory = 'all';
   let toastTimer;
   let pendingListingId = "";
   const $ = id => document.getElementById(id);
@@ -542,7 +633,8 @@
     const query = $('searchInput').value.trim().toLowerCase(), filter = $('statusFilter').value;
     const visible = listings.filter(item => {
       const status = effectiveStatus(item);
-      return (filter === 'all' || status === filter) && (item.name + ' ' + item.location).toLowerCase().includes(query);
+      const categoryMatches = selectedCategory === 'all' || (item.category || 'Other') === selectedCategory;
+      return categoryMatches && (filter === 'all' || status === filter) && (item.name + ' ' + item.location + ' ' + (item.category || 'Other')).toLowerCase().includes(query);
     }).sort((a,b) => new Date(a.deadline) - new Date(b.deadline));
     $('cards').innerHTML = visible.length ? visible.map((item,index) => {
       const status = effectiveStatus(item);
@@ -551,7 +643,7 @@
       const action = status === 'available'
         ? `<button class="primary" data-action="reserve" data-id="${escapeHtml(item.id)}">Reserve 1 portion ↗</button>`
         : `<button disabled>${status === 'claimed' ? 'No portions left' : 'Deadline passed'}</button>`;
-      return `<article class="food-card" style="animation-delay:${Math.min(index*70,280)}ms"><div class="card-visual"><div class="status-pill ${status}"><span class="status-dot"></span>${label}</div><div class="food-emoji">${escapeHtml(item.emoji||'🍽️')}</div></div><div class="card-body"><div class="card-top"><div><h3 class="food-title">${escapeHtml(item.name)}</h3><div class="food-location"><span>⌖</span>${escapeHtml(item.location)}</div></div><div class="quantity">${Number(item.quantity)} portions left</div></div><div class="card-meta"><span class="deadline ${urgent?'urgent':''}">◷ ${escapeHtml(timeLeft(item.deadline))}</span><span>By ${escapeHtml(formatDeadline(item.deadline))}</span></div>${(item.pricePerPortion !== null && item.pricePerPortion !== undefined && item.pricePerPortion !== '') || item.contactNumber ? `<div class="listing-extra">${item.pricePerPortion !== null && item.pricePerPortion !== undefined && item.pricePerPortion !== '' ? `<span class="listing-price">₹${Number(item.pricePerPortion).toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:2})} / portion</span>` : ''}${item.contactNumber ? `<a href="tel:${escapeHtml(item.contactNumber)}">☎ ${escapeHtml(item.contactNumber)}</a>` : ''}</div>` : ''}<div class="card-actions">${action}</div></div></article>`;
+      return `<article class="food-card" style="animation-delay:${Math.min(index*70,280)}ms"><div class="card-visual"><div class="status-pill ${status}"><span class="status-dot"></span>${label}</div><div class="food-emoji">${escapeHtml(item.emoji||'🍽️')}</div></div><div class="card-body"><div class="food-category-label">${escapeHtml(item.category || 'Other')}</div><div class="card-top"><div><h3 class="food-title">${escapeHtml(item.name)}</h3><div class="food-location"><span>⌖</span>${escapeHtml(item.location)}</div></div><div class="quantity">${Number(item.quantity)} portions left</div></div><div class="card-meta"><span class="deadline ${urgent?'urgent':''}">◷ ${escapeHtml(timeLeft(item.deadline))}</span><span>By ${escapeHtml(formatDeadline(item.deadline))}</span></div>${(item.pricePerPortion !== null && item.pricePerPortion !== undefined && item.pricePerPortion !== '') || item.contactNumber ? `<div class="listing-extra">${item.pricePerPortion !== null && item.pricePerPortion !== undefined && item.pricePerPortion !== '' ? `<span class="listing-price">₹${Number(item.pricePerPortion).toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:2})} / portion</span>` : ''}${item.contactNumber ? `<a href="tel:${escapeHtml(item.contactNumber)}">☎ ${escapeHtml(item.contactNumber)}</a>` : ''}</div>` : ''}<div class="card-actions">${action}</div></div></article>`;
     }).join('') : `<div class="empty-state"><div class="empty-icon">🥬</div><h3>${listings.length ? 'No listings found' : 'No food listings yet'}</h3><p>${listings.length ? 'Try another search or filter.' : 'Be the first to share surplus food with your campus.'}</p>${currentUser && currentUser.role==='admin' ? '<button class="add-button" data-action="add-from-empty">+ Add a listing</button>' : ''}</div>`;
     updateStats();
   }
@@ -652,8 +744,8 @@
       if (contactNumber && !/^[+0-9() .-]{7,25}$/.test(contactNumber)) { formError('Enter a valid contact number, or leave it blank.'); return; }
       const pricePerPortion = priceInput === '' ? null : Number(priceInput);
       if (priceInput !== '' && (!Number.isFinite(pricePerPortion) || pricePerPortion < 0 || pricePerPortion > 1000000 || Math.round(pricePerPortion * 100) !== pricePerPortion * 100)) { formError('Enter a price from ₹0 to ₹1,000,000 with up to 2 decimal places, or leave it blank.'); return; }
-      await api('/api/listings', {method:'POST', body:JSON.stringify({name,quantity,location,contactNumber,pricePerPortion,deadline:deadline.toISOString(),emoji:$('foodType').value})});
-      closeModal(); $('searchInput').value=''; $('statusFilter').value='all'; await refreshListings();
+      await api('/api/listings', {method:'POST', body:JSON.stringify({name,quantity,location,contactNumber,pricePerPortion,deadline:deadline.toISOString(),emoji:$('foodType').value,category:$('foodCategory').value})});
+      closeModal(); $('searchInput').value=''; $('statusFilter').value='all'; selectedCategory='all'; document.querySelectorAll('.category-tile').forEach(button=>button.classList.remove('active')); await refreshListings();
       $('listings').scrollIntoView({behavior:'smooth'}); showToast('Your food listing is saved to the database.');
     } catch (err) { formError(err.message); }
     finally { submit.disabled = false; }
@@ -711,6 +803,8 @@
   $('closeModal').addEventListener('click',closeModal); $('modalBackdrop').addEventListener('click',e=>{if(e.target===$('modalBackdrop'))closeModal();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();}); $('listingForm').addEventListener('submit',createListing);
   $('cards').addEventListener('click',handleCardAction); $('searchInput').addEventListener('input',render); $('statusFilter').addEventListener('change',render);
+  $('categoryGrid').addEventListener('click', e => { const tile=e.target.closest('[data-category]'); if(!tile) return; selectedCategory=tile.dataset.category; document.querySelectorAll('.category-tile').forEach(button=>button.classList.toggle('active',button===tile)); render(); $('listings').scrollIntoView({behavior:'smooth',block:'start'}); });
+  $('clearCategory').addEventListener('click', () => { selectedCategory='all'; document.querySelectorAll('.category-tile').forEach(button=>button.classList.remove('active')); render(); $('listings').scrollIntoView({behavior:'smooth',block:'start'}); });
   document.addEventListener('pointermove',e=>{if(e.pointerType==='touch')return;document.documentElement.style.setProperty('--pointer-x',e.clientX+'px');document.documentElement.style.setProperty('--pointer-y',e.clientY+'px');},{passive:true});
   // Restore a valid login after refresh. sessionStorage is cleared when the tab/browser session ends.
   async function restoreSession() {

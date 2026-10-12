@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS listings (
     location TEXT NOT NULL,
     contact_number TEXT NOT NULL DEFAULT '',
     price_per_portion REAL,
+    category TEXT NOT NULL DEFAULT 'Other',
     deadline TEXT NOT NULL,
     emoji TEXT NOT NULL DEFAULT '🍽️',
     status TEXT NOT NULL DEFAULT 'available' CHECK (status IN ('available','claimed','expired')),
@@ -113,6 +114,8 @@ def init_db() -> None:
             conn.execute("ALTER TABLE listings ADD COLUMN contact_number TEXT NOT NULL DEFAULT ''")
         if "price_per_portion" not in columns:
             conn.execute("ALTER TABLE listings ADD COLUMN price_per_portion REAL")
+        if "category" not in columns:
+            conn.execute("ALTER TABLE listings ADD COLUMN category TEXT NOT NULL DEFAULT 'Other'")
         session_columns = {row[1] for row in conn.execute("PRAGMA table_info(sessions)")}
         if "last_seen" not in session_columns:
             conn.execute("ALTER TABLE sessions ADD COLUMN last_seen TEXT NOT NULL DEFAULT ''")
@@ -161,6 +164,7 @@ def listing_to_dict(row: sqlite3.Row, db: sqlite3.Connection) -> dict[str, Any]:
         "location": row["location"],
         "contactNumber": row["contact_number"],
         "pricePerPortion": row["price_per_portion"],
+        "category": row["category"] if "category" in row.keys() else "Other",
         "deadline": row["deadline"],
         "emoji": row["emoji"], "status": row["status"],
         "createdAt": row["created_at"], "createdBy": created_by_display,
@@ -480,6 +484,10 @@ def create_listing():
     location = str(data.get("location", "")).strip()
     contact_number = str(data.get("contactNumber", "")).strip()
     raw_price = data.get("pricePerPortion")
+    category = str(data.get("category", "Other")).strip()
+    allowed_categories = {"Breakfast", "Lunch", "Dinner", "Snacks", "Sweets & Desserts", "Drinks", "Bakery", "Fruits", "Other"}
+    if category not in allowed_categories:
+        return error("Choose a valid food category.")
     emoji = str(data.get("emoji", "🍽️")).strip()[:16] or "🍽️"
     quantity = data.get("quantity")
     deadline_raw = str(data.get("deadline", "")).strip()
@@ -514,9 +522,9 @@ def create_listing():
     listing_id = secrets.token_urlsafe(12)
     db = get_db()
     db.execute(
-        "INSERT INTO listings(id,name,quantity,location,contact_number,price_per_portion,deadline,emoji,status,created_by,created_at) "
-        "VALUES(?,?,?,?,?,?,?,?, 'available',?,?)",
-        (listing_id, name, quantity, location, contact_number, price_per_portion,
+        "INSERT INTO listings(id,name,quantity,location,contact_number,price_per_portion,category,deadline,emoji,status,created_by,created_at) "
+        "VALUES(?,?,?,?,?,?,?,?,?, 'available',?,?)",
+        (listing_id, name, quantity, location, contact_number, price_per_portion, category,
          deadline.isoformat(timespec="seconds"), emoji, session["email"], iso_now()),
     )
     row = db.execute("SELECT * FROM listings WHERE id = ?", (listing_id,)).fetchone()
