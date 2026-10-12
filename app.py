@@ -6,9 +6,9 @@ import sqlite3
 import hashlib
 import hmac
 import re
-import smtplib
-import ssl
-from email.message import EmailMessage
+import json
+import urllib.request
+import urllib.error
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -269,14 +269,13 @@ def send_email_verification():
     if db.execute("SELECT 1 FROM verified_emails WHERE email = ?", (email,)).fetchone():
         return jsonify({"ok": True, "alreadyVerified": True, "message": "This email has already been verified."})
 
-    mail_host = os.environ.get("MAIL_SERVER", "").strip()
-    mail_port = int(os.environ.get("MAIL_PORT", "587"))
-    mail_user = os.environ.get("MAIL_USERNAME", "").strip()
-    mail_password = os.environ.get("MAIL_PASSWORD", "")
-    sender = os.environ.get("MAIL_DEFAULT_SENDER", mail_user).strip()
-    use_tls = os.environ.get("MAIL_USE_TLS", "true").strip().lower() not in ("0", "false", "no")
-    if not mail_host or not sender or not mail_user or not mail_password:
-        return error("Email verification is not configured yet. Set MAIL_SERVER, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD, and MAIL_DEFAULT_SENDER in Render Environment.", 503)
+    resend_api_key = os.environ.get("RESEND_API_KEY", "").strip()
+    sender = os.environ.get("MAIL_DEFAULT_SENDER", "").strip()
+    if not resend_api_key or not sender:
+        return error(
+            "Email verification is not configured yet. Set RESEND_API_KEY and MAIL_DEFAULT_SENDER in Render Environment.",
+            503,
+        )
 
     now = utc_now()
     previous = db.execute("SELECT sent_at FROM email_verification_codes WHERE email=?", (email,)).fetchone()
@@ -291,27 +290,38 @@ def send_email_verification():
     code = f"{secrets.randbelow(1_000_000):06d}"
     expires = (now.replace(microsecond=0) + __import__("datetime").timedelta(minutes=10)).isoformat(timespec="seconds")
     code_hash = hashlib.sha256((email + ":" + code + ":" + os.environ.get("SECRET_KEY", "campus-food-rescue-verification")).encode()).hexdigest()
-    message = EmailMessage()
-    message["Subject"] = "Verify your Campus Food Rescue email"
-    message["From"] = sender
-    message["To"] = email
-    message.set_content(
-        f"Hello {name or 'there'},\n\nYour Campus Food Rescue verification code is: {code}\n\n"
-        "This code expires in 10 minutes. If you did not request it, you can ignore this email.\n"
+    email_text = (
+        f"Hello {name or 'there'},\\n\\nYour Campus Food Rescue verification code is: {code}\\n\\n"
+        "This code expires in 10 minutes. If you did not request it, you can ignore this email.\\n"
+    )
+    payload = json.dumps({
+        "from": sender,
+        "to": [email],
+        "subject": "Verify your Campus Food Rescue email",
+        "text": email_text,
+    }).encode("utf-8")
+    api_request = urllib.request.Request(
+        "https://api.resend.com/emails",
+        data=payload,
+        headers={
+            "Authorization": f"Bearer {resend_api_key}",
+            "Content-Type": "application/json",
+            "User-Agent": "Campus-Food-Rescue/1.0",
+        },
+        method="POST",
     )
     try:
-        if use_tls:
-            with smtplib.SMTP(mail_host, mail_port, timeout=15) as server:
-                server.starttls(context=ssl.create_default_context())
-                server.login(mail_user, mail_password)
-                server.send_message(message)
-        else:
-            with smtplib.SMTP_SSL(mail_host, mail_port, timeout=15, context=ssl.create_default_context()) as server:
-                server.login(mail_user, mail_password)
-                server.send_message(message)
+        with urllib.request.urlopen(api_request, timeout=15) as response:
+            if response.status not in (200, 201):
+                app.logger.error("Resend API returned unexpected HTTP status %s", response.status)
+                return error("The email provider could not send the verification email. Please try again later.", 502)
+    except urllib.error.HTTPError as exc:
+        provider_detail = exc.read().decode("utf-8", errors="replace")[:1000]
+        app.logger.error("Resend email delivery failed (HTTP %s): %s", exc.code, provider_detail)
+        return error("Could not send the verification email. Check the Resend sender configuration and API key.", 502)
     except Exception:
-        app.logger.exception("Verification email delivery failed")
-        return error("Could not send the verification email. Check the mail settings in Render and try again.", 502)
+        app.logger.exception("Resend email delivery failed")
+        return error("Could not connect to the email provider. Check the Render service logs and try again.", 502)
 
     db.execute(
         "INSERT INTO email_verification_codes(email,code_hash,expires_at,sent_at,attempts) VALUES(?,?,?,?,0) "
