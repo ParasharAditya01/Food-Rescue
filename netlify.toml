@@ -1,0 +1,8 @@
+[build]
+  publish = "."
+
+[[redirects]]
+  from = "/*"
+  to = "https://food-rescue-p920.onrender.com/:splat"
+  status = 301
+  force = true
