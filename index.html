@@ -470,12 +470,12 @@
       <div class="auth-field"><label for="authName">FULL NAME</label><input id="authName" maxlength="80" autocomplete="name" placeholder="e.g. Alex Morgan" required></div>
       <div class="auth-field"><label for="authEmail">COLLEGE EMAIL</label><input id="authEmail" type="email" maxlength="254" autocomplete="email" placeholder="you@college.edu" required></div>
       <div class="auth-field"><label for="authRole">HOW WILL YOU USE THE NETWORK?</label><select id="authRole"><option value="student">🎓  Student — find and reserve food</option><option value="admin">🍱  Admin / food provider — publish listings</option></select></div>
-      <div class="auth-field" id="adminCodeField" hidden><label for="adminCode">ADMIN ACCESS CODE</label><input id="adminCode" type="password" autocomplete="off" placeholder="Enter the admin code"></div>
+      <div class="auth-field" id="adminPasswordField" hidden><label for="adminPassword">ADMIN PASSWORD</label><input id="adminPassword" type="password" autocomplete="current-password" placeholder="Enter the admin password"></div>
       <div class="auth-error" id="authError" role="alert"></div>
       <button class="auth-submit" id="authSubmit" type="submit"><span>Join the network</span><b>↗</b></button>
     </form>
     <div class="auth-trust"><span class="trust-check">✓</span><span><b>Your details stay within the prototype</b><small>Use an email you can identify later. Email ownership is not verified.</small></span></div>
-    <div class="auth-footnote">Admin registration also requires a valid access code.</div>
+    <div class="auth-footnote">Admin access requires the configured admin email and password.</div>
     <button class="host-link" id="openHostLogin">Host control panel <span>↗</span></button>
     </div>
   </div>
@@ -483,10 +483,10 @@
 <div class="host-overlay" id="hostLoginOverlay" role="dialog" aria-modal="true" aria-labelledby="hostLoginTitle">
   <div class="host-card login">
     <div class="host-head"><h2 id="hostLoginTitle">Host access</h2><button class="host-btn secondary" id="closeHostLogin" type="button">Close</button></div>
-    <p class="host-note">Restricted owner access. Use the designated Host email and the secret code configured on the backend.</p>
+    <p class="host-note">Restricted owner access. Sign in with the Host email and password configured by the project owner.</p>
     <form id="hostLoginForm">
       <label class="host-field">Host email<input id="hostEmail" type="email" autocomplete="off" placeholder="Enter Host email" required></label>
-      <label class="host-field">Host access code<input id="hostCode" type="password" autocomplete="current-password" required></label>
+      <label class="host-field">Host password<input id="hostPassword" type="password" autocomplete="current-password" required></label>
       <div class="host-error" id="hostLoginError" role="alert"></div>
       <button class="host-btn" type="submit" id="hostLoginSubmit">Sign in as Host</button>
     </form>
@@ -506,7 +506,7 @@
   <header class="topbar">
     <a href="#home" class="brand" style="text-decoration:none;color:inherit"><div class="brand-mark">✳</div><span>campus<span><small>FOOD RESCUE NETWORK</small></span></span></a>
     <nav class="nav"><a href="#listings">Find food</a><a href="#how-it-works">How it works</a><a href="#safety">Food safety</a></nav>
-    <div class="session-bar" id="sessionBar"><span>Signed in as <strong id="sessionName"></strong><span class="role-chip" id="sessionRole"></span></span><button class="signout-btn" id="signOut">Sign out</button></div><button class="top-action" id="navAdd">+ Post surplus</button><button class="top-action" id="openRegistration" type="button" style="margin-left:8px">Join network ↗</button><button class="top-action" id="openHostLoginMain" style="margin-left:8px;background:#fff;color:#173323">Host</button>
+    <div class="session-bar" id="sessionBar"><span>Logged in as <strong id="sessionRole"></strong></span><button class="signout-btn" id="signOut">Sign out</button></div><button class="top-action" id="navAdd">+ Post surplus</button><button class="top-action" id="openRegistration" type="button" style="margin-left:8px">Join network ↗</button>
   </header>
   <section class="hero" id="home">
     <div class="hero-grid">
@@ -642,8 +642,8 @@
       const urgent = status === 'available' && (new Date(item.deadline) - Date.now() < 1000 * 60 * 45);
       const action = status === 'available'
         ? `<button class="primary" data-action="reserve" data-id="${escapeHtml(item.id)}">Reserve 1 portion ↗</button>`
-        : `<button disabled>${status === 'claimed' ? 'No portions left' : 'Deadline passed'}</button>`;
-      return `<article class="food-card" style="animation-delay:${Math.min(index*70,280)}ms"><div class="card-visual"><div class="status-pill ${status}"><span class="status-dot"></span>${label}</div><div class="food-emoji">${escapeHtml(item.emoji||'🍽️')}</div></div><div class="card-body"><div class="food-category-label">${escapeHtml(item.category || 'Other')}</div><div class="card-top"><div><h3 class="food-title">${escapeHtml(item.name)}</h3><div class="food-location"><span>⌖</span>${escapeHtml(item.location)}</div></div><div class="quantity">${Number(item.quantity)} portions left</div></div><div class="card-meta"><span class="deadline ${urgent?'urgent':''}">◷ ${escapeHtml(timeLeft(item.deadline))}</span><span>By ${escapeHtml(formatDeadline(item.deadline))}</span></div>${(item.pricePerPortion !== null && item.pricePerPortion !== undefined && item.pricePerPortion !== '') || item.contactNumber ? `<div class="listing-extra">${item.pricePerPortion !== null && item.pricePerPortion !== undefined && item.pricePerPortion !== '' ? `<span class="listing-price">₹${Number(item.pricePerPortion).toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:2})} / portion</span>` : ''}${item.contactNumber ? `<a href="tel:${escapeHtml(item.contactNumber)}">☎ ${escapeHtml(item.contactNumber)}</a>` : ''}</div>` : ''}<div class="card-actions">${action}</div></div></article>`;
+        : `<button disabled>${status === 'expired' ? 'Expired — no more booking' : 'No portions left'}</button>`;
+      return `<article class="food-card" style="animation-delay:${Math.min(index*70,280)}ms"><div class="card-visual"><div class="status-pill ${status}"><span class="status-dot"></span>${label}</div><div class="food-emoji">${escapeHtml(item.emoji||'🍽️')}</div></div><div class="card-body"><div class="food-category-label">${escapeHtml(item.category || 'Other')}</div><div class="card-top"><div><h3 class="food-title">${escapeHtml(item.name)}</h3><div class="food-location"><span>⌖</span>${escapeHtml(item.location)}</div></div><div class="quantity">${status === 'expired' ? 'Expired' : `${Number(item.quantity)} portions left`}</div></div><div class="card-meta"><span class="deadline ${urgent?'urgent':''}">◷ ${escapeHtml(timeLeft(item.deadline))}</span><span>By ${escapeHtml(formatDeadline(item.deadline))}</span></div>${status === 'expired' ? '<p class="host-note" style="margin:10px 0 0;color:#a93232;font-weight:700">This listing has expired. No more booking is allowed.</p>' : ''}${(item.pricePerPortion !== null && item.pricePerPortion !== undefined && item.pricePerPortion !== '') || item.contactNumber ? `<div class="listing-extra">${item.pricePerPortion !== null && item.pricePerPortion !== undefined && item.pricePerPortion !== '' ? `<span class="listing-price">₹${Number(item.pricePerPortion).toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:2})} / portion</span>` : ''}${item.contactNumber ? `<a href="tel:${escapeHtml(item.contactNumber)}">☎ ${escapeHtml(item.contactNumber)}</a>` : ''}</div>` : ''}<div class="card-actions">${action}</div></div></article>`;
     }).join('') : `<div class="empty-state"><div class="empty-icon">🥬</div><h3>${listings.length ? 'No listings found' : 'No food listings yet'}</h3><p>${listings.length ? 'Try another search or filter.' : 'Be the first to share surplus food with your campus.'}</p>${currentUser && currentUser.role==='admin' ? '<button class="add-button" data-action="add-from-empty">+ Add a listing</button>' : ''}</div>`;
     updateStats();
   }
@@ -765,23 +765,23 @@
     $('adminNotifications').classList.toggle('visible', isAdmin);
     $('sessionBar').style.display = currentUser ? 'flex' : 'none';
     $('openRegistration').style.display = currentUser ? 'none' : 'inline-flex';
-    if (currentUser) { $('sessionName').textContent=currentUser.name; $('sessionRole').textContent=isAdmin?'ADMIN':'STUDENT'; }
+    if (currentUser) $('sessionRole').textContent = isAdmin ? 'ADMIN' : 'STUDENT';
   }
   function showRegistration() {
     $('authBackdrop').style.display='flex';
     $('authForm').reset(); $('authEmail').readOnly=false; $('authName').readOnly=false; $('authRole').disabled=false;
     $('authSubmit').disabled=false; $('authSubmit').innerHTML='<span>Join the network</span><b>↗</b>';
-    $('adminCodeField').hidden=true; $('authError').classList.remove('show'); $('authError').style.background=''; $('authError').style.color='';
+    $('adminPasswordField').hidden=true; $('adminPassword').required=false; $('adminPassword').value=''; $('authError').classList.remove('show'); $('authError').style.background=''; $('authError').style.color='';
     setTimeout(()=>$('authName').focus(),50);
   }
-  $('authRole').addEventListener('change',()=>{$('adminCodeField').hidden=$('authRole').value!=='admin';$('authError').classList.remove('show');});
+  $('authRole').addEventListener('change',()=>{$('adminPasswordField').hidden=$('authRole').value!=='admin';$('adminPassword').required=$('authRole').value==='admin';$('authError').classList.remove('show');});
   $('authForm').addEventListener('submit', async e => {
     e.preventDefault();
     const err=$('authError'); err.classList.remove('show'); err.style.background=''; err.style.color='';
     $('authSubmit').disabled = true;
     try {
-      const name=$('authName').value.trim(), email=$('authEmail').value.trim(), role=$('authRole').value, adminCode=$('adminCode').value;
-      const data = await api('/api/session',{method:'POST',body:JSON.stringify({name,email,role,adminCode})});
+      const name=$('authName').value.trim(), email=$('authEmail').value.trim(), role=$('authRole').value, password=$('adminPassword').value;
+      const data = await api('/api/session',{method:'POST',body:JSON.stringify({name,email,role,password})});
       sessionToken=data.token; currentUser=data.user; sessionStorage.setItem('cfr_session_token',sessionToken); sessionStorage.setItem('cfr_session_user',JSON.stringify(currentUser));
       $('authBackdrop').style.display='none'; $('mainApp').classList.remove('auth-locked'); updateRoleUI(); await refreshListings();
       if (currentUser.role === 'admin') await refreshAdminNotifications();
@@ -843,21 +843,20 @@
       $('hostUsers').innerHTML=hostTable(['Account','Role','Activity','Created','Controls'],d.users.map(u=>`<tr><td><strong>${hostEscape(u.name)}</strong><br>${hostEscape(u.email)}</td><td><select data-role-email="${hostEscape(u.email)}"><option value="student" ${u.role==='student'?'selected':''}>Student</option><option value="admin" ${u.role==='admin'?'selected':''}>Admin</option></select></td><td><span class="host-status ${u.active?'active':''}">${u.active?'ACTIVE':'INACTIVE'}</span><br><small>${hostEscape(hostTime(u.lastSeen))}</small></td><td>${hostEscape(hostTime(u.createdAt))}</td><td><button class="host-btn danger" data-revoke-email="${hostEscape(u.email)}">Sign out sessions</button></td></tr>`));
       $('hostListings').innerHTML=hostTable(['Food','Status / quantity','Deadline','Published by','Action'],d.listings.map(x=>`<tr><td>${hostEscape(x.emoji)} <strong>${hostEscape(x.name)}</strong><br><small>${hostEscape(x.location)}</small><br><small>${hostEscape(x.contactNumber||'No contact')}</small></td><td>${hostEscape(x.status)} / ${Number(x.quantity)||0}</td><td>${hostEscape(hostTime(x.deadline))}</td><td>${hostEscape(x.createdBy)}</td><td><button class="host-btn danger" data-close-listing="${hostEscape(x.id)}">Close listing</button></td></tr>`));
       $('hostReservations').innerHTML=hostTable(['Student','Food','Reserved at','Status'],d.reservations.map(r=>`<tr><td>${hostEscape(r.studentName)}<br><small>${hostEscape(r.studentEmail)}</small></td><td>${hostEscape(r.foodName)}</td><td>${hostEscape(hostTime(r.reservedAt))}</td><td>${hostEscape(r.status)}</td></tr>`));
-      $('hostDashboardSub').textContent=`Host control panel • refreshed ${new Date().toLocaleTimeString()}`;
+      $('hostDashboardSub').textContent=`Logged in as HOST • refreshed ${new Date().toLocaleTimeString()}`;
     }catch(e){$('hostDashboardError').textContent=e.message;}
   }
   async function openHostDashboard(){ $('hostDashboardOverlay').style.display='block'; $('hostLoginOverlay').style.display='none'; await loadHostDashboard(); }
   function showHostLogin(){ $('hostLoginError').textContent=''; $('hostLoginOverlay').style.display='block'; }
   $('openHostLogin').addEventListener('click',showHostLogin);
-  $('openHostLoginMain').addEventListener('click',showHostLogin);
   $('closeHostLogin').addEventListener('click',()=>{$('hostLoginOverlay').style.display='none';});
   $('hostLoginForm').addEventListener('submit',async e=>{
     e.preventDefault();$('hostLoginError').textContent='';$('hostLoginSubmit').disabled=true;
     try{
-      const d=await fetch('/api/host/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:$('hostEmail').value.trim(),hostCode:$('hostCode').value})});
+      const d=await fetch('/api/host/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:$('hostEmail').value.trim(),password:$('hostPassword').value})});
       const data=await d.json().catch(()=>({}));
       if(!d.ok)throw new Error(data.error||'Host login failed.');
-      hostToken=data.token;sessionStorage.setItem('cfr_host_token',hostToken);$('hostCode').value='';await openHostDashboard();
+      hostToken=data.token;sessionStorage.setItem('cfr_host_token',hostToken);$('hostPassword').value='';await openHostDashboard();
     }catch(err){$('hostLoginError').textContent=err.message;}
     finally{$('hostLoginSubmit').disabled=false;}
   });

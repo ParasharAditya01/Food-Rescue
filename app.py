@@ -11,10 +11,12 @@ from flask import Flask, g, jsonify, request, send_from_directory
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = Path(os.environ.get("CAMPUS_FOOD_DB", BASE_DIR / "database.db"))
-# Change this before demoing publicly. Set CAMPUS_ADMIN_CODE in your environment.
-ADMIN_ACCESS_CODE = os.environ.get("CAMPUS_ADMIN_CODE", "ONLY-ADMIN")
-HOST_ACCESS_CODE = os.environ.get("CAMPUS_HOST_CODE", "")
-HOST_EMAIL = os.environ.get("CAMPUS_HOST_EMAIL", "").strip().lower()
+# Privileged accounts use email + password configured as environment variables.
+# Never hard-code passwords in source code or commit them to GitHub.
+ADMIN_EMAIL = os.environ.get("CAMPUS_ADMIN_EMAIL", os.environ.get("ADMIN_EMAIL", "")).strip().lower()
+ADMIN_PASSWORD = os.environ.get("CAMPUS_ADMIN_PASSWORD", os.environ.get("ADMIN_PASSWORD", ""))
+HOST_EMAIL = os.environ.get("CAMPUS_HOST_EMAIL", os.environ.get("HOST_EMAIL", "")).strip().lower()
+HOST_PASSWORD = os.environ.get("CAMPUS_HOST_PASSWORD", os.environ.get("HOST_PASSWORD", ""))
 
 app = Flask(__name__, static_folder=None)
 app.config["JSON_SORT_KEYS"] = False
@@ -139,10 +141,11 @@ def init_db() -> None:
 
 
 def expire_listings(db: sqlite3.Connection) -> None:
-    # Expiration atomically removes all remaining portions from availability.
+    # Once the collection deadline passes, the listing remains visible as Expired
+    # for 24 hours, but it can no longer be reserved and has no available portions.
     db.execute(
         "UPDATE listings SET quantity = 0, status = 'expired' "
-        "WHERE deadline <= ? AND status = 'available' AND quantity > 0",
+        "WHERE deadline <= ? AND status != 'expired'",
         (iso_now(),),
     )
 
@@ -216,33 +219,42 @@ def health():
 
 @app.post("/api/session")
 def create_session():
-    """Create a local prototype session without sending or verifying email."""
+    """Join as a student, or authenticate the configured Admin account."""
     data = request.get_json(silent=True) or {}
     name = str(data.get("name", "")).strip()
     email = str(data.get("email", "")).strip().lower()
     role = str(data.get("role", "student")).strip().lower()
-    code = str(data.get("adminCode", ""))
+    password = str(data.get("password", ""))
 
     if len(name) < 2 or len(name) > 100:
         return error("Enter a name between 2 and 100 characters.")
     if len(email) > 254 or not __import__("re").fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email):
         return error("Enter a valid email address.")
-    if HOST_EMAIL and secrets.compare_digest(email, HOST_EMAIL):
-        return error("That email is reserved for Host access.")
     if role not in ("student", "admin"):
         return error("Choose student or admin.")
-    if role == "admin" and (not ADMIN_ACCESS_CODE or not secrets.compare_digest(code, ADMIN_ACCESS_CODE)):
-        return error("Admin code is incorrect. Ask the project owner for authorized access.", 403)
+    if HOST_EMAIL and secrets.compare_digest(email, HOST_EMAIL):
+        return error("That email is reserved for Host access.", 403)
 
     db = get_db()
     account = db.execute("SELECT role FROM account_roles WHERE email = ?", (email,)).fetchone()
+    if role == "admin":
+        if not ADMIN_PASSWORD:
+            return error("Admin sign-in is not configured. Set CAMPUS_ADMIN_PASSWORD in the backend environment.", 503)
+        configured_admin = bool(ADMIN_EMAIL and secrets.compare_digest(email, ADMIN_EMAIL))
+        host_authorized_admin = bool(account and account["role"] == "admin")
+        if not configured_admin and not host_authorized_admin:
+            return error("This email has not been authorized as Admin by the Host.", 403)
+        if not secrets.compare_digest(password, ADMIN_PASSWORD):
+            return error("Admin email or password is incorrect.", 403)
+    elif ADMIN_EMAIL and secrets.compare_digest(email, ADMIN_EMAIL):
+        return error("This email is reserved for Admin sign-in. Choose Admin and enter the admin password.", 403)
+
     if account is not None and account["role"] != role:
         return error(
-            "This email cannot sign in with the selected role. Contact the Host if your role needs to be changed.",
+            "This email is registered with a different role. Contact the Host if the role needs to be changed.",
             403,
         )
     if account is None:
-        # Handle older databases that may already contain session rows but not account_roles.
         existing_roles = {
             row["role"] for row in db.execute(
                 "SELECT DISTINCT role FROM sessions WHERE lower(email) = ?", (email,)
@@ -250,7 +262,7 @@ def create_session():
         }
         if existing_roles and (len(existing_roles) != 1 or role not in existing_roles):
             return error(
-                "This email cannot sign in with the selected role. Contact the Host if your role needs to be changed.",
+                "This email is registered with a different role. Contact the Host if the role needs to be changed.",
                 403,
             )
         db.execute(
@@ -260,7 +272,7 @@ def create_session():
         account = db.execute("SELECT role FROM account_roles WHERE email = ?", (email,)).fetchone()
         if account is None or account["role"] != role:
             return error(
-                "This email cannot sign in with the selected role. Contact the Host if your role needs to be changed.",
+                "This email is registered with a different role. Contact the Host if the role needs to be changed.",
                 403,
             )
 
@@ -276,20 +288,18 @@ def create_session():
 def create_host_session():
     data = request.get_json(silent=True) or {}
     email = str(data.get("email", "")).strip().lower()
-    code = str(data.get("hostCode", ""))
-    if not HOST_EMAIL:
-        return error("Host email is not configured. Set CAMPUS_HOST_EMAIL on the backend.", 503)
-    if not HOST_ACCESS_CODE:
-        return error("Host access is not configured. Set CAMPUS_HOST_CODE on the backend.", 503)
-    if not secrets.compare_digest(email, HOST_EMAIL) or not secrets.compare_digest(code, HOST_ACCESS_CODE):
-        return error("Host email or access code is incorrect.", 403)
+    password = str(data.get("password", ""))
+    if not HOST_EMAIL or not HOST_PASSWORD:
+        return error("Host sign-in is not configured. Set CAMPUS_HOST_EMAIL and CAMPUS_HOST_PASSWORD in the backend environment.", 503)
+    if not secrets.compare_digest(email, HOST_EMAIL) or not secrets.compare_digest(password, HOST_PASSWORD):
+        return error("Host email or password is incorrect.", 403)
     token = secrets.token_urlsafe(40)
     now = iso_now()
     get_db().execute(
         "INSERT INTO host_sessions(token,email,created_at,last_seen) VALUES(?,?,?,?)",
         (token, HOST_EMAIL, now, now),
     )
-    return jsonify({"token": token, "host": {"name": "Host"}}), 201
+    return jsonify({"token": token, "host": {"name": "Host", "role": "host"}}), 201
 
 
 @app.get("/api/host/overview")
@@ -465,7 +475,14 @@ def get_listings():
     db.execute("BEGIN IMMEDIATE")
     try:
         expire_listings(db)
-        rows = db.execute("SELECT * FROM listings ORDER BY deadline ASC").fetchall()
+        retention_cutoff = (utc_now().timestamp() - 24 * 60 * 60)
+        cutoff_dt = datetime.fromtimestamp(retention_cutoff, timezone.utc).isoformat(timespec="seconds")
+        rows = db.execute(
+            "SELECT * FROM listings "
+            "WHERE julianday(CASE WHEN deadline > created_at THEN deadline ELSE created_at END) >= julianday(?) "
+            "ORDER BY deadline ASC",
+            (cutoff_dt,),
+        ).fetchall()
         result = [listing_to_dict(row, db) for row in rows]
         db.commit()
     except Exception:

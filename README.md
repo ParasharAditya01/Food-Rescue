@@ -1,53 +1,38 @@
-# Campus Food Rescue — Flask + SQLite
+# Campus Food Rescue
 
-The existing frontend is served by Flask and communicates with the backend API. Listings, remaining portions, reservations, and sessions are stored in `database.db` (created automatically beside `app.py`).
+Flask + SQLite prototype for sharing surplus campus food.
 
-## Requirements
-
-- Python 3.10+
-- pip
-
-## Run on macOS / Linux
-
-From this folder:
+## Run locally
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-export CAMPUS_ADMIN_CODE='choose-a-private-admin-code'
-export SMTP_HOST='smtp.gmail.com'
-export SMTP_PORT='587'
-export SMTP_USERNAME='your-sender@gmail.com'
-export SMTP_PASSWORD='your-16-character-app-password'
-export SMTP_FROM_EMAIL='your-sender@gmail.com'
+python -m pip install -r requirements.txt
 python app.py
 ```
 
-Then open **http://127.0.0.1:5000**. Do not open `index.html` directly as a `file://` URL; it must be served by Flask for `/api/...` requests to work.
+Open `http://127.0.0.1:5000`. Keep `app.py`, `index.html`, and `requirements.txt` in the same directory. SQLite defaults to `database.db`; set `CAMPUS_FOOD_DB` to use another path.
 
-On Windows, activate the virtual environment with `.venv\\Scripts\\activate`, then set the environment variable in PowerShell with `$env:CAMPUS_ADMIN_CODE='choose-a-private-admin-code'` before running `python app.py`.
+## Configure Admin and Host sign-in
 
-## Implemented behavior
+Admin and Host use email + password credentials configured as environment variables. No access codes are used. Do not put passwords in source code or commit them to GitHub.
 
-- Admins create listings through the authenticated API.
-- Listing data and reservations persist in SQLite across refreshes and app restarts.
-- Every reservation reduces quantity by exactly one.
-- Reservation check/decrement runs in a SQLite `BEGIN IMMEDIATE` transaction, preventing concurrent requests from reserving more portions than remain.
-- When a deadline passes, the backend sets any still-available quantity to zero and marks the listing expired. Expired listings cannot be reserved.
-- API errors return useful messages and HTTP status codes.
+Required environment variables:
 
-## API endpoints
+- `CAMPUS_ADMIN_EMAIL` — exact email allowed to sign in as Admin
+- `CAMPUS_ADMIN_PASSWORD` — Admin password
+- `CAMPUS_HOST_EMAIL` — exact email allowed to sign in to the Host Control Panel
+- `CAMPUS_HOST_PASSWORD` — Host password
 
-- `GET /api/health` — server/database health check
-- `POST /api/email-otp` — send a six-digit email verification code (JSON: `name`, `email`, `role`, and `adminCode` for admins)
-- `POST /api/email-otp/verify` — verify a code and create a session (JSON: `challengeId`, `otp`)
-- `POST /api/session` — disabled; direct unverified session creation is rejected
-- `DELETE /api/session` — end the current session
-- `GET /api/listings` — list listings and reservation history
-- `POST /api/listings` — admin-only listing creation
-- `POST /api/listings/<id>/reserve` — student-only one-portion reservation
+The shorter aliases `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `HOST_EMAIL`, and `HOST_PASSWORD` are also accepted, but the `CAMPUS_` names are preferred. Set all four values in Render under **Environment** and redeploy. Use separate, strong passwords for Admin and Host.
 
-## Security / deployment note
+Students can join using their name and email. The prototype does not verify student email ownership. Admin and Host credentials are checked on the server and are never stored in the SQLite database.
 
-This is a local hackathon prototype, not production authentication. Email ownership is verified by a six-digit OTP sent through configured SMTP before the backend creates a session. Codes expire after 10 minutes, are single-use, allow five attempts, and a new code is rate-limited to once per 60 seconds per email. Email delivery will fail closed until SMTP variables are configured. The admin code is checked server-side before an admin OTP is sent; set `CAMPUS_ADMIN_CODE` to a private value before using it. For a public deployment, add verified user authentication, CSRF/rate-limiting protections as appropriate, and a production WSGI server.
+## Listing lifecycle
+
+- Listings can be reserved only before their collection deadline and while portions remain.
+- Once the deadline passes, the backend sets the listing to `expired`, sets its available quantity to zero, and blocks reservations.
+- Expired listings remain visible for 24 hours after the later of their creation time or collection deadline. They display **Expired — no more booking** and are then hidden from the public listing page.
+- Host dashboard history remains available in the database.
+
+## Deployment notes
+
+The Render web service should start with `gunicorn app:app`. Ensure `requirements.txt` includes Flask and Gunicorn. For persistent SQLite data on Render, configure a persistent disk and set `CAMPUS_FOOD_DB` to a path on that disk; otherwise data may be lost when the service instance is replaced.
