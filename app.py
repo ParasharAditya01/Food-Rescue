@@ -76,6 +76,27 @@ CREATE TABLE IF NOT EXISTS host_sessions (
     created_at TEXT NOT NULL,
     last_seen TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS menu_items (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    category TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    cook_minutes INTEGER NOT NULL CHECK(cook_minutes BETWEEN 1 AND 240),
+    pickup_location TEXT NOT NULL,
+    active INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL,
+    created_by TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS meal_orders (
+    id TEXT PRIMARY KEY,
+    menu_item_id TEXT NOT NULL REFERENCES menu_items(id),
+    student_email TEXT NOT NULL,
+    student_name TEXT NOT NULL,
+    ordered_at TEXT NOT NULL,
+    ready_at TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'preparing' CHECK(status IN ('preparing','ready','collected','cancelled'))
+);
+CREATE INDEX IF NOT EXISTS idx_meal_orders_student ON meal_orders(student_email, ordered_at);
 """
 
 
@@ -597,6 +618,70 @@ def reserve_portion(listing_id: str):
         app.logger.exception("Reservation transaction failed")
         return error("The reservation could not be saved. Please try again.", 500)
 
+
+
+@app.get("/api/menu")
+def get_menu():
+    rows = get_db().execute("SELECT * FROM menu_items WHERE active=1 ORDER BY category,name").fetchall()
+    return jsonify({"items": [dict(id=r["id"], name=r["name"], category=r["category"], description=r["description"], cookMinutes=r["cook_minutes"], pickupLocation=r["pickup_location"]) for r in rows]})
+
+
+@app.post("/api/menu")
+def create_menu_item():
+    session, failure = current_session("admin")
+    if failure: return failure
+    data = request.get_json(silent=True) or {}
+    name = str(data.get("name", "")).strip()
+    category = str(data.get("category", "")).strip()
+    description = str(data.get("description", "")).strip()[:300]
+    location = str(data.get("pickupLocation", "")).strip()
+    try: minutes = int(data.get("cookMinutes"))
+    except (TypeError, ValueError): return error("Enter cooking time in minutes.")
+    allowed = {"Breakfast", "Lunch", "Dinner", "Snacks", "Sweets & Desserts", "Drinks", "Bakery", "Fruits", "Other"}
+    if not name or len(name)>120: return error("Menu item name is required (maximum 120 characters).")
+    if category not in allowed: return error("Choose a valid menu category.")
+    if not 1 <= minutes <= 240: return error("Cooking time must be 1–240 minutes.")
+    if not location or len(location)>160: return error("Enter a pickup location.")
+    item_id = secrets.token_urlsafe(12)
+    get_db().execute("INSERT INTO menu_items(id,name,category,description,cook_minutes,pickup_location,created_at,created_by) VALUES(?,?,?,?,?,?,?,?)", (item_id,name,category,description,minutes,location,iso_now(),session["email"]))
+    return jsonify({"ok":True,"id":item_id}), 201
+
+
+@app.post("/api/menu/<item_id>/order")
+def order_menu_item(item_id: str):
+    session, failure = current_session("student")
+    if failure: return failure
+    db = get_db()
+    row = db.execute("SELECT * FROM menu_items WHERE id=? AND active=1", (item_id,)).fetchone()
+    if row is None: return error("This menu item is no longer available.", 404)
+    now = utc_now()
+    ready = now.timestamp() + row["cook_minutes"] * 60
+    ready_at = datetime.fromtimestamp(ready, timezone.utc).isoformat(timespec="seconds")
+    order_id = secrets.token_urlsafe(12)
+    db.execute("INSERT INTO meal_orders(id,menu_item_id,student_email,student_name,ordered_at,ready_at,status) VALUES(?,?,?,?,?,?, 'preparing')", (order_id,item_id,session["email"],session["name"],now.isoformat(timespec="seconds"),ready_at))
+    return jsonify({"ok":True,"order":{"id":order_id,"itemName":row["name"],"pickupLocation":row["pickup_location"],"orderedAt":now.isoformat(timespec="seconds"),"readyAt":ready_at,"status":"preparing"}}), 201
+
+
+@app.get("/api/orders")
+def get_my_orders():
+    session, failure = current_session("student")
+    if failure: return failure
+    db = get_db()
+    now = iso_now()
+    db.execute("UPDATE meal_orders SET status='ready' WHERE student_email=? AND status='preparing' AND julianday(ready_at)<=julianday(?)", (session["email"],now))
+    rows = db.execute("SELECT o.*,m.name AS item_name,m.pickup_location FROM meal_orders o JOIN menu_items m ON m.id=o.menu_item_id WHERE o.student_email=? ORDER BY o.ordered_at DESC LIMIT 100", (session["email"],)).fetchall()
+    return jsonify({"orders":[{"id":r["id"],"itemName":r["item_name"],"pickupLocation":r["pickup_location"],"orderedAt":r["ordered_at"],"readyAt":r["ready_at"],"status":r["status"]} for r in rows]})
+
+@app.post("/api/orders/<order_id>/collected")
+def mark_order_collected(order_id: str):
+    session, failure = current_session("student")
+    if failure: return failure
+    db=get_db(); now=iso_now()
+    row=db.execute("SELECT * FROM meal_orders WHERE id=? AND student_email=?",(order_id,session["email"])).fetchone()
+    if row is None: return error("Order not found.",404)
+    if row["status"] == "preparing" and row["ready_at"] > now: return error("Your food is still being prepared.",409)
+    db.execute("UPDATE meal_orders SET status='collected' WHERE id=? AND student_email=?",(order_id,session["email"]))
+    return jsonify({"ok":True})
 
 @app.errorhandler(404)
 def not_found(_error):
