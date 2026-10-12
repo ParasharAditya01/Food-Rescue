@@ -329,6 +329,8 @@
     }
   }
 
+  #emailCodeField[hidden]{display:none!important}
+
   /* Registration opens on request; the public homepage remains the default view. */
   .auth-backdrop{display:none}
   #openRegistration{background:var(--lime);color:#163322}
@@ -898,7 +900,8 @@
   function showRegistration() {
     $('authBackdrop').style.display='flex';
     $('authForm').reset(); $('authEmail').readOnly=false; $('authName').readOnly=false; $('authRole').disabled=false;
-    $('authSubmit').disabled=false; $('authSubmit').innerHTML='<span>Join the network</span><b>↗</b>';
+    verificationCodeSentFor = ''; $('emailCodeField').hidden=true; $('emailVerificationCode').required=false; $('emailVerificationCode').value='';
+    $('authSubmit').disabled=false; $('authSubmit').innerHTML='<span>Send verification code</span><b>↗</b>';
     $('adminPasswordField').hidden=true; $('adminPassword').required=false; $('adminPassword').value=''; $('authError').classList.remove('show'); $('authError').style.background=''; $('authError').style.color='';
     setTimeout(()=>$('authName').focus(),50);
   }
