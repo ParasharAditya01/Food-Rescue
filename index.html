@@ -421,6 +421,7 @@
   .category-tile strong{font:400 25px/1.05 Georgia,'Times New Roman',serif;letter-spacing:-.4px}
   .category-tile small{display:block;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;margin-top:7px;color:#f2e9d8}
   .category-arrow{display:grid;place-items:center;flex:0 0 31px;width:31px;height:31px;border:1px solid #ffffff80;border-radius:50%;font-size:16px;transition:transform .2s}
+  .category-icon{position:absolute;top:14px;left:15px;display:grid;place-items:center;width:42px;height:42px;border:1px solid #ffffff85;border-radius:50%;background:#17171145;backdrop-filter:blur(5px);font-size:23px;box-shadow:0 5px 18px #0002}
   .category-tile:hover .category-arrow{transform:translate(2px,-2px)}
   .category-reset{border:1px solid #d8d0c2;background:white;color:#3e3c34;border-radius:2px;padding:10px 14px;font-size:11px;font-weight:700}
   .category-reset:hover{background:#f2ede3}
@@ -532,11 +533,11 @@
       <div class="category-heading"><div><div class="section-kicker">Explore by craving</div><h2 id="categoryTitle">What are you in the mood for?</h2></div><p>Choose a food collection to find available portions around campus. Every category shows current listings and pickup details.</p></div>
       <div class="category-grid" id="categoryGrid">
         <button class="category-tile" type="button" data-category="Breakfast" style="--tile-image:url('https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80')"><span><strong>Breakfast</strong><small>Start the day</small></span><span class="category-arrow">↗</span></button>
-        <button class="category-tile" type="button" data-category="Lunch" style="--tile-image:url('https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=800&q=80')"><span><strong>Lunch</strong><small>Midday favourites</small></span><span class="category-arrow">↗</span></button>
-        <button class="category-tile" type="button" data-category="Dinner" style="--tile-image:url('https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=800&q=80')"><span><strong>Dinner</strong><small>Evening plates</small></span><span class="category-arrow">↗</span></button>
+        <button class="category-tile" type="button" data-category="Lunch" style="--tile-image:url('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=85')"><span><strong>Lunch</strong><small>Midday favourites</small></span><span class="category-arrow">↗</span></button>
+        <button class="category-tile" type="button" data-category="Dinner" style="--tile-image:url('https://images.unsplash.com/photo-1515003197210-e0cd7184f8b5?auto=format&fit=crop&w=800&q=85')"><span><strong>Dinner</strong><small>Evening plates</small></span><span class="category-arrow">↗</span></button>
         <button class="category-tile" type="button" data-category="Snacks" style="--tile-image:url('https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=800&q=80')"><span><strong>Snacks</strong><small>Small bites</small></span><span class="category-arrow">↗</span></button>
         <button class="category-tile" type="button" data-category="Sweets & Desserts" style="--tile-image:url('https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=800&q=80')"><span><strong>Sweets &amp; Desserts</strong><small>A little treat</small></span><span class="category-arrow">↗</span></button>
-        <button class="category-tile" type="button" data-category="Drinks" style="--tile-image:url('https://images.unsplash.com/photo-1513558161293-cdaf765edfd7?auto=format&fit=crop&w=800&q=80')"><span><strong>Drinks</strong><small>Freshen up</small></span><span class="category-arrow">↗</span></button>
+        <button class="category-tile" type="button" data-category="Drinks" style="--tile-image:url('https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=800&q=85')"><span class="category-icon" aria-hidden="true">🥤</span><span><strong>Drinks</strong><small>Freshen up</small></span><span class="category-arrow">↗</span></button>
         <button class="category-tile" type="button" data-category="Bakery" style="--tile-image:url('https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80')"><span><strong>Bakery</strong><small>Freshly baked</small></span><span class="category-arrow">↗</span></button>
         <button class="category-tile" type="button" data-category="Fruits" style="--tile-image:url('https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=800&q=80')"><span><strong>Fruits</strong><small>Fresh picks</small></span><span class="category-arrow">↗</span></button>
       </div>
@@ -548,7 +549,7 @@
     </section>
     <section id="listings">
       <div class="section-head"><div><div class="section-kicker">The community board</div><h2>Find your next good meal.</h2><p>Browse what's been shared around campus. Reserve what you need before the pickup deadline.</p></div></div>
-      <div class="listing-controls"><div class="search-wrap"><span>⌕</span><input id="searchInput" type="search" placeholder="Search food or pickup location…" aria-label="Search listings"></div><select id="statusFilter" class="filter-select" aria-label="Filter by status"><option value="all">All listings</option><option value="available">Available</option><option value="claimed">Fully reserved</option><option value="expired">Expired</option></select><button class="add-button" id="addListing">+ Add listing</button></div>
+      <div class="listing-controls"><div class="search-wrap"><span>⌕</span><input id="searchInput" type="search" placeholder="Search food or pickup location…" aria-label="Search listings"></div><button class="add-button" id="addListing">+ Add listing</button></div>
       <div class="cards" id="cards" aria-live="polite"></div>
     </section>
     <section class="how-section" id="how-it-works"><div class="section-kicker">Simple by design</div><h2>Good food moves in three steps.</h2><div class="steps"><article class="step"><div class="step-num">01</div><h3>Share the surplus</h3><p>Canteen staff add a food listing with portions, pickup location, and a clear collection deadline.</p></article><article class="step"><div class="step-num">02</div><h3>Find what you need</h3><p>Students and campus community members browse available food and check the pickup details.</p></article><article class="step"><div class="step-num">03</div><h3>Reserve. Collect. Repeat.</h3><p>Reserve a listing, collect it on time, and help make better use of food already prepared.</p></article></div></section>
@@ -596,6 +597,19 @@
   let pendingListingId = "";
   const $ = id => document.getElementById(id);
 
+  // Illustrative demo content only. These records are never sent to the backend,
+  // never counted in the stats, and never offer a booking action.
+  const demoListings = [
+    ['Breakfast','Poha with peanuts','🍲'],['Breakfast','Idli with chutney','🥘'],['Breakfast','Vegetable upma','🥣'],['Breakfast','Aloo paratha','🫓'],['Breakfast','Masala dosa','🥞'],
+    ['Lunch','Veg thali','🍛'],['Lunch','Rajma rice','🍚'],['Lunch','Chole with roti','🫓'],['Lunch','Paneer pulao','🍲'],['Lunch','Dal khichdi','🥣'],
+    ['Dinner','Vegetable biryani','🍛'],['Dinner','Chapati and mixed veg','🥘'],['Dinner','Paneer curry with rice','🍚'],['Dinner','Dal tadka and jeera rice','🍲'],['Dinner','Veg noodles','🍜'],
+    ['Snacks','Samosa','🥟'],['Snacks','Vegetable sandwich','🥪'],['Snacks','Masala corn','🌽'],['Snacks','Dhokla','🟨'],['Snacks','Veg cutlet','🍘'],
+    ['Sweets & Desserts','Gulab jamun','🍮'],['Sweets & Desserts','Kheer cup','🍚'],['Sweets & Desserts','Chocolate brownie','🍫'],['Sweets & Desserts','Jalebi','🥨'],['Sweets & Desserts','Fruit custard','🍨'],
+    ['Drinks','Lemon water','🍋'],['Drinks','Masala chai','☕'],['Drinks','Cold coffee','🥤'],['Drinks','Fresh orange juice','🍊'],['Drinks','Buttermilk','🥛'],
+    ['Bakery','Butter croissant','🥐'],['Bakery','Whole-wheat bread rolls','🍞'],['Bakery','Muffin','🧁'],['Bakery','Garlic bread','🥖'],['Bakery','Plain bun','🍞'],
+    ['Fruits','Banana','🍌'],['Fruits','Apple','🍎'],['Fruits','Orange','🍊'],['Fruits','Seasonal fruit cup','🍉'],['Fruits','Guava','🍐']
+  ].map((item, index) => ({ demoId: `demo-${index+1}`, category:item[0], name:item[1], emoji:item[2], location:'Example campus pickup point' }));
+
   async function api(path, options = {}) {
     const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
     if (sessionToken) headers.Authorization = `Bearer ${sessionToken}`;
@@ -630,13 +644,15 @@
     return 'available';
   }
   function render() {
-    const query = $('searchInput').value.trim().toLowerCase(), filter = $('statusFilter').value;
-    const visible = listings.filter(item => {
-      const status = effectiveStatus(item);
-      const categoryMatches = selectedCategory === 'all' || (item.category || 'Other') === selectedCategory;
-      return categoryMatches && (filter === 'all' || status === filter) && (item.name + ' ' + item.location + ' ' + (item.category || 'Other')).toLowerCase().includes(query);
-    }).sort((a,b) => new Date(a.deadline) - new Date(b.deadline));
-    $('cards').innerHTML = visible.length ? visible.map((item,index) => {
+    const query = $('searchInput').value.trim().toLowerCase();
+    const normalizeCategory = value => String(value || 'Other').trim().toLowerCase().replace(/\s+/g, ' ');
+    const matches = item => {
+      const categoryMatches = selectedCategory === 'all' || normalizeCategory(item.category) === normalizeCategory(selectedCategory);
+      return categoryMatches && (item.name + ' ' + item.location + ' ' + (item.category || 'Other')).toLowerCase().includes(query);
+    };
+    const visible = listings.filter(matches).sort((a,b) => new Date(a.deadline) - new Date(b.deadline));
+    const visibleDemos = demoListings.filter(matches);
+    const realCards = visible.map((item,index) => {
       const status = effectiveStatus(item);
       const label = {available:'Available',claimed:'Fully reserved',expired:'Expired'}[status];
       const urgent = status === 'available' && (new Date(item.deadline) - Date.now() < 1000 * 60 * 45);
@@ -644,7 +660,20 @@
         ? `<button class="primary" data-action="reserve" data-id="${escapeHtml(item.id)}">Reserve 1 portion ↗</button>`
         : `<button disabled>${status === 'expired' ? 'Expired — no more booking' : 'No portions left'}</button>`;
       return `<article class="food-card" style="animation-delay:${Math.min(index*70,280)}ms"><div class="card-visual"><div class="status-pill ${status}"><span class="status-dot"></span>${label}</div><div class="food-emoji">${escapeHtml(item.emoji||'🍽️')}</div></div><div class="card-body"><div class="food-category-label">${escapeHtml(item.category || 'Other')}</div><div class="card-top"><div><h3 class="food-title">${escapeHtml(item.name)}</h3><div class="food-location"><span>⌖</span>${escapeHtml(item.location)}</div></div><div class="quantity">${status === 'expired' ? 'Expired' : `${Number(item.quantity)} portions left`}</div></div><div class="card-meta"><span class="deadline ${urgent?'urgent':''}">◷ ${escapeHtml(timeLeft(item.deadline))}</span><span>By ${escapeHtml(formatDeadline(item.deadline))}</span></div>${status === 'expired' ? '<p class="host-note" style="margin:10px 0 0;color:#a93232;font-weight:700">This listing has expired. No more booking is allowed.</p>' : ''}${(item.pricePerPortion !== null && item.pricePerPortion !== undefined && item.pricePerPortion !== '') || item.contactNumber ? `<div class="listing-extra">${item.pricePerPortion !== null && item.pricePerPortion !== undefined && item.pricePerPortion !== '' ? `<span class="listing-price">₹${Number(item.pricePerPortion).toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:2})} / portion</span>` : ''}${item.contactNumber ? `<a href="tel:${escapeHtml(item.contactNumber)}">☎ ${escapeHtml(item.contactNumber)}</a>` : ''}</div>` : ''}<div class="card-actions">${action}</div></div></article>`;
-    }).join('') : `<div class="empty-state"><div class="empty-icon">🥬</div><h3>${listings.length ? 'No listings found' : 'No food listings yet'}</h3><p>${listings.length ? 'Try another search or filter.' : 'Be the first to share surplus food with your campus.'}</p>${currentUser && currentUser.role==='admin' ? '<button class="add-button" data-action="add-from-empty">+ Add a listing</button>' : ''}</div>`;
+    }).join('');
+    const demoCards = visibleDemos.map((item,index) =>
+      `<article class="food-card demo-food-card" style="animation-delay:${Math.min((visible.length+index)*45,280)}ms">
+        <div class="card-visual"><div class="status-pill" style="color:#795d2b"><span class="status-dot" style="background:#b08b48"></span>DEMO ONLY</div><div class="food-emoji">${escapeHtml(item.emoji)}</div></div>
+        <div class="card-body"><div class="food-category-label">${escapeHtml(item.category)} · SAMPLE</div>
+          <div class="card-top"><div><h3 class="food-title">${escapeHtml(item.name)}</h3><div class="food-location"><span>ⓘ</span>Example item — not a real listing</div></div></div>
+          <div class="card-meta"><span>Illustrative sample</span><span>Not available</span></div>
+          <p style="margin:12px 0 0;color:#8b5e22;font-size:11px;font-weight:700">Demo content only. No food is being offered.</p>
+          <div class="card-actions"><button disabled title="Demo listings cannot be booked">Demo — booking disabled</button></div>
+        </div>
+      </article>`
+    ).join('');
+    const cardsMarkup = realCards + demoCards;
+    $('cards').innerHTML = cardsMarkup || `<div class="empty-state"><div class="empty-icon">🥬</div><h3>${listings.length || demoListings.length ? 'No listings found' : 'No food listings yet'}</h3><p>${selectedCategory !== 'all' ? `No ${escapeHtml(selectedCategory.toLowerCase())} listings match this search. Try another search or view all food.` : 'Try another search.'}</p>${currentUser && currentUser.role==='admin' ? '<button class="add-button" data-action="add-from-empty">+ Add a listing</button>' : ''}</div>`;
     updateStats();
   }
   function updateStats() {
@@ -745,7 +774,7 @@
       const pricePerPortion = priceInput === '' ? null : Number(priceInput);
       if (priceInput !== '' && (!Number.isFinite(pricePerPortion) || pricePerPortion < 0 || pricePerPortion > 1000000 || Math.round(pricePerPortion * 100) !== pricePerPortion * 100)) { formError('Enter a price from ₹0 to ₹1,000,000 with up to 2 decimal places, or leave it blank.'); return; }
       await api('/api/listings', {method:'POST', body:JSON.stringify({name,quantity,location,contactNumber,pricePerPortion,deadline:deadline.toISOString(),emoji:$('foodType').value,category:$('foodCategory').value})});
-      closeModal(); $('searchInput').value=''; $('statusFilter').value='all'; selectedCategory='all'; document.querySelectorAll('.category-tile').forEach(button=>button.classList.remove('active')); await refreshListings();
+      closeModal(); $('searchInput').value=''; selectedCategory='all'; document.querySelectorAll('.category-tile').forEach(button=>button.classList.remove('active')); await refreshListings();
       $('listings').scrollIntoView({behavior:'smooth'}); showToast('Your food listing is saved to the database.');
     } catch (err) { formError(err.message); }
     finally { submit.disabled = false; }
@@ -802,7 +831,7 @@
   $('findFood').addEventListener('click',()=>$('listings').scrollIntoView({behavior:'smooth'}));
   $('closeModal').addEventListener('click',closeModal); $('modalBackdrop').addEventListener('click',e=>{if(e.target===$('modalBackdrop'))closeModal();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();}); $('listingForm').addEventListener('submit',createListing);
-  $('cards').addEventListener('click',handleCardAction); $('searchInput').addEventListener('input',render); $('statusFilter').addEventListener('change',render);
+  $('cards').addEventListener('click',handleCardAction); $('searchInput').addEventListener('input',render);
   $('categoryGrid').addEventListener('click', e => { const tile=e.target.closest('[data-category]'); if(!tile) return; selectedCategory=tile.dataset.category; document.querySelectorAll('.category-tile').forEach(button=>button.classList.toggle('active',button===tile)); render(); $('listings').scrollIntoView({behavior:'smooth',block:'start'}); });
   $('clearCategory').addEventListener('click', () => { selectedCategory='all'; document.querySelectorAll('.category-tile').forEach(button=>button.classList.remove('active')); render(); $('listings').scrollIntoView({behavior:'smooth',block:'start'}); });
   document.addEventListener('pointermove',e=>{if(e.pointerType==='touch')return;document.documentElement.style.setProperty('--pointer-x',e.clientX+'px');document.documentElement.style.setProperty('--pointer-y',e.clientY+'px');},{passive:true});
