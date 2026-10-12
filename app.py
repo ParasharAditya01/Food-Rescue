@@ -291,8 +291,8 @@ def send_email_verification():
     expires = (now.replace(microsecond=0) + __import__("datetime").timedelta(minutes=10)).isoformat(timespec="seconds")
     code_hash = hashlib.sha256((email + ":" + code + ":" + os.environ.get("SECRET_KEY", "campus-food-rescue-verification")).encode()).hexdigest()
     email_text = (
-        f"Hello {name or 'there'},\\n\\nYour Campus Food Rescue verification code is: {code}\\n\\n"
-        "This code expires in 10 minutes. If you did not request it, you can ignore this email.\\n"
+        f"Hello {name or 'there'},\n\nYour Campus Food Rescue verification code is: {code}\n\n"
+        "This code expires in 10 minutes. If you did not request it, you can ignore this email.\n"
     )
     payload = json.dumps({
         "from": sender,
