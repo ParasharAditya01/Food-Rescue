@@ -329,8 +329,6 @@
     }
   }
 
-  #emailCodeField[hidden]{display:none!important}
-
   /* Registration opens on request; the public homepage remains the default view. */
   .auth-backdrop{display:none}
   #openRegistration{background:var(--lime);color:#163322}
@@ -505,14 +503,13 @@
     <p>Join the network to discover surplus food or share meals with students nearby.</p>
     <form id="authForm" novalidate>
       <div class="auth-field"><label for="authName">FULL NAME</label><input id="authName" maxlength="80" autocomplete="name" placeholder="e.g. Alex Morgan" required></div>
-      <div class="auth-field"><label for="authEmail">EMAIL ADDRESS</label><input id="authEmail" type="email" maxlength="254" autocomplete="email" placeholder="you@example.com" required></div>
-      <div class="auth-field" id="emailCodeField" hidden><label for="emailVerificationCode">6-DIGIT EMAIL VERIFICATION CODE</label><input id="emailVerificationCode" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="Enter code from your inbox"></div>
+      <div class="auth-field"><label for="authEmail">COLLEGE EMAIL</label><input id="authEmail" type="email" maxlength="254" autocomplete="email" placeholder="you@college.edu" required></div>
       <div class="auth-field"><label for="authRole">HOW WILL YOU USE THE NETWORK?</label><select id="authRole"><option value="student">🎓  Student — find and reserve food</option><option value="admin">🍱  Admin / food provider — publish listings</option></select></div>
       <div class="auth-field" id="adminPasswordField" hidden><label for="adminPassword">ADMIN PASSWORD</label><input id="adminPassword" type="password" autocomplete="current-password" placeholder="Enter the admin password"></div>
       <div class="auth-error" id="authError" role="alert"></div>
       <button class="auth-submit" id="authSubmit" type="submit"><span>Join the network</span><b>↗</b></button>
     </form>
-    <div class="auth-trust"><span class="trust-check">✓</span><span><b>Your details stay within the prototype</b><small>We verify email ownership with a one-time code before granting access.</small></span></div>
+    <div class="auth-trust"><span class="trust-check">✓</span><span><b>Your details stay within the prototype</b><small>Use an email you can identify later. Email ownership is not verified.</small></span></div>
     <div class="auth-footnote">Admin access requires the configured admin email and password.</div>
     <button class="host-link" id="openHostLogin">Host control panel <span>↗</span></button>
     </div>
@@ -900,54 +897,23 @@
   function showRegistration() {
     $('authBackdrop').style.display='flex';
     $('authForm').reset(); $('authEmail').readOnly=false; $('authName').readOnly=false; $('authRole').disabled=false;
-    verificationCodeSentFor = ''; $('emailCodeField').hidden=true; $('emailVerificationCode').required=false; $('emailVerificationCode').value='';
-    $('authSubmit').disabled=false; $('authSubmit').innerHTML='<span>Send verification code</span><b>↗</b>';
+    $('authSubmit').disabled=false; $('authSubmit').innerHTML='<span>Join the network</span><b>↗</b>';
     $('adminPasswordField').hidden=true; $('adminPassword').required=false; $('adminPassword').value=''; $('authError').classList.remove('show'); $('authError').style.background=''; $('authError').style.color='';
     setTimeout(()=>$('authName').focus(),50);
   }
   $('authRole').addEventListener('change',()=>{$('adminPasswordField').hidden=$('authRole').value!=='admin';$('adminPassword').required=$('authRole').value==='admin';$('authError').classList.remove('show');});
-  let verificationCodeSentFor = '';
-  $('authEmail').addEventListener('input', () => {
-    if ($('authEmail').value.trim().toLowerCase() !== verificationCodeSentFor) {
-      verificationCodeSentFor = '';
-      $('emailCodeField').hidden = true;
-      $('emailVerificationCode').value = '';
-      $('authSubmit').innerHTML = '<span>Send verification code</span><b>↗</b>';
-    }
-  });
   $('authForm').addEventListener('submit', async e => {
     e.preventDefault();
     const err=$('authError'); err.classList.remove('show'); err.style.background=''; err.style.color='';
-    const name=$('authName').value.trim(), email=$('authEmail').value.trim().toLowerCase(), role=$('authRole').value, password=$('adminPassword').value;
     $('authSubmit').disabled = true;
     try {
-      if (!email) throw new Error('Enter your email address.');
-      if (verificationCodeSentFor !== email) {
-        const sent = await api('/api/email-verification/send',{method:'POST',body:JSON.stringify({name,email})});
-        if (sent.alreadyVerified) {
-          verificationCodeSentFor = email;
-          $('emailCodeField').hidden = true;
-        } else {
-          verificationCodeSentFor = email;
-          $('emailCodeField').hidden = false;
-          $('emailVerificationCode').required = true;
-          $('authSubmit').innerHTML = '<span>Verify email & join</span><b>↗</b>';
-          err.textContent = sent.message || 'A verification code was sent. Check your inbox and spam folder.';
-          err.classList.add('show');
-          $('emailVerificationCode').focus();
-          return;
-        }
-      }
-      if (!$('emailCodeField').hidden) {
-        const code = $('emailVerificationCode').value.trim();
-        await api('/api/email-verification/verify',{method:'POST',body:JSON.stringify({email,code})});
-      }
+      const name=$('authName').value.trim(), email=$('authEmail').value.trim(), role=$('authRole').value, password=$('adminPassword').value;
       const data = await api('/api/session',{method:'POST',body:JSON.stringify({name,email,role,password})});
       sessionToken=data.token; currentUser=data.user; sessionStorage.setItem('cfr_session_token',sessionToken); sessionStorage.setItem('cfr_session_user',JSON.stringify(currentUser));
       $('authBackdrop').style.display='none'; $('mainApp').classList.remove('auth-locked'); updateRoleUI(); await refreshListings();
       if (currentUser.role === 'admin') await refreshAdminNotifications();
       await refreshMenuAndOrders();
-      showToast(currentUser.role==='admin'?'Admin access granted.':'Email verified. You can now browse and reserve food.');
+      showToast(currentUser.role==='admin'?'Admin access granted.':'You can now browse and reserve food.');
     } catch (error) { err.textContent=error.message; err.classList.add('show'); }
     finally { $('authSubmit').disabled = false; }
   });
