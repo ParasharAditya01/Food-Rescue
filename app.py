@@ -3,12 +3,6 @@ from __future__ import annotations
 import os
 import secrets
 import sqlite3
-import hashlib
-import hmac
-import re
-import json
-import urllib.request
-import urllib.error
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -70,17 +64,6 @@ CREATE TABLE IF NOT EXISTS sessions (
     role TEXT NOT NULL CHECK (role IN ('admin','student')),
     created_at TEXT NOT NULL,
     last_seen TEXT NOT NULL DEFAULT ''
-);
-CREATE TABLE IF NOT EXISTS email_verification_codes (
-    email TEXT PRIMARY KEY,
-    code_hash TEXT NOT NULL,
-    expires_at TEXT NOT NULL,
-    sent_at TEXT NOT NULL,
-    attempts INTEGER NOT NULL DEFAULT 0
-);
-CREATE TABLE IF NOT EXISTS verified_emails (
-    email TEXT PRIMARY KEY,
-    verified_at TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS account_roles (
     email TEXT PRIMARY KEY,
@@ -255,110 +238,6 @@ def health():
     return jsonify({"ok": True, "database": "sqlite", "time": iso_now()})
 
 
-@app.post("/api/email-verification/send")
-def send_email_verification():
-    data = request.get_json(silent=True) or {}
-    email = str(data.get("email", "")).strip().lower()
-    name = str(data.get("name", "")).strip()
-    if len(email) > 254 or not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email):
-        return error("Enter a valid email address.")
-    if email == HOST_EMAIL and HOST_EMAIL:
-        return error("That email is reserved for Host access.", 403)
-
-    db = get_db()
-    if db.execute("SELECT 1 FROM verified_emails WHERE email = ?", (email,)).fetchone():
-        return jsonify({"ok": True, "alreadyVerified": True, "message": "This email has already been verified."})
-
-    resend_api_key = os.environ.get("RESEND_API_KEY", "").strip()
-    sender = os.environ.get("MAIL_DEFAULT_SENDER", "").strip()
-    if not resend_api_key or not sender:
-        return error(
-            "Email verification is not configured yet. Set RESEND_API_KEY and MAIL_DEFAULT_SENDER in Render Environment.",
-            503,
-        )
-
-    now = utc_now()
-    previous = db.execute("SELECT sent_at FROM email_verification_codes WHERE email=?", (email,)).fetchone()
-    if previous:
-        try:
-            elapsed = (now - datetime.fromisoformat(previous["sent_at"])).total_seconds()
-        except ValueError:
-            elapsed = 999
-        if elapsed < 60:
-            return error(f"Please wait {int(60 - elapsed)} seconds before requesting another code.", 429)
-
-    code = f"{secrets.randbelow(1_000_000):06d}"
-    expires = (now.replace(microsecond=0) + __import__("datetime").timedelta(minutes=10)).isoformat(timespec="seconds")
-    code_hash = hashlib.sha256((email + ":" + code + ":" + os.environ.get("SECRET_KEY", "campus-food-rescue-verification")).encode()).hexdigest()
-    email_text = (
-        f"Hello {name or 'there'},\n\nYour Campus Food Rescue verification code is: {code}\n\n"
-        "This code expires in 10 minutes. If you did not request it, you can ignore this email.\n"
-    )
-    payload = json.dumps({
-        "from": sender,
-        "to": [email],
-        "subject": "Verify your Campus Food Rescue email",
-        "text": email_text,
-    }).encode("utf-8")
-    api_request = urllib.request.Request(
-        "https://api.resend.com/emails",
-        data=payload,
-        headers={
-            "Authorization": f"Bearer {resend_api_key}",
-            "Content-Type": "application/json",
-            "User-Agent": "Campus-Food-Rescue/1.0",
-        },
-        method="POST",
-    )
-    try:
-        with urllib.request.urlopen(api_request, timeout=15) as response:
-            if response.status not in (200, 201):
-                app.logger.error("Resend API returned unexpected HTTP status %s", response.status)
-                return error("The email provider could not send the verification email. Please try again later.", 502)
-    except urllib.error.HTTPError as exc:
-        provider_detail = exc.read().decode("utf-8", errors="replace")[:1000]
-        app.logger.error("Resend email delivery failed (HTTP %s): %s", exc.code, provider_detail)
-        return error("Could not send the verification email. Check the Resend sender configuration and API key.", 502)
-    except Exception:
-        app.logger.exception("Resend email delivery failed")
-        return error("Could not connect to the email provider. Check the Render service logs and try again.", 502)
-
-    db.execute(
-        "INSERT INTO email_verification_codes(email,code_hash,expires_at,sent_at,attempts) VALUES(?,?,?,?,0) "
-        "ON CONFLICT(email) DO UPDATE SET code_hash=excluded.code_hash,expires_at=excluded.expires_at,sent_at=excluded.sent_at,attempts=0",
-        (email, code_hash, expires, now.isoformat(timespec="seconds")),
-    )
-    return jsonify({"ok": True, "message": "Verification code sent. Check your inbox and spam folder."}), 200
-
-
-@app.post("/api/email-verification/verify")
-def verify_email_code():
-    data = request.get_json(silent=True) or {}
-    email = str(data.get("email", "")).strip().lower()
-    code = str(data.get("code", "")).strip()
-    if not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email) or not re.fullmatch(r"\d{6}", code):
-        return error("Enter your email address and the six-digit verification code.")
-    db = get_db()
-    if db.execute("SELECT 1 FROM verified_emails WHERE email=?", (email,)).fetchone():
-        return jsonify({"ok": True, "verified": True})
-    row = db.execute("SELECT * FROM email_verification_codes WHERE email=?", (email,)).fetchone()
-    if row is None:
-        return error("Request a verification code first.", 400)
-    if datetime.fromisoformat(row["expires_at"]) <= utc_now():
-        db.execute("DELETE FROM email_verification_codes WHERE email=?", (email,))
-        return error("That code has expired. Request a new code.", 400)
-    if row["attempts"] >= 5:
-        db.execute("DELETE FROM email_verification_codes WHERE email=?", (email,))
-        return error("Too many incorrect attempts. Request a new code.", 429)
-    expected = hashlib.sha256((email + ":" + code + ":" + os.environ.get("SECRET_KEY", "campus-food-rescue-verification")).encode()).hexdigest()
-    if not hmac.compare_digest(expected, row["code_hash"]):
-        db.execute("UPDATE email_verification_codes SET attempts=attempts+1 WHERE email=?", (email,))
-        return error("Incorrect verification code. Check the email and try again.", 400)
-    db.execute("INSERT OR IGNORE INTO verified_emails(email,verified_at) VALUES(?,?)", (email, iso_now()))
-    db.execute("DELETE FROM email_verification_codes WHERE email=?", (email,))
-    return jsonify({"ok": True, "verified": True, "message": "Email verified successfully."})
-
-
 @app.post("/api/session")
 def create_session():
     """Join as a student, or authenticate the configured Admin account."""
@@ -378,8 +257,6 @@ def create_session():
         return error("That email is reserved for Host access.", 403)
 
     db = get_db()
-    if db.execute("SELECT 1 FROM verified_emails WHERE email = ?", (email,)).fetchone() is None:
-        return error("Verify ownership of this email address before joining or signing in.", 403)
     account = db.execute("SELECT role FROM account_roles WHERE email = ?", (email,)).fetchone()
     if role == "admin":
         if not ADMIN_PASSWORD:
