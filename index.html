@@ -923,7 +923,7 @@
     const err=$('authError'); err.classList.remove('show'); err.style.background=''; err.style.color='';
     $('authSubmit').disabled = true;
     try {
-      const name=$('authName').value.trim(), email=$('authEmail').value.trim(), role=$('authRole').value, password=$('adminPassword').value;
+      const name=$('authName').value.trim(), email=$('authEmail').value.replace(/[\u200B-\u200D\uFEFF]/g,'').trim().toLowerCase(), role=$('authRole').value, password=$('adminPassword').value;
       const data = await api('/api/session',{method:'POST',body:JSON.stringify({name,email,role,password,action:authMode})});
       sessionToken=data.token; currentUser=data.user; sessionStorage.setItem('cfr_session_token',sessionToken); sessionStorage.setItem('cfr_session_user',JSON.stringify(currentUser));
       $('authBackdrop').style.display='none'; $('mainApp').classList.remove('auth-locked'); updateRoleUI(); await refreshListings();
