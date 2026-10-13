@@ -161,7 +161,6 @@ def init_db() -> None:
                 (item_id, name, category, description, cook_minutes, price, iso_now()),
             )
             conn.execute("UPDATE menu_items SET price=? WHERE id=? AND created_by='sample-menu'", (price, item_id))
-            )
         # Safely upgrade databases created before contact/price fields existed.
         columns = {row[1] for row in conn.execute("PRAGMA table_info(listings)")}
         if "contact_number" not in columns:
