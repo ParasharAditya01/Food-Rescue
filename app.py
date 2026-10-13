@@ -82,7 +82,6 @@ CREATE TABLE IF NOT EXISTS menu_items (
     category TEXT NOT NULL,
     description TEXT NOT NULL DEFAULT '',
     cook_minutes INTEGER NOT NULL CHECK(cook_minutes BETWEEN 1 AND 240),
-    price REAL NOT NULL DEFAULT 0 CHECK(price >= 0),
     pickup_location TEXT NOT NULL,
     active INTEGER NOT NULL DEFAULT 1,
     created_at TEXT NOT NULL,
@@ -95,7 +94,6 @@ CREATE TABLE IF NOT EXISTS meal_orders (
     student_name TEXT NOT NULL,
     ordered_at TEXT NOT NULL,
     ready_at TEXT NOT NULL,
-    quantity INTEGER NOT NULL DEFAULT 1 CHECK(quantity BETWEEN 1 AND 99),
     status TEXT NOT NULL DEFAULT 'preparing' CHECK(status IN ('preparing','ready','collected','cancelled'))
 );
 CREATE INDEX IF NOT EXISTS idx_meal_orders_student ON meal_orders(student_email, ordered_at);
@@ -136,32 +134,31 @@ def init_db() -> None:
         # Seed an illustrative menu on first deployment. Stable IDs make this safe
         # to run on every restart without duplicating items or overwriting admin edits.
         sample_menu = [
-            ("sample-cafe-cappuccino", "Cappuccino", "Drinks", "Espresso with steamed milk and a light foam. Coffeehouse-style sample; confirm availability with your campus provider.", 7, 220),
-            ("sample-cafe-latte", "Caffè Latte", "Drinks", "Espresso with steamed milk. Coffeehouse-style sample; not an official Starbucks menu item listing.", 7, 240),
-            ("sample-cafe-americano", "Americano", "Drinks", "Espresso diluted with hot water. Coffeehouse-style sample; confirm availability with your campus provider.", 5, 200),
-            ("sample-cafe-mocha", "Caffè Mocha", "Drinks", "Coffee with chocolate and milk. Coffeehouse-style sample; not an official Starbucks menu item listing.", 8, 280),
-            ("sample-cafe-frappe", "Java Chip-style Blended Coffee", "Drinks", "Iced blended coffee with chocolate chips. Inspired by popular coffeehouse drinks; not an official brand offering.", 10, 320),
-            ("sample-cafe-matcha", "Iced Matcha Latte", "Drinks", "Chilled milk with matcha green tea. Coffeehouse-style sample; confirm availability with your campus provider.", 6, 280),
-            ("sample-bakery-croissant", "Butter Croissant", "Bakery", "Flaky, buttery pastry inspired by café bakery counters. Sample menu item; not live inventory.", 5, 160),
-            ("sample-bakery-brownie", "Chocolate Brownie", "Sweets & Desserts", "Rich chocolate brownie served as a café-style treat. Sample menu item; not live inventory.", 5, 150),
-            ("sample-taj-paneer-pepper", "Paneer Pepper Salt", "Snacks", "Paneer with pepper and salt, inspired by a dish listed on a published Taj Rishikesh menu. Not an official Taj offering.", 15, 350),
-            ("sample-taj-crispy-corn", "Crispy Corn with Ginger & Spring Onion", "Snacks", "Crispy corn with aromatics, inspired by a published Taj Rishikesh menu. Not an official Taj offering.", 15, 350),
-            ("sample-taj-chicken-dim-sum", "Steamed Chicken Dim Sum", "Snacks", "Steamed chicken dumplings inspired by a published Taj Rishikesh menu. Not an official Taj offering.", 18, 400),
-            ("sample-taj-veg-dim-sum", "Broccoli & Corn Dim Sum", "Snacks", "Vegetable dumplings inspired by a published Taj Rishikesh menu. Not an official Taj offering.", 18, 350),
-            ("sample-taj-cheese-board", "Artisan Cheese Board", "Snacks", "A cheese-and-accompaniment platter inspired by a published Taj Rishikesh menu. Not an official Taj offering.", 10, 450),
-            ("sample-indian-paneer", "Paneer Butter Masala with Rice", "Lunch", "Creamy tomato-based paneer curry served with rice. Illustrative Indian meal sample.", 20, 220),
-            ("sample-indian-biryani", "Vegetable Biryani", "Lunch", "Fragrant basmati rice with vegetables and spices. Illustrative Indian meal sample.", 20, 180),
-            ("sample-indian-dosa", "Masala Dosa", "Breakfast", "Crisp dosa with spiced potato filling. Illustrative South Indian meal sample.", 15, 100),
-            ("sample-sandwich", "Grilled Cheese & Tomato Sandwich", "Snacks", "Toasted sandwich with cheese and tomato. Illustrative café meal sample.", 10, 140),
-            ("sample-salad", "Seasonal Garden Salad", "Lunch", "Fresh greens and seasonal vegetables. Illustrative lighter meal sample.", 8, 150),
+            ("sample-cafe-cappuccino", "Cappuccino", "Drinks", "Espresso with steamed milk and a light foam. Coffeehouse-style sample; confirm availability with your campus provider.", 7),
+            ("sample-cafe-latte", "Caffè Latte", "Drinks", "Espresso with steamed milk. Coffeehouse-style sample; not an official Starbucks menu item listing.", 7),
+            ("sample-cafe-americano", "Americano", "Drinks", "Espresso diluted with hot water. Coffeehouse-style sample; confirm availability with your campus provider.", 5),
+            ("sample-cafe-mocha", "Caffè Mocha", "Drinks", "Coffee with chocolate and milk. Coffeehouse-style sample; not an official Starbucks menu item listing.", 8),
+            ("sample-cafe-frappe", "Java Chip-style Blended Coffee", "Drinks", "Iced blended coffee with chocolate chips. Inspired by popular coffeehouse drinks; not an official brand offering.", 10),
+            ("sample-cafe-matcha", "Iced Matcha Latte", "Drinks", "Chilled milk with matcha green tea. Coffeehouse-style sample; confirm availability with your campus provider.", 6),
+            ("sample-bakery-croissant", "Butter Croissant", "Bakery", "Flaky, buttery pastry inspired by café bakery counters. Sample menu item; not live inventory.", 5),
+            ("sample-bakery-brownie", "Chocolate Brownie", "Sweets & Desserts", "Rich chocolate brownie served as a café-style treat. Sample menu item; not live inventory.", 5),
+            ("sample-taj-paneer-pepper", "Paneer Pepper Salt", "Snacks", "Paneer with pepper and salt, inspired by a dish listed on a published Taj Rishikesh menu. Not an official Taj offering.", 15),
+            ("sample-taj-crispy-corn", "Crispy Corn with Ginger & Spring Onion", "Snacks", "Crispy corn with aromatics, inspired by a published Taj Rishikesh menu. Not an official Taj offering.", 15),
+            ("sample-taj-chicken-dim-sum", "Steamed Chicken Dim Sum", "Snacks", "Steamed chicken dumplings inspired by a published Taj Rishikesh menu. Not an official Taj offering.", 18),
+            ("sample-taj-veg-dim-sum", "Broccoli & Corn Dim Sum", "Snacks", "Vegetable dumplings inspired by a published Taj Rishikesh menu. Not an official Taj offering.", 18),
+            ("sample-taj-cheese-board", "Artisan Cheese Board", "Snacks", "A cheese-and-accompaniment platter inspired by a published Taj Rishikesh menu. Not an official Taj offering.", 10),
+            ("sample-indian-paneer", "Paneer Butter Masala with Rice", "Lunch", "Creamy tomato-based paneer curry served with rice. Illustrative Indian meal sample.", 20),
+            ("sample-indian-biryani", "Vegetable Biryani", "Lunch", "Fragrant basmati rice with vegetables and spices. Illustrative Indian meal sample.", 20),
+            ("sample-indian-dosa", "Masala Dosa", "Breakfast", "Crisp dosa with spiced potato filling. Illustrative South Indian meal sample.", 15),
+            ("sample-sandwich", "Grilled Cheese & Tomato Sandwich", "Snacks", "Toasted sandwich with cheese and tomato. Illustrative café meal sample.", 10),
+            ("sample-salad", "Seasonal Garden Salad", "Lunch", "Fresh greens and seasonal vegetables. Illustrative lighter meal sample.", 8),
         ]
-        for item_id, name, category, description, cook_minutes, price in sample_menu:
+        for item_id, name, category, description, cook_minutes in sample_menu:
             conn.execute(
-                "INSERT OR IGNORE INTO menu_items(id,name,category,description,cook_minutes,price,pickup_location,active,created_at,created_by) "
-                "VALUES(?,?,?,?,?,?,'Campus Café Demo Counter',1,?,'sample-menu')",
-                (item_id, name, category, description, cook_minutes, price, iso_now()),
+                "INSERT OR IGNORE INTO menu_items(id,name,category,description,cook_minutes,pickup_location,active,created_at,created_by) "
+                "VALUES(?,?,?,?,?,'Campus Café Demo Counter',1,?,'sample-menu')",
+                (item_id, name, category, description, cook_minutes, iso_now()),
             )
-            conn.execute("UPDATE menu_items SET price=? WHERE id=? AND created_by='sample-menu'", (price, item_id))
         # Safely upgrade databases created before contact/price fields existed.
         columns = {row[1] for row in conn.execute("PRAGMA table_info(listings)")}
         if "contact_number" not in columns:
@@ -170,12 +167,6 @@ def init_db() -> None:
             conn.execute("ALTER TABLE listings ADD COLUMN price_per_portion REAL")
         if "category" not in columns:
             conn.execute("ALTER TABLE listings ADD COLUMN category TEXT NOT NULL DEFAULT 'Other'")
-        order_columns = {row[1] for row in conn.execute("PRAGMA table_info(meal_orders)")}
-        if "quantity" not in order_columns:
-            conn.execute("ALTER TABLE meal_orders ADD COLUMN quantity INTEGER NOT NULL DEFAULT 1")
-        menu_columns = {row[1] for row in conn.execute("PRAGMA table_info(menu_items)")}
-        if "price" not in menu_columns:
-            conn.execute("ALTER TABLE menu_items ADD COLUMN price REAL NOT NULL DEFAULT 0")
         session_columns = {row[1] for row in conn.execute("PRAGMA table_info(sessions)")}
         if "last_seen" not in session_columns:
             conn.execute("ALTER TABLE sessions ADD COLUMN last_seen TEXT NOT NULL DEFAULT ''")
@@ -283,13 +274,9 @@ def create_session():
     email = str(data.get("email", "")).strip().lower()
     role = str(data.get("role", "student")).strip().lower()
     password = str(data.get("password", ""))
-    mode = str(data.get("mode", "signup")).strip().lower()
-    if mode not in ("signup", "login"):
-        return error("Choose Sign Up or Log In.")
-    if mode == "signup" and (len(name) < 2 or len(name) > 100):
+
+    if len(name) < 2 or len(name) > 100:
         return error("Enter a name between 2 and 100 characters.")
-    if mode == "login" and len(name) < 2:
-        name = ""
     if len(email) > 254 or not __import__("re").fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email):
         return error("Enter a valid email address.")
     if role not in ("student", "admin"):
@@ -298,11 +285,7 @@ def create_session():
         return error("That email is reserved for Host access.", 403)
 
     db = get_db()
-    account = db.execute("SELECT role FROM account_roles WHERE lower(email) = ?", (email,)).fetchone()
-    if mode == "signup" and account is not None:
-        return error("Email already registered. Please log in instead.", 409)
-    if mode == "login" and account is None:
-        return error("No account found for this email. Please sign up first.", 404)
+    account = db.execute("SELECT role FROM account_roles WHERE email = ?", (email,)).fetchone()
     if role == "admin":
         if not ADMIN_PASSWORD:
             return error("Admin sign-in is not configured. Set CAMPUS_ADMIN_PASSWORD in the backend environment.", 503)
@@ -320,7 +303,7 @@ def create_session():
             "This email is registered with a different role. Contact the Host if the role needs to be changed.",
             403,
         )
-    if mode == "signup" and account is None:
+    if account is None:
         existing_roles = {
             row["role"] for row in db.execute(
                 "SELECT DISTINCT role FROM sessions WHERE lower(email) = ?", (email,)
@@ -342,9 +325,6 @@ def create_session():
                 403,
             )
 
-    if mode == "login" and not name:
-        previous = db.execute("SELECT name FROM sessions WHERE lower(email)=? ORDER BY created_at DESC LIMIT 1", (email,)).fetchone()
-        name = previous["name"] if previous else email.split("@")[0]
     token = secrets.token_urlsafe(32)
     db.execute(
         "INSERT INTO sessions(token,name,email,role,created_at,last_seen) VALUES(?,?,?,?,?,?)",
@@ -671,7 +651,7 @@ def reserve_portion(listing_id: str):
 @app.get("/api/menu")
 def get_menu():
     rows = get_db().execute("SELECT * FROM menu_items WHERE active=1 ORDER BY category,name").fetchall()
-    return jsonify({"items": [dict(id=r["id"], name=r["name"], category=r["category"], description=r["description"], cookMinutes=r["cook_minutes"], price=r["price"], pickupLocation=r["pickup_location"]) for r in rows]})
+    return jsonify({"items": [dict(id=r["id"], name=r["name"], category=r["category"], description=r["description"], cookMinutes=r["cook_minutes"], pickupLocation=r["pickup_location"]) for r in rows]})
 
 
 @app.post("/api/menu")
@@ -685,16 +665,13 @@ def create_menu_item():
     location = str(data.get("pickupLocation", "")).strip()
     try: minutes = int(data.get("cookMinutes"))
     except (TypeError, ValueError): return error("Enter cooking time in minutes.")
-    try: price = round(float(data.get("price")), 2)
-    except (TypeError, ValueError): return error("Enter a valid price in rupees.")
     allowed = {"Breakfast", "Lunch", "Dinner", "Snacks", "Sweets & Desserts", "Drinks", "Bakery", "Fruits", "Other"}
     if not name or len(name)>120: return error("Menu item name is required (maximum 120 characters).")
     if category not in allowed: return error("Choose a valid menu category.")
     if not 1 <= minutes <= 240: return error("Cooking time must be 1–240 minutes.")
-    if not 0 <= price <= 100000: return error("Price must be between ₹0 and ₹100,000.")
     if not location or len(location)>160: return error("Enter a pickup location.")
     item_id = secrets.token_urlsafe(12)
-    get_db().execute("INSERT INTO menu_items(id,name,category,description,cook_minutes,price,pickup_location,created_at,created_by) VALUES(?,?,?,?,?,?,?,?,?)", (item_id,name,category,description,minutes,price,location,iso_now(),session["email"]))
+    get_db().execute("INSERT INTO menu_items(id,name,category,description,cook_minutes,pickup_location,created_at,created_by) VALUES(?,?,?,?,?,?,?,?)", (item_id,name,category,description,minutes,location,iso_now(),session["email"]))
     return jsonify({"ok":True,"id":item_id}), 201
 
 
@@ -702,19 +679,15 @@ def create_menu_item():
 def order_menu_item(item_id: str):
     session, failure = current_session("student")
     if failure: return failure
-    data = request.get_json(silent=True) or {}
-    try: quantity = int(data.get("quantity"))
-    except (TypeError, ValueError): return error("Choose a valid quantity.")
-    if not 1 <= quantity <= 99: return error("Quantity must be between 1 and 99.")
     db = get_db()
     row = db.execute("SELECT * FROM menu_items WHERE id=? AND active=1", (item_id,)).fetchone()
     if row is None: return error("This menu item is no longer available.", 404)
     now = utc_now()
-    ready = now.timestamp() + row["cook_minutes"] * quantity * 60
+    ready = now.timestamp() + row["cook_minutes"] * 60
     ready_at = datetime.fromtimestamp(ready, timezone.utc).isoformat(timespec="seconds")
     order_id = secrets.token_urlsafe(12)
-    db.execute("INSERT INTO meal_orders(id,menu_item_id,student_email,student_name,ordered_at,ready_at,quantity,status) VALUES(?,?,?,?,?,?,?, 'preparing')", (order_id,item_id,session["email"],session["name"],now.isoformat(timespec="seconds"),ready_at,quantity))
-    return jsonify({"ok":True,"order":{"id":order_id,"itemName":row["name"],"quantity":quantity,"pickupLocation":row["pickup_location"],"orderedAt":now.isoformat(timespec="seconds"),"readyAt":ready_at,"status":"preparing"}}), 201
+    db.execute("INSERT INTO meal_orders(id,menu_item_id,student_email,student_name,ordered_at,ready_at,status) VALUES(?,?,?,?,?,?, 'preparing')", (order_id,item_id,session["email"],session["name"],now.isoformat(timespec="seconds"),ready_at))
+    return jsonify({"ok":True,"order":{"id":order_id,"itemName":row["name"],"pickupLocation":row["pickup_location"],"orderedAt":now.isoformat(timespec="seconds"),"readyAt":ready_at,"status":"preparing"}}), 201
 
 
 @app.get("/api/orders")
@@ -724,8 +697,8 @@ def get_my_orders():
     db = get_db()
     now = iso_now()
     db.execute("UPDATE meal_orders SET status='ready' WHERE student_email=? AND status='preparing' AND julianday(ready_at)<=julianday(?)", (session["email"],now))
-    rows = db.execute("SELECT o.*,m.name AS item_name,m.pickup_location,m.price AS item_price FROM meal_orders o JOIN menu_items m ON m.id=o.menu_item_id WHERE o.student_email=? ORDER BY o.ordered_at DESC LIMIT 100", (session["email"],)).fetchall()
-    return jsonify({"orders":[{"id":r["id"],"itemName":r["item_name"],"quantity":r["quantity"],"price":r["item_price"],"totalPrice":round(r["item_price"]*r["quantity"],2),"pickupLocation":r["pickup_location"],"orderedAt":r["ordered_at"],"readyAt":r["ready_at"],"status":r["status"]} for r in rows]})
+    rows = db.execute("SELECT o.*,m.name AS item_name,m.pickup_location FROM meal_orders o JOIN menu_items m ON m.id=o.menu_item_id WHERE o.student_email=? ORDER BY o.ordered_at DESC LIMIT 100", (session["email"],)).fetchall()
+    return jsonify({"orders":[{"id":r["id"],"itemName":r["item_name"],"pickupLocation":r["pickup_location"],"orderedAt":r["ordered_at"],"readyAt":r["ready_at"],"status":r["status"]} for r in rows]})
 
 @app.post("/api/orders/<order_id>/collected")
 def mark_order_collected(order_id: str):
