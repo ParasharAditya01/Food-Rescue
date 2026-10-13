@@ -733,7 +733,8 @@
       return categoryMatches && (item.name + ' ' + item.location + ' ' + (item.category || 'Other')).toLowerCase().includes(query);
     };
     const visible = listings.filter(matches).sort((a,b) => new Date(a.deadline) - new Date(b.deadline));
-    const visibleDemos = demoListings.filter(matches);
+    // Demo foods are shown only to authenticated users; visitors see real backend listings only.
+    const visibleDemos = currentUser ? demoListings.filter(matches) : [];
     const realCards = visible.map((item,index) => {
       const status = effectiveStatus(item);
       const label = {available:'Available',claimed:'Fully reserved',expired:'Expired'}[status];
@@ -755,7 +756,7 @@
       </article>`
     ).join('');
     const cardsMarkup = realCards + demoCards;
-    $('cards').innerHTML = cardsMarkup || `<div class="empty-state"><div class="empty-icon">🥬</div><h3>${listings.length || demoListings.length ? 'No listings found' : 'No food listings yet'}</h3><p>${selectedCategory !== 'all' ? `No ${escapeHtml(selectedCategory.toLowerCase())} listings match this search. Try another search or view all food.` : 'Try another search.'}</p>${currentUser && currentUser.role==='admin' ? '<button class="add-button" data-action="add-from-empty">+ Add a listing</button>' : ''}</div>`;
+    $('cards').innerHTML = cardsMarkup || `<div class="empty-state"><div class="empty-icon">🥬</div><h3>${visible.length || (currentUser && demoListings.length) ? 'No listings found' : 'No food listings yet'}</h3><p>${selectedCategory !== 'all' ? `No ${escapeHtml(selectedCategory.toLowerCase())} listings match this search. Try another search or view all food.` : 'Try another search.'}</p>${currentUser && currentUser.role==='admin' ? '<button class="add-button" data-action="add-from-empty">+ Add a listing</button>' : ''}</div>`;
     updateStats();
   }
   function updateStats() {
