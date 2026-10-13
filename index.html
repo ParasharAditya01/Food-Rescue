@@ -397,7 +397,9 @@
   .hero-stamp span{color:#d7c29a}
   .hero-scroll{color:#817b70;letter-spacing:1.6px}.hero-scroll:before{background:#b9a47e}.hero-scroll:after{color:#8d754c}
   .live-ribbon{background:#292b24;color:#e9e1d3;border-color:#292b24;letter-spacing:1.8px}
-  .live-ribbon .live-ping{background:#4ca86a;box-shadow:0 0 7px 2px #6c963a88;filter:drop-shadow(0 0 5px #6c963a);animation:sparkle 2s ease-in-out infinite}
+  .live-ribbon .live-ping,.live-ribbon .ribbon-spark{animation:ribbon-sync-glow 2s ease-in-out infinite;animation-delay:0s}
+  .live-ribbon .live-ping{background:#4ca86a;box-shadow:0 0 7px 2px #6c963a88;filter:drop-shadow(0 0 5px #6c963a)}
+  @keyframes ribbon-sync-glow{0%,100%{opacity:.45;filter:brightness(.85) drop-shadow(0 0 2px #6c963a55)}50%{opacity:1;filter:brightness(1.5) drop-shadow(0 0 7px #6c963a)}}
   .main{max-width:1440px;padding:42px clamp(18px,5.2vw,84px) 80px}
   .impact-row{margin-top:-20px;gap:0;box-shadow:var(--shadow);border:1px solid var(--line);background:white}
   .impact{border:0;border-right:1px solid var(--line);border-radius:0;box-shadow:none;padding:23px 25px;animation:none}.impact:last-child{border-right:0}
