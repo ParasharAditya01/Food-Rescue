@@ -283,9 +283,13 @@ def create_session():
     email = str(data.get("email", "")).strip().lower()
     role = str(data.get("role", "student")).strip().lower()
     password = str(data.get("password", ""))
-
-    if len(name) < 2 or len(name) > 100:
+    mode = str(data.get("mode", "signup")).strip().lower()
+    if mode not in ("signup", "login"):
+        return error("Choose Sign Up or Log In.")
+    if mode == "signup" and (len(name) < 2 or len(name) > 100):
         return error("Enter a name between 2 and 100 characters.")
+    if mode == "login" and len(name) < 2:
+        name = ""
     if len(email) > 254 or not __import__("re").fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email):
         return error("Enter a valid email address.")
     if role not in ("student", "admin"):
@@ -294,7 +298,11 @@ def create_session():
         return error("That email is reserved for Host access.", 403)
 
     db = get_db()
-    account = db.execute("SELECT role FROM account_roles WHERE email = ?", (email,)).fetchone()
+    account = db.execute("SELECT role FROM account_roles WHERE lower(email) = ?", (email,)).fetchone()
+    if mode == "signup" and account is not None:
+        return error("Email already registered. Please log in instead.", 409)
+    if mode == "login" and account is None:
+        return error("No account found for this email. Please sign up first.", 404)
     if role == "admin":
         if not ADMIN_PASSWORD:
             return error("Admin sign-in is not configured. Set CAMPUS_ADMIN_PASSWORD in the backend environment.", 503)
@@ -312,7 +320,7 @@ def create_session():
             "This email is registered with a different role. Contact the Host if the role needs to be changed.",
             403,
         )
-    if account is None:
+    if mode == "signup" and account is None:
         existing_roles = {
             row["role"] for row in db.execute(
                 "SELECT DISTINCT role FROM sessions WHERE lower(email) = ?", (email,)
@@ -334,6 +342,9 @@ def create_session():
                 403,
             )
 
+    if mode == "login" and not name:
+        previous = db.execute("SELECT name FROM sessions WHERE lower(email)=? ORDER BY created_at DESC LIMIT 1", (email,)).fetchone()
+        name = previous["name"] if previous else email.split("@")[0]
     token = secrets.token_urlsafe(32)
     db.execute(
         "INSERT INTO sessions(token,name,email,role,created_at,last_seen) VALUES(?,?,?,?,?,?)",
