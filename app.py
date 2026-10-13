@@ -154,6 +154,9 @@ def init_db() -> None:
             ("sample-sandwich", "Grilled Cheese & Tomato Sandwich", "Snacks", "Toasted sandwich with cheese and tomato. Illustrative café meal sample.", 10),
             ("sample-salad", "Seasonal Garden Salad", "Lunch", "Fresh greens and seasonal vegetables. Illustrative lighter meal sample.", 8),
         ]
+        menu_columns = {row[1] for row in conn.execute("PRAGMA table_info(menu_items)")}
+        if "price_per_portion" not in menu_columns:
+            conn.execute("ALTER TABLE menu_items ADD COLUMN price_per_portion REAL")
         sample_prices = {
             "sample-cafe-cappuccino": 220, "sample-cafe-latte": 240,
             "sample-cafe-americano": 200, "sample-cafe-mocha": 280,
@@ -171,9 +174,6 @@ def init_db() -> None:
                 "VALUES(?,?,?,?,?,?,'Campus Café Demo Counter',1,?,'sample-menu')",
                 (item_id, name, category, description, cook_minutes, sample_prices[item_id], iso_now()),
             )
-        menu_columns = {row[1] for row in conn.execute("PRAGMA table_info(menu_items)")}
-        if "price_per_portion" not in menu_columns:
-            conn.execute("ALTER TABLE menu_items ADD COLUMN price_per_portion REAL")
         # Keep the illustrative sample menu priced on every startup, without touching admin-created items.
         for item_id, price in sample_prices.items():
             conn.execute("UPDATE menu_items SET price_per_portion=? WHERE id=? AND created_by='sample-menu'", (price, item_id))
