@@ -385,24 +385,49 @@ def health():
 
 @app.post("/api/session")
 def create_session():
-    """Join as a student, or authenticate the configured Admin account."""
+    """Register a new account once, or sign in to an existing account."""
     data = request.get_json(silent=True) or {}
     name = str(data.get("name", "")).strip()
     email = str(data.get("email", "")).strip().lower()
     role = str(data.get("role", "student")).strip().lower()
     password = str(data.get("password", ""))
+    action = str(data.get("action", "signup")).strip().lower()
 
+    if action not in ("signup", "login"):
+        return error("Choose Sign up or Log in.")
     if len(name) < 2 or len(name) > 100:
         return error("Enter a name between 2 and 100 characters.")
-    if len(email) > 254 or not __import__("re").fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email):
+    if len(email) > 254 or not __import__("re").fullmatch(r"[^\\s@]+@[^\\s@]+\\.[^\\s@]+", email):
         return error("Enter a valid email address.")
     if role not in ("student", "admin"):
         return error("Choose student or admin.")
     if HOST_EMAIL and secrets.compare_digest(email, HOST_EMAIL):
-        return error("That email is reserved for Host access.", 403)
+        return error("That email is reserved for Host access. Use the Host login.")
 
     db = get_db()
     account = db.execute("SELECT role FROM account_roles WHERE email = ?", (email,)).fetchone()
+
+    # Recover legacy registrations from sessions if the account registry is missing a row.
+    if account is None:
+        old_roles = {
+            row["role"] for row in db.execute(
+                "SELECT DISTINCT role FROM sessions WHERE lower(email) = ?", (email,)
+            ).fetchall()
+        }
+        if len(old_roles) == 1:
+            old_role = next(iter(old_roles))
+            db.execute(
+                "INSERT OR IGNORE INTO account_roles(email,role,created_at) VALUES(?,?,?)",
+                (email, old_role, iso_now()),
+            )
+            account = db.execute("SELECT role FROM account_roles WHERE email = ?", (email,)).fetchone()
+
+    if action == "signup" and account is not None:
+        return error("This email is already registered. Please choose Log in instead of Sign up.", 409)
+
+    if action == "login" and account is None:
+        return error("No account exists for this email yet. Please choose Sign up first.", 404)
+
     if role == "admin":
         if not ADMIN_PASSWORD:
             return error("Admin sign-in is not configured. Set CAMPUS_ADMIN_PASSWORD in the backend environment.", 503)
@@ -420,27 +445,12 @@ def create_session():
             "This email is registered with a different role. Contact the Host if the role needs to be changed.",
             403,
         )
-    if account is None:
-        existing_roles = {
-            row["role"] for row in db.execute(
-                "SELECT DISTINCT role FROM sessions WHERE lower(email) = ?", (email,)
-            ).fetchall()
-        }
-        if existing_roles and (len(existing_roles) != 1 or role not in existing_roles):
-            return error(
-                "This email is registered with a different role. Contact the Host if the role needs to be changed.",
-                403,
-            )
+
+    if action == "signup":
         db.execute(
-            "INSERT OR IGNORE INTO account_roles(email,role,created_at) VALUES(?,?,?)",
+            "INSERT INTO account_roles(email,role,created_at) VALUES(?,?,?)",
             (email, role, iso_now()),
         )
-        account = db.execute("SELECT role FROM account_roles WHERE email = ?", (email,)).fetchone()
-        if account is None or account["role"] != role:
-            return error(
-                "This email is registered with a different role. Contact the Host if the role needs to be changed.",
-                403,
-            )
 
     token = secrets.token_urlsafe(32)
     db.execute(
