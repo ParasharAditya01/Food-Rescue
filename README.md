@@ -1,38 +1,43 @@
 # Campus Food Rescue
 
-Flask + SQLite prototype for sharing surplus campus food.
+Campus Food Rescue is a web application concept that helps campus communities share surplus food and make it available to students before it goes to waste.
 
-## Run locally
+## Features
 
-```bash
-python -m pip install -r requirements.txt
-python app.py
-```
+- Browse available surplus-food listings.
+- View collection deadlines and remaining portions.
+- Reserve portions while a listing is available.
+- Track listing availability and expiration.
+- Provide separate experiences for students, hosts, and administrators.
 
-Open `http://127.0.0.1:5000`. Keep `app.py`, `index.html`, and `requirements.txt` in the same directory. SQLite defaults to `database.db`; set `CAMPUS_FOOD_DB` to use another path.
+## Built With
 
-## Configure Admin and Host sign-in
+- Python
+- Flask
+- SQLite
+- HTML, CSS, and JavaScript
 
-Admin and Host use email + password credentials configured as environment variables. No access codes are used. Do not put passwords in source code or commit them to GitHub.
+## Project Status
 
-Required environment variables:
+This project is an evolving prototype. Features and workflows may change as development continues.
 
-- `CAMPUS_ADMIN_EMAIL` — exact email allowed to sign in as Admin
-- `CAMPUS_ADMIN_PASSWORD` — Admin password
-- `CAMPUS_HOST_EMAIL` — exact email allowed to sign in to the Host Control Panel
-- `CAMPUS_HOST_PASSWORD` — Host password
+## Run Locally
 
-The shorter aliases `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `HOST_EMAIL`, and `HOST_PASSWORD` are also accepted, but the `CAMPUS_` names are preferred. Set all four values in Render under **Environment** and redeploy. Use separate, strong passwords for Admin and Host.
+1. Install Python.
+2. Install the project dependencies:
+   ```bash
+   python -m pip install -r requirements.txt
+   ```
+3. Start the application:
+   ```bash
+   python app.py
+   ```
+4. Open `http://127.0.0.1:5000` in your browser.
 
-Students can join using their name and email. The prototype does not verify student email ownership. Admin and Host credentials are checked on the server and are never stored in the SQLite database.
+## Security
 
-## Listing lifecycle
+Do not commit passwords, API keys, email-service credentials, or other secrets to the repository. Configure private deployment settings securely.
 
-- Listings can be reserved only before their collection deadline and while portions remain.
-- Once the deadline passes, the backend sets the listing to `expired`, sets its available quantity to zero, and blocks reservations.
-- Expired listings remain visible for 24 hours after the later of their creation time or collection deadline. They display **Expired — no more booking** and are then hidden from the public listing page.
-- Host dashboard history remains available in the database.
+## Contributing
 
-## Deployment notes
-
-The Render web service should start with `gunicorn app:app`. Ensure `requirements.txt` includes Flask and Gunicorn. For persistent SQLite data on Render, configure a persistent disk and set `CAMPUS_FOOD_DB` to a path on that disk; otherwise data may be lost when the service instance is replaced.
+Suggestions and improvements that help reduce food waste and improve the campus experience are welcome.
