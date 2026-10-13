@@ -244,7 +244,7 @@ def init_db() -> None:
         already_cleaned = conn.execute(
             "SELECT 1 FROM app_migrations WHERE name = ?", (cleanup_name,)
         ).fetchone()
-        if not already_cleaned:
+        if not already_cleaned and (HOST_EMAIL or ADMIN_EMAIL):
             privileged_emails = {
                 email for email in (HOST_EMAIL, ADMIN_EMAIL) if email
             }
