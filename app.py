@@ -82,6 +82,7 @@ CREATE TABLE IF NOT EXISTS menu_items (
     category TEXT NOT NULL,
     description TEXT NOT NULL DEFAULT '',
     cook_minutes INTEGER NOT NULL CHECK(cook_minutes BETWEEN 1 AND 240),
+    price_per_portion REAL,
     pickup_location TEXT NOT NULL,
     active INTEGER NOT NULL DEFAULT 1,
     created_at TEXT NOT NULL,
@@ -153,12 +154,29 @@ def init_db() -> None:
             ("sample-sandwich", "Grilled Cheese & Tomato Sandwich", "Snacks", "Toasted sandwich with cheese and tomato. Illustrative café meal sample.", 10),
             ("sample-salad", "Seasonal Garden Salad", "Lunch", "Fresh greens and seasonal vegetables. Illustrative lighter meal sample.", 8),
         ]
+        sample_prices = {
+            "sample-cafe-cappuccino": 220, "sample-cafe-latte": 240,
+            "sample-cafe-americano": 200, "sample-cafe-mocha": 280,
+            "sample-cafe-frappe": 320, "sample-cafe-matcha": 280,
+            "sample-bakery-croissant": 160, "sample-bakery-brownie": 150,
+            "sample-taj-paneer-pepper": 350, "sample-taj-crispy-corn": 350,
+            "sample-taj-chicken-dim-sum": 400, "sample-taj-veg-dim-sum": 350,
+            "sample-taj-cheese-board": 450, "sample-indian-paneer": 220,
+            "sample-indian-biryani": 180, "sample-indian-dosa": 100,
+            "sample-sandwich": 140, "sample-salad": 150,
+        }
         for item_id, name, category, description, cook_minutes in sample_menu:
             conn.execute(
-                "INSERT OR IGNORE INTO menu_items(id,name,category,description,cook_minutes,pickup_location,active,created_at,created_by) "
-                "VALUES(?,?,?,?,?,'Campus Café Demo Counter',1,?,'sample-menu')",
-                (item_id, name, category, description, cook_minutes, iso_now()),
+                "INSERT OR IGNORE INTO menu_items(id,name,category,description,cook_minutes,price_per_portion,pickup_location,active,created_at,created_by) "
+                "VALUES(?,?,?,?,?,?,'Campus Café Demo Counter',1,?,'sample-menu')",
+                (item_id, name, category, description, cook_minutes, sample_prices[item_id], iso_now()),
             )
+        menu_columns = {row[1] for row in conn.execute("PRAGMA table_info(menu_items)")}
+        if "price_per_portion" not in menu_columns:
+            conn.execute("ALTER TABLE menu_items ADD COLUMN price_per_portion REAL")
+        # Keep the illustrative sample menu priced on every startup, without touching admin-created items.
+        for item_id, price in sample_prices.items():
+            conn.execute("UPDATE menu_items SET price_per_portion=? WHERE id=? AND created_by='sample-menu'", (price, item_id))
         # Safely upgrade databases created before contact/price fields existed.
         columns = {row[1] for row in conn.execute("PRAGMA table_info(listings)")}
         if "contact_number" not in columns:
@@ -651,7 +669,7 @@ def reserve_portion(listing_id: str):
 @app.get("/api/menu")
 def get_menu():
     rows = get_db().execute("SELECT * FROM menu_items WHERE active=1 ORDER BY category,name").fetchall()
-    return jsonify({"items": [dict(id=r["id"], name=r["name"], category=r["category"], description=r["description"], cookMinutes=r["cook_minutes"], pickupLocation=r["pickup_location"]) for r in rows]})
+    return jsonify({"items": [dict(id=r["id"], name=r["name"], category=r["category"], description=r["description"], cookMinutes=r["cook_minutes"], pricePerPortion=r["price_per_portion"], pickupLocation=r["pickup_location"]) for r in rows]})
 
 
 @app.post("/api/menu")
@@ -665,13 +683,20 @@ def create_menu_item():
     location = str(data.get("pickupLocation", "")).strip()
     try: minutes = int(data.get("cookMinutes"))
     except (TypeError, ValueError): return error("Enter cooking time in minutes.")
+    raw_price = data.get("pricePerPortion")
+    try:
+        price = float(raw_price)
+    except (TypeError, ValueError):
+        return error("Enter a valid price per portion.")
+    if not math.isfinite(price) or not 0 <= price <= 1_000_000 or round(price, 2) != price:
+        return error("Price must be ₹0–₹1,000,000 per portion, with up to 2 decimal places.")
     allowed = {"Breakfast", "Lunch", "Dinner", "Snacks", "Sweets & Desserts", "Drinks", "Bakery", "Fruits", "Other"}
     if not name or len(name)>120: return error("Menu item name is required (maximum 120 characters).")
     if category not in allowed: return error("Choose a valid menu category.")
     if not 1 <= minutes <= 240: return error("Cooking time must be 1–240 minutes.")
     if not location or len(location)>160: return error("Enter a pickup location.")
     item_id = secrets.token_urlsafe(12)
-    get_db().execute("INSERT INTO menu_items(id,name,category,description,cook_minutes,pickup_location,created_at,created_by) VALUES(?,?,?,?,?,?,?,?)", (item_id,name,category,description,minutes,location,iso_now(),session["email"]))
+    get_db().execute("INSERT INTO menu_items(id,name,category,description,cook_minutes,price_per_portion,pickup_location,created_at,created_by) VALUES(?,?,?,?,?,?,?,?,?)", (item_id,name,category,description,minutes,price,location,iso_now(),session["email"]))
     return jsonify({"ok":True,"id":item_id}), 201
 
 
