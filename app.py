@@ -96,7 +96,8 @@ CREATE TABLE IF NOT EXISTS meal_orders (
     student_name TEXT NOT NULL,
     ordered_at TEXT NOT NULL,
     ready_at TEXT NOT NULL,
-    status TEXT NOT NULL DEFAULT 'preparing' CHECK(status IN ('preparing','ready','collected','cancelled'))
+    status TEXT NOT NULL DEFAULT 'preparing' CHECK(status IN ('preparing','ready','collected','cancelled')),
+    portions INTEGER NOT NULL DEFAULT 1 CHECK(portions BETWEEN 1 AND 99)
 );
 CREATE INDEX IF NOT EXISTS idx_meal_orders_student ON meal_orders(student_email, ordered_at);
 """
@@ -155,6 +156,9 @@ def init_db() -> None:
             ("sample-sandwich", "Grilled Cheese & Tomato Sandwich", "Snacks", "1 sandwich per portion (2 triangular halves). Illustrative serving size.", 10),
             ("sample-salad", "Seasonal Garden Salad", "Lunch", "1 bowl per portion (approximately 200 g). Illustrative serving size.", 8),
         ]
+        order_columns = {row[1] for row in conn.execute("PRAGMA table_info(meal_orders)")}
+        if "portions" not in order_columns:
+            conn.execute("ALTER TABLE meal_orders ADD COLUMN portions INTEGER NOT NULL DEFAULT 1")
         menu_columns = {row[1] for row in conn.execute("PRAGMA table_info(menu_items)")}
         if "price_per_portion" not in menu_columns:
             conn.execute("ALTER TABLE menu_items ADD COLUMN price_per_portion REAL")
@@ -720,6 +724,10 @@ def create_menu_item():
 def order_menu_item(item_id: str):
     session, failure = current_session("student")
     if failure: return failure
+    data = request.get_json(silent=True) or {}
+    portions = data.get("portions", 1)
+    if isinstance(portions, bool) or not isinstance(portions, int) or not 1 <= portions <= 99:
+        return error("Choose a whole number of portions from 1 to 99.")
     db = get_db()
     row = db.execute("SELECT * FROM menu_items WHERE id=? AND active=1", (item_id,)).fetchone()
     if row is None: return error("This menu item is no longer available.", 404)
@@ -727,8 +735,8 @@ def order_menu_item(item_id: str):
     ready = now.timestamp() + row["cook_minutes"] * 60
     ready_at = datetime.fromtimestamp(ready, timezone.utc).isoformat(timespec="seconds")
     order_id = secrets.token_urlsafe(12)
-    db.execute("INSERT INTO meal_orders(id,menu_item_id,student_email,student_name,ordered_at,ready_at,status) VALUES(?,?,?,?,?,?, 'preparing')", (order_id,item_id,session["email"],session["name"],now.isoformat(timespec="seconds"),ready_at))
-    return jsonify({"ok":True,"order":{"id":order_id,"itemName":row["name"],"pickupLocation":row["pickup_location"],"orderedAt":now.isoformat(timespec="seconds"),"readyAt":ready_at,"status":"preparing"}}), 201
+    db.execute("INSERT INTO meal_orders(id,menu_item_id,student_email,student_name,ordered_at,ready_at,status,portions) VALUES(?,?,?,?,?,?, 'preparing',?)", (order_id,item_id,session["email"],session["name"],now.isoformat(timespec="seconds"),ready_at,portions))
+    return jsonify({"ok":True,"order":{"id":order_id,"itemName":row["name"],"pickupLocation":row["pickup_location"],"orderedAt":now.isoformat(timespec="seconds"),"readyAt":ready_at,"status":"preparing","portions":portions}}), 201
 
 
 @app.get("/api/orders")
@@ -739,7 +747,7 @@ def get_my_orders():
     now = iso_now()
     db.execute("UPDATE meal_orders SET status='ready' WHERE student_email=? AND status='preparing' AND julianday(ready_at)<=julianday(?)", (session["email"],now))
     rows = db.execute("SELECT o.*,m.name AS item_name,m.pickup_location FROM meal_orders o JOIN menu_items m ON m.id=o.menu_item_id WHERE o.student_email=? ORDER BY o.ordered_at DESC LIMIT 100", (session["email"],)).fetchall()
-    return jsonify({"orders":[{"id":r["id"],"itemName":r["item_name"],"pickupLocation":r["pickup_location"],"orderedAt":r["ordered_at"],"readyAt":r["ready_at"],"status":r["status"]} for r in rows]})
+    return jsonify({"orders":[{"id":r["id"],"itemName":r["item_name"],"menuItemId":r["menu_item_id"],"pickupLocation":r["pickup_location"],"orderedAt":r["ordered_at"],"readyAt":r["ready_at"],"status":r["status"],"portions":r["portions"]} for r in rows]})
 
 @app.post("/api/orders/<order_id>/collected")
 def mark_order_collected(order_id: str):
