@@ -82,6 +82,7 @@ CREATE TABLE IF NOT EXISTS menu_items (
     category TEXT NOT NULL,
     description TEXT NOT NULL DEFAULT '',
     cook_minutes INTEGER NOT NULL CHECK(cook_minutes BETWEEN 1 AND 240),
+    portions_per_batch INTEGER NOT NULL DEFAULT 1 CHECK(portions_per_batch BETWEEN 1 AND 99),
     price_per_portion REAL,
     serving_size TEXT NOT NULL DEFAULT '',
     pickup_location TEXT NOT NULL,
@@ -160,6 +161,8 @@ def init_db() -> None:
         if "portions" not in order_columns:
             conn.execute("ALTER TABLE meal_orders ADD COLUMN portions INTEGER NOT NULL DEFAULT 1")
         menu_columns = {row[1] for row in conn.execute("PRAGMA table_info(menu_items)")}
+        if "portions_per_batch" not in menu_columns:
+            conn.execute("ALTER TABLE menu_items ADD COLUMN portions_per_batch INTEGER NOT NULL DEFAULT 1")
         if "price_per_portion" not in menu_columns:
             conn.execute("ALTER TABLE menu_items ADD COLUMN price_per_portion REAL")
         if "serving_size" not in menu_columns:
@@ -193,8 +196,18 @@ def init_db() -> None:
             "sample-sandwich": "1 sandwich (2 triangular halves)", "sample-salad": "1 bowl (approx. 200 g)",
         }
         # Keep illustrative prices and portion sizes stable without touching admin-created items.
+        sample_batch_capacity = {
+            "sample-cafe-cappuccino": 2, "sample-cafe-latte": 2, "sample-cafe-americano": 3,
+            "sample-cafe-mocha": 2, "sample-cafe-frappe": 2, "sample-cafe-matcha": 2,
+            "sample-bakery-croissant": 6, "sample-bakery-brownie": 6,
+            "sample-taj-paneer-pepper": 3, "sample-taj-crispy-corn": 3,
+            "sample-taj-chicken-dim-sum": 4, "sample-taj-veg-dim-sum": 4,
+            "sample-taj-cheese-board": 2, "sample-indian-paneer": 4,
+            "sample-indian-biryani": 6, "sample-indian-dosa": 2,
+            "sample-sandwich": 2, "sample-salad": 3,
+        }
         for item_id, price in sample_prices.items():
-            conn.execute("UPDATE menu_items SET price_per_portion=?, serving_size=? WHERE id=? AND created_by='sample-menu'", (price, sample_servings[item_id], item_id))
+            conn.execute("UPDATE menu_items SET price_per_portion=?, serving_size=?, portions_per_batch=? WHERE id=? AND created_by='sample-menu'", (price, sample_servings[item_id], sample_batch_capacity[item_id], item_id))
         # Safely upgrade databases created before contact/price fields existed.
         columns = {row[1] for row in conn.execute("PRAGMA table_info(listings)")}
         if "contact_number" not in columns:
@@ -687,7 +700,7 @@ def reserve_portion(listing_id: str):
 @app.get("/api/menu")
 def get_menu():
     rows = get_db().execute("SELECT * FROM menu_items WHERE active=1 ORDER BY category,name").fetchall()
-    return jsonify({"items": [dict(id=r["id"], name=r["name"], category=r["category"], description=r["description"], cookMinutes=r["cook_minutes"], pricePerPortion=r["price_per_portion"], servingSize=r["serving_size"], pickupLocation=r["pickup_location"]) for r in rows]})
+    return jsonify({"items": [dict(id=r["id"], name=r["name"], category=r["category"], description=r["description"], cookMinutes=r["cook_minutes"], portionsPerBatch=r["portions_per_batch"], pricePerPortion=r["price_per_portion"], servingSize=r["serving_size"], pickupLocation=r["pickup_location"]) for r in rows]})
 
 
 @app.post("/api/menu")
@@ -716,7 +729,10 @@ def create_menu_item():
     if not 1 <= minutes <= 240: return error("Cooking time must be 1–240 minutes.")
     if not location or len(location)>160: return error("Enter a pickup location.")
     item_id = secrets.token_urlsafe(12)
-    get_db().execute("INSERT INTO menu_items(id,name,category,description,cook_minutes,price_per_portion,serving_size,pickup_location,created_at,created_by) VALUES(?,?,?,?,?,?,?,?,?,?)", (item_id,name,category,description,minutes,price,serving_size,location,iso_now(),session["email"]))
+    portions_per_batch = data.get("portionsPerBatch", 1)
+    if isinstance(portions_per_batch, bool) or not isinstance(portions_per_batch, int) or not 1 <= portions_per_batch <= 99:
+        return error("Set portions per batch to a whole number from 1 to 99.")
+    get_db().execute("INSERT INTO menu_items(id,name,category,description,cook_minutes,portions_per_batch,price_per_portion,serving_size,pickup_location,created_at,created_by) VALUES(?,?,?,?,?,?,?,?,?,?,?)", (item_id,name,category,description,minutes,portions_per_batch,price,serving_size,location,iso_now(),session["email"]))
     return jsonify({"ok":True,"id":item_id}), 201
 
 
@@ -732,11 +748,21 @@ def order_menu_item(item_id: str):
     row = db.execute("SELECT * FROM menu_items WHERE id=? AND active=1", (item_id,)).fetchone()
     if row is None: return error("This menu item is no longer available.", 404)
     now = utc_now()
-    ready = now.timestamp() + row["cook_minutes"] * 60
+    existing = db.execute(
+        "SELECT * FROM meal_orders WHERE menu_item_id=? AND student_email=? AND status='preparing' ORDER BY ordered_at DESC LIMIT 1",
+        (item_id, session["email"]),
+    ).fetchone()
+    total_portions = portions + (existing["portions"] if existing else 0)
+    batches = (total_portions + row["portions_per_batch"] - 1) // row["portions_per_batch"]
+    ready = now.timestamp() + batches * row["cook_minutes"] * 60
     ready_at = datetime.fromtimestamp(ready, timezone.utc).isoformat(timespec="seconds")
-    order_id = secrets.token_urlsafe(12)
-    db.execute("INSERT INTO meal_orders(id,menu_item_id,student_email,student_name,ordered_at,ready_at,status,portions) VALUES(?,?,?,?,?,?, 'preparing',?)", (order_id,item_id,session["email"],session["name"],now.isoformat(timespec="seconds"),ready_at,portions))
-    return jsonify({"ok":True,"order":{"id":order_id,"itemName":row["name"],"pickupLocation":row["pickup_location"],"orderedAt":now.isoformat(timespec="seconds"),"readyAt":ready_at,"status":"preparing","portions":portions}}), 201
+    if existing:
+        order_id = existing["id"]
+        db.execute("UPDATE meal_orders SET portions=?, ordered_at=?, ready_at=?, status='preparing' WHERE id=?", (total_portions, now.isoformat(timespec="seconds"), ready_at, order_id))
+    else:
+        order_id = secrets.token_urlsafe(12)
+        db.execute("INSERT INTO meal_orders(id,menu_item_id,student_email,student_name,ordered_at,ready_at,status,portions) VALUES(?,?,?,?,?,?, 'preparing',?)", (order_id,item_id,session["email"],session["name"],now.isoformat(timespec="seconds"),ready_at,total_portions))
+    return jsonify({"ok":True,"order":{"id":order_id,"itemName":row["name"],"pickupLocation":row["pickup_location"],"orderedAt":now.isoformat(timespec="seconds"),"readyAt":ready_at,"status":"preparing","portions":total_portions,"batches":batches}}), 201
 
 
 @app.get("/api/orders")
