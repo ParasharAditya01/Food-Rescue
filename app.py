@@ -388,17 +388,20 @@ def create_session():
     """Register a new account once, or sign in to an existing account."""
     data = request.get_json(silent=True) or {}
     name = str(data.get("name", "")).strip()
-    email = str(data.get("email", "")).strip().lower()
+    # Remove invisible formatting characters often introduced by copy/paste.
+    email = str(data.get("email", "")).translate({ord(ch): None for ch in "\u200b\u200c\u200d\ufeff"}).strip().lower()
     role = str(data.get("role", "student")).strip().lower()
     password = str(data.get("password", ""))
     action = str(data.get("action", "signup")).strip().lower()
 
     if action not in ("signup", "login"):
         return error("Choose Sign up or Log in.")
-    if len(name) < 2 or len(name) > 100:
+    if action == "signup" and (len(name) < 2 or len(name) > 100):
         return error("Enter a name between 2 and 100 characters.")
+    if action == "login" and not name:
+        name = email.split("@", 1)[0] if "@" in email else ""
     if len(email) > 254 or not __import__("re").fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email):
-        return error("Enter a valid email address.")
+        return error("Email format was not recognized. Remove spaces and enter the complete address, such as name@example.com.")
     if role not in ("student", "admin"):
         return error("Choose student or admin.")
     if HOST_EMAIL and secrets.compare_digest(email, HOST_EMAIL):
