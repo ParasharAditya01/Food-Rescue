@@ -502,12 +502,14 @@
     <h1 id="authTitle">Your campus.<br><span>Your community.</span></h1>
     <p>Join the network to discover surplus food or share meals with students nearby.</p>
     <form id="authForm" novalidate>
-      <div class="auth-field"><label for="authName">FULL NAME</label><input id="authName" maxlength="80" autocomplete="name" placeholder="e.g. Alex Morgan" required></div>
+      <div class="auth-mode-switch" style="display:flex;gap:10px;margin:0 0 18px"><button type="button" class="auth-submit" id="showSignUp" style="flex:1"><span>Sign Up</span></button><button type="button" class="auth-submit" id="showLogIn" style="flex:1;background:#eef3ee;color:#243b2c"><span>Log In</span></button></div>
+      <input id="authMode" type="hidden" value="signup">
+      <div class="auth-field" id="authNameField"><label for="authName">FULL NAME</label><input id="authName" maxlength="80" autocomplete="name" placeholder="e.g. Alex Morgan" required></div>
       <div class="auth-field"><label for="authEmail">COLLEGE EMAIL</label><input id="authEmail" type="email" maxlength="254" autocomplete="email" placeholder="you@college.edu" required></div>
       <div class="auth-field"><label for="authRole">HOW WILL YOU USE THE NETWORK?</label><select id="authRole"><option value="student">🎓  Student — find and reserve food</option><option value="admin">🍱  Admin / food provider — publish listings</option></select></div>
       <div class="auth-field" id="adminPasswordField" hidden><label for="adminPassword">ADMIN PASSWORD</label><input id="adminPassword" type="password" autocomplete="current-password" placeholder="Enter the admin password"></div>
       <div class="auth-error" id="authError" role="alert"></div>
-      <button class="auth-submit" id="authSubmit" type="submit"><span>Join the network</span><b>↗</b></button>
+      <button class="auth-submit" id="authSubmit" type="submit"><span>Sign Up</span><b>↗</b></button>
     </form>
     <div class="auth-trust"><span class="trust-check">✓</span><span><b>Your details stay within the prototype</b><small>Use an email you can identify later. Email ownership is not verified.</small></span></div>
     <div class="auth-footnote">Admin access requires the configured admin email and password.</div>
@@ -904,13 +906,30 @@
     setTimeout(()=>$('authName').focus(),50);
   }
   $('authRole').addEventListener('change',()=>{$('adminPasswordField').hidden=$('authRole').value!=='admin';$('adminPassword').required=$('authRole').value==='admin';$('authError').classList.remove('show');});
+  function setAuthMode(mode) {
+    $('authMode').value=mode;
+    const signup=mode==='signup';
+    $('authNameField').hidden=!signup;
+    $('authName').required=signup;
+    $('authTitle').innerHTML=signup?'Create your <span>campus account.</span>':'Welcome <span>back.</span>';
+    $('authSubtitle').textContent=signup?'Create an account to browse available campus food.':'Log in with the email address you registered with.';
+    $('authSubmit').innerHTML='<span>'+(signup?'Sign Up':'Log In')+'</span><b>↗</b>';
+    $('showSignUp').style.background=signup?'#244b35':'#eef3ee';
+    $('showSignUp').style.color=signup?'#fff':'#243b2c';
+    $('showLogIn').style.background=!signup?'#244b35':'#eef3ee';
+    $('showLogIn').style.color=!signup?'#fff':'#243b2c';
+    $('authError').classList.remove('show');
+  }
+  $('showSignUp').addEventListener('click',()=>setAuthMode('signup'));
+  $('showLogIn').addEventListener('click',()=>setAuthMode('login'));
+  setAuthMode('signup');
   $('authForm').addEventListener('submit', async e => {
     e.preventDefault();
     const err=$('authError'); err.classList.remove('show'); err.style.background=''; err.style.color='';
     $('authSubmit').disabled = true;
     try {
-      const name=$('authName').value.trim(), email=$('authEmail').value.trim(), role=$('authRole').value, password=$('adminPassword').value;
-      const data = await api('/api/session',{method:'POST',body:JSON.stringify({name,email,role,password})});
+      const name=$('authName').value.trim(), email=$('authEmail').value.trim(), role=$('authRole').value, password=$('adminPassword').value, mode=$('authMode').value;
+      const data = await api('/api/session',{method:'POST',body:JSON.stringify({name,email,role,password,mode})});
       sessionToken=data.token; currentUser=data.user; sessionStorage.setItem('cfr_session_token',sessionToken); sessionStorage.setItem('cfr_session_user',JSON.stringify(currentUser));
       $('authBackdrop').style.display='none'; $('mainApp').classList.remove('auth-locked'); updateRoleUI(); await refreshListings();
       if (currentUser.role === 'admin') await refreshAdminNotifications();
