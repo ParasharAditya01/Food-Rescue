@@ -95,6 +95,7 @@ CREATE TABLE IF NOT EXISTS meal_orders (
     student_name TEXT NOT NULL,
     ordered_at TEXT NOT NULL,
     ready_at TEXT NOT NULL,
+    quantity INTEGER NOT NULL DEFAULT 1 CHECK(quantity BETWEEN 1 AND 99),
     status TEXT NOT NULL DEFAULT 'preparing' CHECK(status IN ('preparing','ready','collected','cancelled'))
 );
 CREATE INDEX IF NOT EXISTS idx_meal_orders_student ON meal_orders(student_email, ordered_at);
@@ -169,6 +170,9 @@ def init_db() -> None:
             conn.execute("ALTER TABLE listings ADD COLUMN price_per_portion REAL")
         if "category" not in columns:
             conn.execute("ALTER TABLE listings ADD COLUMN category TEXT NOT NULL DEFAULT 'Other'")
+        order_columns = {row[1] for row in conn.execute("PRAGMA table_info(meal_orders)")}
+        if "quantity" not in order_columns:
+            conn.execute("ALTER TABLE meal_orders ADD COLUMN quantity INTEGER NOT NULL DEFAULT 1")
         menu_columns = {row[1] for row in conn.execute("PRAGMA table_info(menu_items)")}
         if "price" not in menu_columns:
             conn.execute("ALTER TABLE menu_items ADD COLUMN price REAL NOT NULL DEFAULT 0")
@@ -687,15 +691,19 @@ def create_menu_item():
 def order_menu_item(item_id: str):
     session, failure = current_session("student")
     if failure: return failure
+    data = request.get_json(silent=True) or {}
+    try: quantity = int(data.get("quantity"))
+    except (TypeError, ValueError): return error("Choose a valid quantity.")
+    if not 1 <= quantity <= 99: return error("Quantity must be between 1 and 99.")
     db = get_db()
     row = db.execute("SELECT * FROM menu_items WHERE id=? AND active=1", (item_id,)).fetchone()
     if row is None: return error("This menu item is no longer available.", 404)
     now = utc_now()
-    ready = now.timestamp() + row["cook_minutes"] * 60
+    ready = now.timestamp() + row["cook_minutes"] * quantity * 60
     ready_at = datetime.fromtimestamp(ready, timezone.utc).isoformat(timespec="seconds")
     order_id = secrets.token_urlsafe(12)
-    db.execute("INSERT INTO meal_orders(id,menu_item_id,student_email,student_name,ordered_at,ready_at,status) VALUES(?,?,?,?,?,?, 'preparing')", (order_id,item_id,session["email"],session["name"],now.isoformat(timespec="seconds"),ready_at))
-    return jsonify({"ok":True,"order":{"id":order_id,"itemName":row["name"],"pickupLocation":row["pickup_location"],"orderedAt":now.isoformat(timespec="seconds"),"readyAt":ready_at,"status":"preparing"}}), 201
+    db.execute("INSERT INTO meal_orders(id,menu_item_id,student_email,student_name,ordered_at,ready_at,quantity,status) VALUES(?,?,?,?,?,?,?, 'preparing')", (order_id,item_id,session["email"],session["name"],now.isoformat(timespec="seconds"),ready_at,quantity))
+    return jsonify({"ok":True,"order":{"id":order_id,"itemName":row["name"],"quantity":quantity,"pickupLocation":row["pickup_location"],"orderedAt":now.isoformat(timespec="seconds"),"readyAt":ready_at,"status":"preparing"}}), 201
 
 
 @app.get("/api/orders")
@@ -705,8 +713,8 @@ def get_my_orders():
     db = get_db()
     now = iso_now()
     db.execute("UPDATE meal_orders SET status='ready' WHERE student_email=? AND status='preparing' AND julianday(ready_at)<=julianday(?)", (session["email"],now))
-    rows = db.execute("SELECT o.*,m.name AS item_name,m.pickup_location FROM meal_orders o JOIN menu_items m ON m.id=o.menu_item_id WHERE o.student_email=? ORDER BY o.ordered_at DESC LIMIT 100", (session["email"],)).fetchall()
-    return jsonify({"orders":[{"id":r["id"],"itemName":r["item_name"],"pickupLocation":r["pickup_location"],"orderedAt":r["ordered_at"],"readyAt":r["ready_at"],"status":r["status"]} for r in rows]})
+    rows = db.execute("SELECT o.*,m.name AS item_name,m.pickup_location,m.price AS item_price FROM meal_orders o JOIN menu_items m ON m.id=o.menu_item_id WHERE o.student_email=? ORDER BY o.ordered_at DESC LIMIT 100", (session["email"],)).fetchall()
+    return jsonify({"orders":[{"id":r["id"],"itemName":r["item_name"],"quantity":r["quantity"],"price":r["item_price"],"totalPrice":round(r["item_price"]*r["quantity"],2),"pickupLocation":r["pickup_location"],"orderedAt":r["ordered_at"],"readyAt":r["ready_at"],"status":r["status"]} for r in rows]})
 
 @app.post("/api/orders/<order_id>/collected")
 def mark_order_collected(order_id: str):
