@@ -901,6 +901,8 @@
     ['navAdd','heroAdd','addListing'].forEach(id => { const el=$(id); if(el) el.hidden=!isAdmin; });
     $('adminNotifications').classList.toggle('visible', isAdmin);
     $('sessionBar').style.display = currentUser ? 'flex' : 'none';
+    const authActions = document.querySelector('.top-auth-actions');
+    if (authActions) authActions.style.display = currentUser ? 'none' : 'flex';
     $('openRegistration').style.display = currentUser ? 'none' : 'inline-flex';
     if (currentUser) $('sessionRole').textContent = isAdmin ? 'ADMIN' : 'STUDENT';
     if (typeof refreshMenuAndOrders === 'function') refreshMenuAndOrders();
