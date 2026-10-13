@@ -908,7 +908,9 @@
     if (currentUser) $('sessionRole').textContent = isAdmin ? 'ADMIN' : 'STUDENT';
     if (typeof refreshMenuAndOrders === 'function') refreshMenuAndOrders();
   }
+  let authMode = 'signup';
   function showRegistration() {
+    authMode='signup';
     $('authBackdrop').style.display='flex';
     $('authForm').reset(); $('authEmail').readOnly=false; $('authName').readOnly=false; $('authRole').disabled=false;
     $('authSubmit').disabled=false; $('authSubmit').innerHTML='<span>Join the network</span><b>↗</b>';
@@ -922,7 +924,7 @@
     $('authSubmit').disabled = true;
     try {
       const name=$('authName').value.trim(), email=$('authEmail').value.trim(), role=$('authRole').value, password=$('adminPassword').value;
-      const data = await api('/api/session',{method:'POST',body:JSON.stringify({name,email,role,password})});
+      const data = await api('/api/session',{method:'POST',body:JSON.stringify({name,email,role,password,action:authMode})});
       sessionToken=data.token; currentUser=data.user; sessionStorage.setItem('cfr_session_token',sessionToken); sessionStorage.setItem('cfr_session_user',JSON.stringify(currentUser));
       $('authBackdrop').style.display='none'; $('mainApp').classList.remove('auth-locked'); updateRoleUI(); await refreshListings();
       if (currentUser.role === 'admin') await refreshAdminNotifications();
@@ -940,11 +942,11 @@
     $('authBackdrop').style.display='none';$('mainApp').classList.remove('auth-locked');updateRoleUI();await refreshListings();showToast('You have signed out.');
   });
   $('openRegistration').addEventListener('click',showRegistration);
-  $('headerLogIn').addEventListener('click',()=>{showRegistration(); $('authTitle').innerHTML='Welcome<br><span>back.</span>'; $('authSubmit').innerHTML='<span>Log in</span><b>↗</b>'; $('authName').placeholder='Enter your full name'; $('authError').textContent=''; $('authError').classList.remove('show'); });
+  $('headerLogIn').addEventListener('click',()=>{showRegistration(); authMode='login'; $('authTitle').innerHTML='Welcome<br><span>back.</span>'; $('authSubmit').innerHTML='<span>Log in</span><b>↗</b>'; $('authName').placeholder='Enter your full name'; $('authError').textContent='Use the email you already registered with. If you have an account, do not sign up again.'; $('authError').classList.add('show'); });
   $('navAdd').addEventListener('click',openModal); $('heroAdd').addEventListener('click',openModal); $('addListing').addEventListener('click',openModal);
   $('findFood').addEventListener('click',()=>$('listings').scrollIntoView({behavior:'smooth'}));
   $('closeModal').addEventListener('click',closeModal); $('modalBackdrop').addEventListener('click',e=>{if(e.target===$('modalBackdrop'))closeModal();});
-  document.addEventListener('click', e => { if (e.target.closest('#foodGateSignUp')) { showRegistration(); } if (e.target.closest('#foodGateLogin')) { showRegistration(); $('authTitle').innerHTML='Welcome<br><span>back.</span>'; $('authSubmit').innerHTML='<span>Log in</span><b>↗</b>'; $('authName').placeholder='Enter your full name'; $('authError').textContent='For this prototype, login uses the same email-based session flow as sign-up.'; $('authError').classList.add('show'); } });
+  document.addEventListener('click', e => { if (e.target.closest('#foodGateSignUp')) { showRegistration(); } if (e.target.closest('#foodGateLogin')) { showRegistration(); authMode='login'; $('authTitle').innerHTML='Welcome<br><span>back.</span>'; $('authSubmit').innerHTML='<span>Log in</span><b>↗</b>'; $('authName').placeholder='Enter your full name'; $('authError').textContent='Use the email you already registered with. If you have an account, do not sign up again.'; $('authError').classList.add('show'); } });
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();}); $('listingForm').addEventListener('submit',createListing);
   $('cards').addEventListener('click',handleCardAction); $('searchInput').addEventListener('input',render);
   $('categoryGrid').addEventListener('click', e => { const tile=e.target.closest('[data-category]'); if(!tile) return; selectedCategory=tile.dataset.category; document.querySelectorAll('.category-tile').forEach(button=>button.classList.toggle('active',button===tile)); render(); $('listings').scrollIntoView({behavior:'smooth',block:'start'}); });
