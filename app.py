@@ -397,7 +397,7 @@ def create_session():
         return error("Choose Sign up or Log in.")
     if len(name) < 2 or len(name) > 100:
         return error("Enter a name between 2 and 100 characters.")
-    if len(email) > 254 or not __import__("re").fullmatch(r"[^\\s@]+@[^\\s@]+\\.[^\\s@]+", email):
+    if len(email) > 254 or not __import__("re").fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email):
         return error("Enter a valid email address.")
     if role not in ("student", "admin"):
         return error("Choose student or admin.")
