@@ -227,12 +227,80 @@ def init_db() -> None:
             INSERT OR IGNORE INTO account_roles(email, role, created_at)
             SELECT lower(email), MIN(role), MIN(created_at)
             FROM sessions
-            WHERE lower(email) != ?
+            WHERE lower(email) NOT IN (?, ?)
             GROUP BY lower(email)
             HAVING COUNT(DISTINCT role) = 1
             """,
-            (HOST_EMAIL,),
+            (HOST_EMAIL or "__no_host_configured__", ADMIN_EMAIL or "__no_admin_configured__"),
         )
+
+        # One-time privacy cleanup: remove legacy user email addresses while keeping
+        # the configured Host and Admin accounts. The migration marker prevents
+        # this cleanup from deleting new registrations on later restarts.
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS app_migrations (name TEXT PRIMARY KEY, applied_at TEXT NOT NULL)"
+        )
+        cleanup_name = "purge_legacy_emails_except_host_admin_v1"
+        already_cleaned = conn.execute(
+            "SELECT 1 FROM app_migrations WHERE name = ?", (cleanup_name,)
+        ).fetchone()
+        if not already_cleaned:
+            privileged_emails = {
+                email for email in (HOST_EMAIL, ADMIN_EMAIL) if email
+            }
+            # Delete old registrations and sign-in sessions, retaining Host/Admin.
+            for email in (HOST_EMAIL, ADMIN_EMAIL):
+                if email:
+                    conn.execute(
+                        "INSERT OR IGNORE INTO account_roles(email, role, created_at) VALUES(?,?,?)",
+                        (email, "admin", iso_now()),
+                    )
+            if privileged_emails:
+                placeholders = ",".join("?" for _ in privileged_emails)
+                params = tuple(sorted(privileged_emails))
+                conn.execute(
+                    f"DELETE FROM account_roles WHERE lower(email) NOT IN ({placeholders})",
+                    params,
+                )
+                conn.execute(
+                    f"DELETE FROM sessions WHERE lower(email) NOT IN ({placeholders})",
+                    params,
+                )
+                conn.execute(
+                    f"DELETE FROM host_sessions WHERE lower(email) NOT IN ({placeholders})",
+                    params,
+                )
+                # Preserve transaction/history rows but remove non-privileged emails.
+                conn.execute(
+                    f"UPDATE reservations SET user_email = '' WHERE lower(user_email) NOT IN ({placeholders})",
+                    params,
+                )
+                conn.execute(
+                    f"UPDATE admin_notifications SET student_email = '' WHERE lower(student_email) NOT IN ({placeholders})",
+                    params,
+                )
+                conn.execute(
+                    f"UPDATE meal_orders SET student_email = '' WHERE lower(student_email) NOT IN ({placeholders})",
+                    params,
+                )
+                conn.execute(
+                    f"UPDATE listings SET created_by = 'Campus Admin' WHERE instr(created_by, '@') > 0 AND lower(created_by) NOT IN ({placeholders})",
+                    params,
+                )
+            else:
+                # If privileged emails are not configured, remove all stored account emails
+                # rather than accidentally retaining an unknown account.
+                conn.execute("DELETE FROM account_roles")
+                conn.execute("DELETE FROM sessions")
+                conn.execute("DELETE FROM host_sessions")
+                conn.execute("UPDATE reservations SET user_email = ''")
+                conn.execute("UPDATE admin_notifications SET student_email = ''")
+                conn.execute("UPDATE meal_orders SET student_email = ''")
+                conn.execute("UPDATE listings SET created_by = 'Campus Admin' WHERE instr(created_by, '@') > 0")
+            conn.execute(
+                "INSERT INTO app_migrations(name, applied_at) VALUES(?, ?)",
+                (cleanup_name, iso_now()),
+            )
         conn.commit()
     finally:
         conn.close()
