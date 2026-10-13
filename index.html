@@ -778,7 +778,7 @@
   async function refreshMenuAndOrders() {
     const panel=$('adminMenuPanel'); panel.hidden=!(currentUser && currentUser.role==='admin');
     const menu=$('menuCards'), msg=$('menuMessage'), orders=$('myOrders');
-    if (!currentUser) { msg.textContent='Sign in to browse the campus menu and place an order.'; menu.innerHTML=''; orders.innerHTML=''; return; }
+    if (!currentUser) { msg.textContent='Join the network to see available food and prices.'; menu.innerHTML='<div class="empty-state"><p>Food availability is members-only.</p><button class="primary" id="joinToBrowse">Join the network to view food</button></div>'; orders.innerHTML=''; const joinButton=$('joinToBrowse'); if(joinButton) joinButton.addEventListener('click',showRegistration); return; }
     try {
       const data=await api('/api/menu'); const items=data.items||[];
       msg.textContent=items.length?'Menu items prepared by the Admin. Demo food listings are not included here.':'The Admin has not published any menu items yet.';
@@ -933,8 +933,35 @@
   $('closeModal').addEventListener('click',closeModal); $('modalBackdrop').addEventListener('click',e=>{if(e.target===$('modalBackdrop'))closeModal();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();}); $('listingForm').addEventListener('submit',createListing);
   $('cards').addEventListener('click',handleCardAction); $('searchInput').addEventListener('input',render);
-  $('categoryGrid').addEventListener('click', e => { const tile=e.target.closest('[data-category]'); if(!tile) return; selectedCategory=tile.dataset.category; document.querySelectorAll('.category-tile').forEach(button=>button.classList.toggle('active',button===tile)); render(); $('listings').scrollIntoView({behavior:'smooth',block:'start'}); });
-  $('clearCategory').addEventListener('click', () => { selectedCategory='all'; document.querySelectorAll('.category-tile').forEach(button=>button.classList.remove('active')); render(); $('listings').scrollIntoView({behavior:'smooth',block:'start'}); });
+  $('categoryGrid').addEventListener('click', e => {
+    const tile=e.target.closest('[data-category]'); if(!tile) return;
+    if(!currentUser) {
+      $('authBackdrop').style.display='flex';
+      $('authForm').reset(); $('authEmail').readOnly=false; $('authName').readOnly=false; $('authRole').disabled=false;
+      $('authSubmit').disabled=false; $('authSubmit').innerHTML='<span>Join the network</span><b>↗</b>';
+      $('adminPasswordField').hidden=true; $('adminPassword').required=false; $('adminPassword').value='';
+      $('authError').classList.remove('show'); $('authError').style.background=''; $('authError').style.color='';
+      $('authTitle').textContent='Join the network to browse food';
+      $('authSubtitle').textContent='Create an account or sign in first. Available food and menu details are visible only to network members.';
+      $('authName').focus();
+      return;
+    }
+    selectedCategory=tile.dataset.category; document.querySelectorAll('.category-tile').forEach(button=>button.classList.toggle('active',button===tile)); render(); $('listings').scrollIntoView({behavior:'smooth',block:'start'});
+  });
+  $('clearCategory').addEventListener('click', () => {
+    if(!currentUser) {
+      $('authBackdrop').style.display='flex';
+      $('authForm').reset(); $('authEmail').readOnly=false; $('authName').readOnly=false; $('authRole').disabled=false;
+      $('authSubmit').disabled=false; $('authSubmit').innerHTML='<span>Join the network</span><b>↗</b>';
+      $('adminPasswordField').hidden=true; $('adminPassword').required=false; $('adminPassword').value='';
+      $('authError').classList.remove('show'); $('authError').style.background=''; $('authError').style.color='';
+      $('authTitle').textContent='Join the network to browse food';
+      $('authSubtitle').textContent='Create an account or sign in first. Available food and menu details are visible only to network members.';
+      $('authName').focus();
+      return;
+    }
+    selectedCategory='all'; document.querySelectorAll('.category-tile').forEach(button=>button.classList.remove('active')); render(); $('listings').scrollIntoView({behavior:'smooth',block:'start'});
+  });
   document.addEventListener('pointermove',e=>{if(e.pointerType==='touch')return;document.documentElement.style.setProperty('--pointer-x',e.clientX+'px');document.documentElement.style.setProperty('--pointer-y',e.clientY+'px');},{passive:true});
   // Restore a valid login after refresh. sessionStorage is cleared when the tab/browser session ends.
   async function restoreSession() {
