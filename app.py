@@ -131,6 +131,34 @@ def init_db() -> None:
     conn = sqlite3.connect(DB_PATH)
     try:
         conn.executescript(SCHEMA)
+        # Seed an illustrative menu on first deployment. Stable IDs make this safe
+        # to run on every restart without duplicating items or overwriting admin edits.
+        sample_menu = [
+            ("sample-cafe-cappuccino", "Cappuccino", "Drinks", "Espresso with steamed milk and a light foam. Coffeehouse-style sample; confirm availability with your campus provider.", 7),
+            ("sample-cafe-latte", "Caffè Latte", "Drinks", "Espresso with steamed milk. Coffeehouse-style sample; not an official Starbucks menu item listing.", 7),
+            ("sample-cafe-americano", "Americano", "Drinks", "Espresso diluted with hot water. Coffeehouse-style sample; confirm availability with your campus provider.", 5),
+            ("sample-cafe-mocha", "Caffè Mocha", "Drinks", "Coffee with chocolate and milk. Coffeehouse-style sample; not an official Starbucks menu item listing.", 8),
+            ("sample-cafe-frappe", "Java Chip-style Blended Coffee", "Drinks", "Iced blended coffee with chocolate chips. Inspired by popular coffeehouse drinks; not an official brand offering.", 10),
+            ("sample-cafe-matcha", "Iced Matcha Latte", "Drinks", "Chilled milk with matcha green tea. Coffeehouse-style sample; confirm availability with your campus provider.", 6),
+            ("sample-bakery-croissant", "Butter Croissant", "Bakery", "Flaky, buttery pastry inspired by café bakery counters. Sample menu item; not live inventory.", 5),
+            ("sample-bakery-brownie", "Chocolate Brownie", "Sweets & Desserts", "Rich chocolate brownie served as a café-style treat. Sample menu item; not live inventory.", 5),
+            ("sample-taj-paneer-pepper", "Paneer Pepper Salt", "Snacks", "Paneer with pepper and salt, inspired by a dish listed on a published Taj Rishikesh menu. Not an official Taj offering.", 15),
+            ("sample-taj-crispy-corn", "Crispy Corn with Ginger & Spring Onion", "Snacks", "Crispy corn with aromatics, inspired by a published Taj Rishikesh menu. Not an official Taj offering.", 15),
+            ("sample-taj-chicken-dim-sum", "Steamed Chicken Dim Sum", "Snacks", "Steamed chicken dumplings inspired by a published Taj Rishikesh menu. Not an official Taj offering.", 18),
+            ("sample-taj-veg-dim-sum", "Broccoli & Corn Dim Sum", "Snacks", "Vegetable dumplings inspired by a published Taj Rishikesh menu. Not an official Taj offering.", 18),
+            ("sample-taj-cheese-board", "Artisan Cheese Board", "Snacks", "A cheese-and-accompaniment platter inspired by a published Taj Rishikesh menu. Not an official Taj offering.", 10),
+            ("sample-indian-paneer", "Paneer Butter Masala with Rice", "Lunch", "Creamy tomato-based paneer curry served with rice. Illustrative Indian meal sample.", 20),
+            ("sample-indian-biryani", "Vegetable Biryani", "Lunch", "Fragrant basmati rice with vegetables and spices. Illustrative Indian meal sample.", 20),
+            ("sample-indian-dosa", "Masala Dosa", "Breakfast", "Crisp dosa with spiced potato filling. Illustrative South Indian meal sample.", 15),
+            ("sample-sandwich", "Grilled Cheese & Tomato Sandwich", "Snacks", "Toasted sandwich with cheese and tomato. Illustrative café meal sample.", 10),
+            ("sample-salad", "Seasonal Garden Salad", "Lunch", "Fresh greens and seasonal vegetables. Illustrative lighter meal sample.", 8),
+        ]
+        for item_id, name, category, description, cook_minutes in sample_menu:
+            conn.execute(
+                "INSERT OR IGNORE INTO menu_items(id,name,category,description,cook_minutes,pickup_location,active,created_at,created_by) "
+                "VALUES(?,?,?,?,?,'Campus Café Demo Counter',1,?,'sample-menu')",
+                (item_id, name, category, description, cook_minutes, iso_now()),
+            )
         # Safely upgrade databases created before contact/price fields existed.
         columns = {row[1] for row in conn.execute("PRAGMA table_info(listings)")}
         if "contact_number" not in columns:
