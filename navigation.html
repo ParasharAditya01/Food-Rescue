@@ -6,18 +6,17 @@
   <meta name="theme-color" content="#f6f5ef">
   <title>Explore | Campus Food Rescue</title>
   <style>
-    :root{color-scheme:light;--ink:#211f1b;--muted:#77736a;--green:#48453d;--line:#e7e3da;--paper:#f8f7f3;--white:#fffefa}
-    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.65 'DM Sans',Arial,sans-serif}
-    a{color:inherit}.topbar{height:70px;padding:0 clamp(20px,5vw,76px);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);background:var(--white)}
-    .brand{text-decoration:none;font:400 19px Georgia,serif;letter-spacing:.1px}.brand-mark{display:inline-grid;place-items:center;margin-right:10px;width:29px;height:29px;background:#211f1b;color:white;border-radius:50%;font:16px Arial}
-    .back{font-size:10px;letter-spacing:.5px;text-transform:uppercase;text-decoration:none;border:1px solid #d9d5cc;padding:10px 14px;background:transparent}
-    main{width:min(1260px,calc(100% - 40px));margin:0 auto;padding:64px 0 86px;text-align:center}.eyebrow{font-size:9px;font-weight:700;letter-spacing:2.2px;text-transform:uppercase;color:#8c754e}
-    h1{font:400 clamp(44px,7vw,78px)/1.02 Georgia,serif;letter-spacing:-1.5px;margin:16px 0}h1 em{color:#887c66;font-weight:400} .intro{max-width:550px;color:var(--muted);margin:0 auto 36px;font-size:12px}
-    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;text-align:left}.card{position:relative;display:flex;flex-direction:column;justify-content:flex-end;min-height:clamp(260px,34vw,440px);padding:25px;background:#726b5d;border:0;color:#fffefa;text-decoration:none;overflow:hidden;transition:transform .25s}.card:before,.card:after{content:"";position:absolute;inset:0}.card:before{background-image:var(--nav-img);background-size:cover;background-position:center;transition:transform .6s}.card:after{background:linear-gradient(180deg,#17140f18 20%,#17140fbc 100%)}.card:hover:before{transform:scale(1.04)}.card>*{position:relative;z-index:1}.card:hover{transform:translateY(-2px)}.icon{font-size:23px}.card h2{font:400 clamp(27px,3.2vw,39px)/1.1 Georgia,serif;margin:13px 0 7px}.card p{font-size:11px;color:#f0ece5;margin:0;max-width:390px}.arrow{position:absolute;right:24px;top:22px;color:white;font-size:20px}
-    .card:nth-child(1){--nav-img:url('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1200&q=85')}.card:nth-child(2){--nav-img:url('https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?auto=format&fit=crop&w=1200&q=85')}.card:nth-child(3){--nav-img:url('https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1200&q=85')}.card:nth-child(4){--nav-img:url('https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=1200&q=85')}
-    .home{display:inline-flex;gap:10px;align-items:center;margin-top:28px;padding:13px 19px;background:#211f1b;color:white;text-decoration:none;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase}
-    footer{padding:23px clamp(20px,5vw,76px);border-top:1px solid var(--line);background:#211f1b;color:#d1ccc2;font:13px Georgia,serif}
-    @media(max-width:620px){.topbar{height:64px}.brand{font-size:17px}.back{padding:8px 10px}main{padding:48px 0 60px}.grid{grid-template-columns:1fr;gap:10px}.card{min-height:260px}h1{letter-spacing:-.8px}}
+    :root{color-scheme:light;--ink:#25291f;--muted:#716f64;--green:#4b5941;--line:#e8e4d8;--paper:#f6f5ef;--white:#fffdf9}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.6 'DM Sans',Arial,sans-serif}
+    a{color:inherit}.topbar{height:76px;padding:0 clamp(20px,6vw,90px);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);background:#f6f5ef}
+    .brand{text-decoration:none;font:700 20px Georgia,serif;letter-spacing:-.5px}.brand-mark{display:inline-grid;place-items:center;margin-right:10px;width:34px;height:34px;background:var(--green);color:white;border-radius:50%;font:18px Arial}
+    .back{font-size:13px;font-weight:700;text-decoration:none;border:1px solid var(--line);padding:9px 14px;background:var(--white)}
+    main{width:min(1020px,calc(100% - 40px));margin:0 auto;padding:72px 0 90px}.eyebrow{font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--green)}
+    h1{font:400 clamp(44px,7vw,76px)/1.02 Georgia,serif;letter-spacing:-2px;margin:14px 0 16px}h1 em{color:#78836d;font-weight:400} .intro{max-width:570px;color:var(--muted);margin:0 0 38px}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.card{position:relative;display:flex;flex-direction:column;min-height:190px;padding:24px;background:var(--white);border:1px solid var(--line);text-decoration:none;transition:transform .18s,border-color .18s}.card:hover{transform:translateY(-3px);border-color:#9aa28e}.icon{font-size:25px}.card h2{font:400 27px Georgia,serif;margin:18px 0 4px}.card p{font-size:13px;color:var(--muted);margin:0;max-width:390px}.arrow{position:absolute;right:22px;top:22px;color:var(--green);font-size:20px}
+    .home{display:inline-flex;gap:10px;align-items:center;margin-top:30px;padding:12px 17px;background:var(--green);color:white;text-decoration:none;font-size:13px;font-weight:700}
+    footer{padding:23px clamp(20px,6vw,90px);border-top:1px solid var(--line);color:var(--muted);font:14px Georgia,serif}
+    @media(max-width:620px){.topbar{height:66px}.brand{font-size:17px}.back{padding:7px 10px}main{padding:48px 0 64px}.grid{grid-template-columns:1fr}.card{min-height:160px}h1{letter-spacing:-1px}}
   </style>
 </head>
 <body>
