@@ -596,6 +596,11 @@
 
     <section id="meal-orders" class="host-section" style="margin:56px 0;background:#fff;border:1px solid var(--line);border-radius:20px;padding:24px;">
       <div class="section-head" style="margin-top:0"><div><div class="section-kicker">Separate meal ordering area</div><h2>Order from the campus menu</h2><p>Choose a menu item prepared by the Admin. Your personal countdown begins after placing an order.</p></div></div>
+      <div id="adminOrderPanel" hidden style="background:#fffaf0;border:1px solid #e4d6b9;border-radius:16px;padding:18px;margin-bottom:20px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><h3 style="margin:0">Admin: incoming menu orders</h3><span id="pendingOrderCount" class="notification-count">0 pending</span></div>
+        <p class="host-note">Review each student order. The cooking countdown starts only after you accept it.</p>
+        <div id="adminOrderList" class="cards"></div>
+      </div>
       <div id="adminMenuPanel" hidden style="background:#f6f8f2;border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:20px">
         <h3 style="margin-top:0">Admin: publish a menu item</h3>
         <form id="menuForm" class="form-grid">
@@ -783,25 +788,46 @@
   }
   function formError(message) { $('formError').textContent = message; $('formError').classList.add('show'); }
 
-  function countdown(readyAt) { const seconds=Math.max(0,Math.ceil((new Date(readyAt).getTime()-Date.now())/1000)); return seconds<=0?'Ready for pickup':`${Math.floor(seconds/60)}m ${String(seconds%60).padStart(2,'0')}s remaining`; }
-  async function refreshMenuAndOrders() {
-    const panel=$('adminMenuPanel'); panel.hidden=!(currentUser && currentUser.role==='admin');
-    const menu=$('menuCards'), msg=$('menuMessage'), orders=$('myOrders');
-    if (!currentUser) { msg.textContent='Sign in to browse the campus menu and place an order.'; menu.innerHTML=''; orders.innerHTML=''; return; }
+  function countdown(readyAt) { if(!readyAt)return 'Waiting for Admin approval — timer has not started'; const seconds=Math.max(0,Math.ceil((new Date(readyAt).getTime()-Date.now())/1000)); return seconds<=0?'Ready for pickup':`${Math.floor(seconds/60)}m ${String(seconds%60).padStart(2,'0')}s remaining`; }
+  async function refreshAdminOrders() {
+    const panel=$('adminOrderPanel'); panel.hidden=!(currentUser&&currentUser.role==='admin'); if(panel.hidden)return;
     try {
-      const data=await api('/api/menu'); const items=data.items||[];
-      let list=[];
-      if(currentUser.role==='student') { const od=await api('/api/orders'); list=od.orders||[]; }
-      const orderedIds=new Set(list.map(o=>o.menuItemId));
-      msg.textContent=items.length?'Menu items prepared by the Admin. Demo food listings are not included here.':'The Admin has not published any menu items yet.';
-      menu.innerHTML=items.map(item=>{const ordered=list.some(o=>o.menuItemId===item.id&&o.status!=='collected'&&o.status!=='cancelled');return `<article class="food-card"><div class="card-visual"><div class="food-emoji">${item.category==='Drinks'?'🥤':item.category==='Breakfast'?'🥞':item.category==='Lunch'?'🍛':item.category==='Dinner'?'🍲':'🍽️'}</div></div><div class="card-body"><div class="food-category-label">${escapeHtml(item.category)}</div><h3 class="food-title">${escapeHtml(item.name)}</h3><div class="listing-extra"><span class="listing-price">${item.pricePerPortion === null || item.pricePerPortion === undefined ? 'Price not set' : Number(item.pricePerPortion) === 0 ? 'Free' : '₹' + Number(item.pricePerPortion).toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:2}) + ' / portion'}</span><span class="listing-price">${escapeHtml(item.servingSize || 'Portion size not set')}</span></div><p class="host-note">${escapeHtml(item.description||'Prepared to order')}</p><div class="card-meta"><span>⏱ ${Number(item.cookMinutes)} min / batch · up to ${Number(item.portionsPerBatch)||1} portions</span><span>⌖ ${escapeHtml(item.pickupLocation)}</span></div>${currentUser.role==='student'?`<div class="field" style="margin-top:14px"><label for="portions-${escapeHtml(item.id)}">Number of portions</label><input id="portions-${escapeHtml(item.id)}" data-portion-count type="number" min="1" max="99" step="1" value="1" required></div><div class="card-actions">${ordered?'<button type="button" disabled class="primary">Food ordered</button>':''}<button class="primary" data-order-menu="${escapeHtml(item.id)}">${ordered?'Add more portions':'Order food'}</button></div>`:'<p class="host-note">Admin view — students can place orders.</p>'}</div></article>`}).join('');
-      if(currentUser.role==='student') {
-        orders.innerHTML=list.length?list.map(o=>{const ready=new Date(o.readyAt).getTime()<=Date.now()||o.status==='ready'||o.status==='collected'; const status=o.status==='collected'?'COLLECTED':ready?'READY FOR PICKUP':'PREPARING';return `<article class="food-card"><div class="card-body"><div class="food-category-label">${status}</div><h3 class="food-title">${escapeHtml(o.itemName)}</h3><p class="host-note">Portions ordered: <strong>${Number(o.portions)||1}</strong></p><p class="host-note">Pickup: ${escapeHtml(o.pickupLocation)}</p><p class="order-countdown" data-ready-at="${escapeHtml(o.readyAt)}" style="font-weight:800;color:var(--green)">${o.status==='collected'?'Already collected':countdown(o.readyAt)}</p>${ready&&o.status!=='collected'?`<button class="add-button" data-collected="${escapeHtml(o.id)}">I've collected my food</button>`:''}</div></article>`}).join(''):'<div class="empty-state"><p>You have not ordered any menu items yet.</p></div>';
+      const data=await api('/api/admin/orders'), orders=data.orders||[];
+      $('pendingOrderCount').textContent=`${Number(data.pendingCount)||0} pending`;
+      $('adminOrderList').innerHTML=orders.length?orders.map(o=>{
+        const pending=o.approvalStatus==='pending';
+        const status=pending?'AWAITING APPROVAL':o.approvalStatus==='rejected'?'REJECTED':o.status==='collected'?'COLLECTED':o.status==='ready'?'READY FOR PICKUP':'PREPARING';
+        return `<article class="food-card"><div class="card-body"><div class="food-category-label">${status}${pending?' · NEW':''}</div><h3 class="food-title">${escapeHtml(o.itemName)}</h3><p class="host-note">Student: <strong>${escapeHtml(o.studentName)}</strong> · ${escapeHtml(o.studentEmail)}</p><p class="host-note">Portions: <strong>${Number(o.portions)||1}</strong></p><p class="host-note">Placed: ${escapeHtml(formatNotificationTime(o.orderedAt))}</p><p class="host-note">Pickup: ${escapeHtml(o.pickupLocation)}</p>${pending?`<div class="card-actions"><button class="primary" data-order-decision="accept" data-order-id="${escapeHtml(o.id)}">Accept order</button><button data-order-decision="reject" data-order-id="${escapeHtml(o.id)}" style="background:#fff1ef;color:#9a3028;border:1px solid #e8c4bf">Reject order</button></div>`:o.approvalStatus==='accepted'?`<p class="host-note" style="font-weight:700;color:var(--green)">Countdown: ${countdown(o.readyAt)}</p>`:'<p class="host-note">This order was rejected.</p>'}</div></article>`;
+      }).join(''):'<div class="empty-state"><p>No menu orders yet. New student orders will appear here.</p></div>';
+    } catch(err) { $('adminOrderList').innerHTML=`<div class="notification-empty">Could not load orders: ${escapeHtml(err.message)}</div>`; }
+  }
+  async function refreshMenuAndOrders() {
+    const panel=$('adminMenuPanel'); panel.hidden=!(currentUser&&currentUser.role==='admin');
+    const menu=$('menuCards'), msg=$('menuMessage'), orders=$('myOrders');
+    if(!currentUser){msg.textContent='Sign in to browse the campus menu and place an order.';menu.innerHTML='';orders.innerHTML='';$('adminOrderPanel').hidden=true;return;}
+    try {
+      const data=await api('/api/menu'),items=data.items||[]; let list=[];
+      if(currentUser.role==='student'){const od=await api('/api/orders');list=od.orders||[];} else {await refreshAdminOrders();}
+      msg.textContent=items.length?'Menu items prepared by the Admin. New orders require Admin approval before cooking starts.':'The Admin has not published any menu items yet.';
+      menu.innerHTML=items.map(item=>{
+        const ordered=list.some(o=>o.menuItemId===item.id&&o.status!=='collected'&&o.status!=='cancelled'&&o.approvalStatus!=='rejected');
+        const emoji=item.category==='Drinks'?'🥤':item.category==='Breakfast'?'🥞':item.category==='Lunch'?'🍛':item.category==='Dinner'?'🍲':'🍽️';
+        return `<article class="food-card"><div class="card-visual"><div class="food-emoji">${emoji}</div></div><div class="card-body"><div class="food-category-label">${escapeHtml(item.category)}</div><h3 class="food-title">${escapeHtml(item.name)}</h3><div class="listing-extra"><span class="listing-price">${item.pricePerPortion===null||item.pricePerPortion===undefined?'Price not set':Number(item.pricePerPortion)===0?'Free':'₹'+Number(item.pricePerPortion).toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:2})+' / portion'}</span><span class="listing-price">${escapeHtml(item.servingSize||'Portion size not set')}</span></div><p class="host-note">${escapeHtml(item.description||'Prepared to order')}</p><div class="card-meta"><span>⏱ ${Number(item.cookMinutes)} min / batch · up to ${Number(item.portionsPerBatch)||1} portions</span><span>⌖ ${escapeHtml(item.pickupLocation)}</span></div>${currentUser.role==='student'?`<div class="field" style="margin-top:14px"><label for="portions-${escapeHtml(item.id)}">Number of portions</label><input id="portions-${escapeHtml(item.id)}" data-portion-count type="number" min="1" max="99" step="1" value="1" required></div><div class="card-actions"><button class="primary" data-order-menu="${escapeHtml(item.id)}">${ordered?'Add more portions':'Order food'}</button></div>`:'<p class="host-note">Admin view — students can place orders.</p>'}</div></article>`;
+      }).join('');
+      if(currentUser.role==='student'){
+        orders.innerHTML=list.length?list.map(o=>{
+          const pending=o.approvalStatus==='pending',rejected=o.approvalStatus==='rejected';
+          const ready=o.status==='ready'||o.status==='collected'||(o.readyAt&&new Date(o.readyAt).getTime()<=Date.now());
+          const status=o.status==='collected'?'COLLECTED':rejected?'REJECTED':pending?'AWAITING ADMIN APPROVAL':ready?'READY FOR PICKUP':'PREPARING';
+          const timer=pending?'The cooking timer starts after Admin accepts your order.':rejected?'This order was rejected by Admin.':o.status==='collected'?'Already collected':countdown(o.readyAt);
+          return `<article class="food-card"><div class="card-body"><div class="food-category-label">${status}</div><h3 class="food-title">${escapeHtml(o.itemName)}</h3><p class="host-note">Portions ordered: <strong>${Number(o.portions)||1}</strong></p><p class="host-note">Pickup: ${escapeHtml(o.pickupLocation)}</p><p class="order-countdown" ${o.readyAt&&o.approvalStatus==='accepted'?'data-ready-at="'+escapeHtml(o.readyAt)+'"':''} style="font-weight:800;color:var(--green)">${timer}</p>${ready&&o.status!=='collected'&&o.approvalStatus==='accepted'?`<button class="add-button" data-collected="${escapeHtml(o.id)}">I've collected my food</button>`:''}</div></article>`;
+        }).join(''):'<div class="empty-state"><p>You have not ordered any menu items yet.</p></div>';
       } else orders.innerHTML='<div class="empty-state"><p>Sign in as a student to see your personal cooking timers.</p></div>';
     } catch(err) { msg.textContent='Could not load the menu: '+err.message; }
   }
   $('menuForm').addEventListener('submit',async e=>{e.preventDefault();const error=$('menuFormError');error.textContent='';try{await api('/api/menu',{method:'POST',body:JSON.stringify({name:$('menuName').value.trim(),category:$('menuCategory').value,cookMinutes:Number($('menuCookMinutes').value),portionsPerBatch:Number($('menuPortionsPerBatch').value),pricePerPortion:Number($('menuPrice').value),servingSize:$('menuServingSize').value.trim(),pickupLocation:$('menuPickup').value.trim(),description:$('menuDescription').value.trim()})});e.target.reset();$('menuCookMinutes').value=15;$('menuPortionsPerBatch').value=3;showToast('Menu item published.');await refreshMenuAndOrders();}catch(err){error.textContent=err.message;}});
-  $('menuCards').addEventListener('click',async e=>{const b=e.target.closest('[data-order-menu]');if(!b)return;if(!currentUser||currentUser.role!=='student'){showToast('Sign in as a student to order menu food.');return;}const card=b.closest('.food-card');const input=card.querySelector('[data-portion-count]');const portions=Number(input&&input.value);if(!Number.isInteger(portions)||portions<1||portions>99){showToast('Choose a whole number of portions from 1 to 99.');if(input)input.focus();return;}b.disabled=true;try{await api(`/api/menu/${encodeURIComponent(b.dataset.orderMenu)}/order`,{method:'POST',body:JSON.stringify({portions})});showToast(`Food ordered: ${portions} portion${portions===1?'':'s'}.`);await refreshMenuAndOrders();}catch(err){showToast(err.message);}finally{b.disabled=false;}});
+  $('menuCards').addEventListener('click',async e=>{const b=e.target.closest('[data-order-menu]');if(!b)return;if(!currentUser||currentUser.role!=='student'){showToast('Sign in as a student to order menu food.');return;}const card=b.closest('.food-card');const input=card.querySelector('[data-portion-count]');const portions=Number(input&&input.value);if(!Number.isInteger(portions)||portions<1||portions>99){showToast('Choose a whole number of portions from 1 to 99.');if(input)input.focus();return;}b.disabled=true;try{await api(`/api/menu/${encodeURIComponent(b.dataset.orderMenu)}/order`,{method:'POST',body:JSON.stringify({portions})});showToast('Order request sent to Admin. Your timer starts after approval.');await refreshMenuAndOrders();}catch(err){showToast(err.message);}finally{b.disabled=false;}});
+  $('adminOrderList').addEventListener('click',async e=>{const b=e.target.closest('[data-order-decision]');if(!b||!currentUser||currentUser.role!=='admin')return;const decision=b.dataset.orderDecision,orderId=b.dataset.orderId;b.disabled=true;try{const result=await api(`/api/admin/orders/${encodeURIComponent(orderId)}/${decision}`,{method:'POST',body:JSON.stringify({})});showToast(result.message||'Order updated.');await refreshMenuAndOrders();}catch(err){showToast(err.message);await refreshMenuAndOrders();}finally{b.disabled=false;}});
   $('myOrders').addEventListener('click',async e=>{const b=e.target.closest('[data-collected]');if(!b)return;try{await api(`/api/orders/${encodeURIComponent(b.dataset.collected)}/collected`,{method:'POST',body:JSON.stringify({})});showToast('Order marked as collected.');await refreshMenuAndOrders();}catch(err){showToast(err.message);}});
   setInterval(()=>{document.querySelectorAll('[data-ready-at]').forEach(el=>{if(!el.closest('.food-card').querySelector('[data-collected]'))el.textContent=countdown(el.dataset.readyAt);else el.textContent=countdown(el.dataset.readyAt);});},1000);
 
@@ -1030,7 +1056,7 @@
   if(hostToken){openHostDashboard().catch(()=>{});}
   // The API is the source of truth; refresh periodically so deadline changes are reflected.
   restoreSession();
-  setInterval(()=>{if(document.visibilityState==='visible'){refreshListings();if(sessionToken)api('/api/session').catch(()=>{});if(hostToken&&$('hostDashboardOverlay').style.display==='block')loadHostDashboard();}},30000);
+  setInterval(()=>{if(document.visibilityState==='visible'){refreshListings();if(sessionToken){api('/api/session').catch(()=>{});if(currentUser&&currentUser.role==='admin'){refreshAdminOrders();refreshAdminNotifications();}else if(currentUser&&currentUser.role==='student'){refreshMenuAndOrders();}}if(hostToken&&$('hostDashboardOverlay').style.display==='block')loadHostDashboard();}},15000);
 })();
 
 </script>
