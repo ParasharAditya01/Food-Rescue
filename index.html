@@ -481,6 +481,61 @@
   }
   @media(max-width:380px){.footer-main{grid-template-columns:1fr}.footer-about{grid-column:auto}}
 
+  /* Editorial, image-led visual system inspired by luxury campaign homepages. */
+  :root{--bg:#f8f7f3;--ink:#211f1b;--muted:#77736a;--green:#48453d;--lime:#d8c8a8;--line:#e7e3da;--white:#fffefa;--shadow:0 12px 32px rgba(39,34,25,.055)}
+  body{background:var(--bg);color:var(--ink);font-family:'DM Sans',Arial,sans-serif}
+  .topbar{height:auto;min-height:70px;background:#fffefa!important;color:#211f1b!important;border-bottom:1px solid #e9e6df!important;padding:12px clamp(18px,5vw,76px);gap:22px}
+  .brand{color:var(--ink)!important;font-family:Georgia,'Times New Roman',serif;font-weight:400;letter-spacing:.1px;font-size:19px;white-space:nowrap}
+  .brand-mark{width:29px;height:29px;border-radius:50%;background:#211f1b!important;color:#fffefa!important;box-shadow:none!important;font-size:17px}
+  .brand span small{color:#77736a!important;font-size:8px;letter-spacing:1.45px}
+  .topbar .nav{color:#413f39!important;font-size:11px;letter-spacing:.15px;gap:clamp(12px,2vw,27px)}
+  .topbar .nav a:after{background:#96825d!important;height:1px}
+  .top-action,.top-auth-actions .top-action{background:#211f1b!important;color:#fffefa!important;border:1px solid #211f1b!important;border-radius:0!important;box-shadow:none!important;font-size:11px!important;letter-spacing:.4px!important;text-transform:uppercase;padding:12px 16px!important}
+  .top-action:hover,.top-auth-actions .top-action:hover{background:#48453d!important;transform:none!important}
+  .top-auth-login{color:#211f1b!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;text-transform:uppercase;font-size:11px!important;letter-spacing:.4px}
+  .topbar .session-bar{color:#514d45!important}.topbar .session-bar strong{color:#514d45!important}.topbar .signout-btn{color:#211f1b!important;border-color:#cfc9bd!important;border-radius:0!important}
+  .site-search{display:flex;justify-content:center;background:#fffefa;border-bottom:1px solid #eeeae2;padding:0 clamp(18px,5vw,76px) 12px}
+  .site-search label{display:flex;align-items:center;gap:12px;width:min(720px,100%);min-height:42px;padding:0 16px;border:1px solid #d9d5cc;border-radius:24px;color:#77736a}
+  .site-search input{width:100%;border:0!important;outline:0!important;box-shadow:none!important;background:transparent;color:var(--ink);font-size:12px}
+  .site-search input::placeholder{color:#8a867d}
+  .hero{min-height:clamp(560px,76vh,820px);padding:45px 24px 56px;background:#453f36 url('https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=2200&q=88') center 53%/cover no-repeat!important;color:#fffefa!important;isolation:isolate;display:flex;align-items:center;justify-content:center;text-align:center}
+  .hero:before{content:"";position:absolute;inset:0;width:auto;height:auto;border-radius:0;background:linear-gradient(180deg,rgba(22,19,15,.14),rgba(22,19,15,.18) 35%,rgba(22,19,15,.66))!important;right:0;top:0;z-index:-1}
+  .hero-grid{display:block;width:100%;max-width:950px;margin:auto;position:relative;z-index:1}
+  .hero-grid>div:first-child{display:flex;flex-direction:column;align-items:center}
+  .hero .eyebrow{color:#f2e8d6!important;font-size:10px;letter-spacing:2.2px}
+  .hero .pulse{background:#f2e8d6;box-shadow:0 0 0 5px #f2e8d633;animation:none}
+  .hero h1{font:400 clamp(44px,7vw,84px)/1.03 Georgia,'Times New Roman',serif!important;letter-spacing:-1.6px!important;margin:22px auto 15px;max-width:840px;color:#fffefa}
+  .hero h1 em{font-style:italic!important;color:#e6d7bd!important}
+  .hero p{max-width:520px;color:#f1eee8!important;font-size:14px;line-height:1.8}
+  .hero-buttons{justify-content:center;gap:10px;margin-top:25px}
+  .btn-primary,.btn-secondary{border-radius:0!important;padding:14px 21px!important;font-size:10px!important;letter-spacing:.8px;text-transform:uppercase}
+  .btn-primary{background:#fffefa!important;color:#211f1b!important}.btn-primary:hover{transform:translateY(-2px)!important;box-shadow:0 8px 20px #0003!important}
+  .btn-secondary{background:transparent!important;border-color:#fffefa!important;color:#fffefa!important}
+  .hero-note{justify-content:center;color:#f0ece5!important;font-size:10px;letter-spacing:.15px}.hero-note .avatar{border-color:#474139;background:#f1eadf}
+  .hero-art{display:none!important}.hero-scroll{color:#fffefa!important;letter-spacing:1.4px;text-transform:uppercase;font-size:9px}
+  .live-ribbon{background:#ede9e0!important;color:#514d45!important;border-color:#e7e3da!important;font-size:9px;letter-spacing:1.8px}
+  .main{max-width:1440px;padding:56px clamp(20px,5vw,78px) 82px}
+  .impact-row{margin:0 auto 66px;max-width:1000px;gap:0;background:transparent;box-shadow:none}
+  .impact{background:transparent;border:0;border-right:1px solid #ddd8ce;border-radius:0;box-shadow:none;padding:10px 24px;justify-content:center;text-align:center;animation:none}
+  .impact:last-child{border-right:0}.impact-icon{display:none}.impact strong{font:400 32px Georgia,'Times New Roman',serif;letter-spacing:0;color:#36332d}.impact span{font-size:9px;letter-spacing:1.3px;text-transform:uppercase;color:#77736a}
+  .category-section{margin-top:0}.category-heading{display:block;text-align:center;margin:0 auto 28px;max-width:700px}.category-heading .section-kicker,.section-kicker{color:#8c754e!important;font-size:9px!important;letter-spacing:2px!important}.category-heading h2,.section-head h2{font:400 clamp(34px,4vw,50px)/1.1 Georgia,'Times New Roman',serif!important;letter-spacing:-.7px!important;color:#211f1b;margin:12px 0}.category-heading p{margin:0 auto;color:#77736a;max-width:530px;font-size:12px}
+  .category-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.category-tile{min-height:clamp(170px,22vw,285px);padding:18px;background:#a49a88;box-shadow:none!important}.category-tile:after{background:linear-gradient(180deg,#17171108 20%,#1717118c 100%)!important}.category-tile strong{font:400 clamp(19px,2.2vw,29px)/1.1 Georgia,'Times New Roman',serif!important;letter-spacing:-.2px}.category-tile small{font-size:8px;letter-spacing:1.4px}.category-tile:hover,.category-tile.active{transform:translateY(-2px)!important;outline-color:#d8c8a8!important}
+  .category-reset{border:0!important;background:transparent!important;color:#504a40!important;font-size:10px!important;text-transform:uppercase;letter-spacing:1px}
+  .section-head{margin:72px 0 25px!important}.section-head h2{margin-top:10px!important}.section-head p{font-size:12px!important;color:#77736a!important}
+  .listing-controls{border-top:1px solid var(--line);padding-top:18px}.search-wrap input{border-radius:0!important;border-color:#d8d3c9!important;box-shadow:none!important;background:#fffefa;min-height:48px;font-size:13px}.filter-select{border-radius:0!important;background:#fffefa;border-color:#d8d3c9}.add-button{border-radius:0!important;background:#211f1b!important;color:#fffefa!important;text-transform:uppercase;letter-spacing:.65px;font-size:10px!important;padding:0 18px!important}
+  .cards{gap:13px}.food-card{border:1px solid #e6e1d7!important;border-radius:0!important;background:#fffefa!important;box-shadow:none!important;animation:none!important}.food-card:hover{transform:translateY(-3px)!important;box-shadow:0 12px 28px #29251d12!important}.card-visual{height:220px!important;background:#eee9df!important}.food-dish-image{min-height:220px!important}.food-emoji{filter:none!important}.food-title{font:400 23px/1.15 Georgia,'Times New Roman',serif!important;letter-spacing:0!important}.card-body{padding:18px!important}.quantity,.listing-price{border-radius:0!important;background:#f0ece4!important;color:#504a40!important}.status-pill{border-radius:0!important;font-size:9px!important;letter-spacing:.5px}
+  .admin-notifications,.notification-item,.empty-state{border-radius:0!important;box-shadow:none!important;background:#fffefa!important}.admin-notifications{border-color:var(--line)!important}.notification-count{border-radius:0!important;background:#eee8dc!important;color:#51483a!important}
+  #meal-orders{margin:76px 0!important;padding:clamp(22px,4vw,48px)!important;background:#f0ede6!important;border:0!important;border-radius:0!important}
+  #meal-orders .section-head{margin:0 0 28px!important}#meal-orders h3{font:400 25px Georgia,'Times New Roman',serif!important}
+  #meal-orders .food-card{background:#fffefa!important}.how-section{margin-top:74px!important;background:#efede7!important;border-radius:0!important;padding:clamp(24px,4vw,48px)!important}.how-section h2{font:400 clamp(32px,4vw,46px)/1.1 Georgia,'Times New Roman',serif!important;letter-spacing:-.7px!important}.step{border-radius:0!important;background:#fffefa!important;border-color:#e4dfd5!important}.step-num{background:#48453d!important}
+  .safety{background:#fffefa!important;border:1px solid var(--line)!important;border-radius:0!important;color:#69645b!important}.safety strong{color:#403c34!important}
+  .site-footer{background:#211f1b!important;color:#d1ccc2!important}.site-footer .footer-brand{color:#fffefa!important;font-family:Georgia,'Times New Roman',serif!important;font-weight:400!important}.site-footer .footer-brand span{background:#d8c8a8!important;color:#211f1b!important;border-radius:50%!important}.footer-links h3{color:#fffefa!important}.footer-about p,.footer-links a,.footer-links button{color:#c6c0b5!important}.footer-back-top,.footer-links a:hover,.footer-links button:hover{color:#e1cfaa!important}
+  .auth-backdrop{background:#f2efe8!important;backdrop-filter:none!important;padding:0!important}.auth-layout{width:min(1100px,100%)!important;max-height:min(760px,100vh)!important;border-radius:0!important;box-shadow:0 20px 60px #28231918!important}.auth-showcase{background:#463f35!important}.auth-showcase:before{background:linear-gradient(180deg,#2823191c,#28231980),url('https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1200&q=85') center/cover!important}.auth-card{border-radius:0!important;box-shadow:none!important}.auth-brand-mark{background:#211f1b!important;color:#fffefa!important;border-radius:50%!important}.auth-card h1{font:400 34px/1.1 Georgia,'Times New Roman',serif!important;letter-spacing:-.5px!important}.auth-card h1 span{color:#82765f!important}
+  .host-overlay{background:#211f1bdc!important;backdrop-filter:blur(3px)!important}.host-card,.host-card.login{border-radius:0!important;box-shadow:0 20px 60px #0002!important}.host-btn,.host-btn.secondary,.host-btn.danger{border-radius:0!important}
+  @media(max-width:900px){.category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hero{min-height:650px}.impact{padding:10px 14px}.topbar .nav{gap:12px}}
+  @media(max-width:650px){.topbar{padding:10px 16px!important;gap:10px!important}.topbar .nav{order:5!important;padding:8px 0 3px!important;border-top:1px solid #efebe3}.site-search{padding:0 16px 10px}.hero{min-height:590px;padding:35px 20px 48px}.hero h1{font-size:clamp(44px,12vw,62px)!important;letter-spacing:-.8px!important}.hero p{font-size:13px}.main{padding:38px 18px 58px}.impact-row{grid-template-columns:repeat(3,1fr);margin-bottom:48px}.impact{padding:8px 5px}.impact strong{font-size:25px}.impact span{font-size:8px;letter-spacing:.8px}.category-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.category-tile{min-height:165px;padding:13px}.category-tile strong{font-size:22px!important}.section-head{margin:54px 0 20px!important}.listing-controls{gap:8px}.cards{grid-template-columns:1fr}.card-visual,.food-dish-image{height:230px!important;min-height:230px!important}#meal-orders{margin:54px -2px!important;padding:22px 16px!important}.footer-main{grid-template-columns:1fr 1fr}.auth-layout{max-height:100vh!important;overflow-y:auto}.auth-showcase{min-height:210px!important}.auth-card{padding:24px!important}}
+  @media(prefers-reduced-motion:reduce){.food-card:hover,.category-tile:hover{transform:none!important}}
+
 </style>
 </head>
 <body>
@@ -550,6 +605,7 @@
     <nav class="nav" aria-label="Main navigation"><a href="#home">Home</a><a href="#food-categories">Categories</a><a href="#listings">Find food</a><a href="#meal-orders">Order from menu</a><a href="#how-it-works">How it works</a><a href="#safety">Food safety</a><a href="/navigation">Explore</a></nav>
     <div class="session-bar" id="sessionBar"><span>Logged in as <strong id="sessionRole"></strong></span><button class="signout-btn" id="signOut">Sign out</button></div><button class="top-action" id="navAdd">+ Post surplus</button><div class="top-auth-actions"><button class="top-auth-login" id="headerLogIn" type="button">Log in</button><button class="top-action" id="openRegistration" type="button">Sign up ↗</button></div>
   </header>
+  <div class="site-search"><label><span aria-hidden="true">⌕</span><input id="globalSearch" type="search" placeholder="Search for a meal or pickup location" aria-label="Search campus food"></label></div>
   <section class="hero" id="home">
     <div class="hero-grid">
       <div>
@@ -975,7 +1031,7 @@
   $('closeModal').addEventListener('click',closeModal); $('modalBackdrop').addEventListener('click',e=>{if(e.target===$('modalBackdrop'))closeModal();});
   document.addEventListener('click', e => { if (e.target.closest('#foodGateSignUp')) { showRegistration(); } if (e.target.closest('#foodGateLogin')) { showRegistration(); authMode='login'; $('authTitle').innerHTML='Welcome<br><span>back.</span>'; $('authSubmit').innerHTML='<span>Log in</span><b>↗</b>'; $('authName').placeholder='Enter your full name'; $('authError').textContent='Use the email you already registered with. If you have an account, do not sign up again.'; $('authError').classList.add('show'); } });
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();}); $('listingForm').addEventListener('submit',createListing);
-  $('cards').addEventListener('click',handleCardAction); $('searchInput').addEventListener('input',render);
+  $('cards').addEventListener('click',handleCardAction); $('searchInput').addEventListener('input',()=>{$('globalSearch').value=$('searchInput').value;render();}); $('globalSearch').addEventListener('input',()=>{$('searchInput').value=$('globalSearch').value;render();}); $('globalSearch').addEventListener('keydown',e=>{if(e.key==='Enter'){$('listings').scrollIntoView({behavior:'smooth',block:'start'});}});
   $('categoryGrid').addEventListener('click', e => { const tile=e.target.closest('[data-category]'); if(!tile) return; selectedCategory=tile.dataset.category; document.querySelectorAll('.category-tile').forEach(button=>button.classList.toggle('active',button===tile)); render(); $('listings').scrollIntoView({behavior:'smooth',block:'start'}); });
   $('clearCategory').addEventListener('click', () => { selectedCategory='all'; document.querySelectorAll('.category-tile').forEach(button=>button.classList.remove('active')); render(); $('listings').scrollIntoView({behavior:'smooth',block:'start'}); });
   document.addEventListener('pointermove',e=>{if(e.pointerType==='touch')return;document.documentElement.style.setProperty('--pointer-x',e.clientX+'px');document.documentElement.style.setProperty('--pointer-y',e.clientY+'px');},{passive:true});
