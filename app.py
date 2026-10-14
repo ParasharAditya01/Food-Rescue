@@ -382,6 +382,11 @@ def index():
     return send_from_directory(BASE_DIR, "index.html")
 
 
+@app.get("/navigation")
+def navigation():
+    return send_from_directory(BASE_DIR, "navigation.html")
+
+
 @app.get("/api/health")
 def health():
     return jsonify({"ok": True, "database": "sqlite", "time": iso_now()})
