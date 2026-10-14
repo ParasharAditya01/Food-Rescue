@@ -160,6 +160,10 @@ def init_db() -> None:
         order_columns = {row[1] for row in conn.execute("PRAGMA table_info(meal_orders)")}
         if "portions" not in order_columns:
             conn.execute("ALTER TABLE meal_orders ADD COLUMN portions INTEGER NOT NULL DEFAULT 1")
+        if "approval_status" not in order_columns:
+            # Preserve existing orders as approved when upgrading an older database.
+            conn.execute("ALTER TABLE meal_orders ADD COLUMN approval_status TEXT NOT NULL DEFAULT 'accepted'")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_meal_orders_approval ON meal_orders(approval_status, ordered_at)")
         menu_columns = {row[1] for row in conn.execute("PRAGMA table_info(menu_items)")}
         if "portions_per_batch" not in menu_columns:
             conn.execute("ALTER TABLE menu_items ADD COLUMN portions_per_batch INTEGER NOT NULL DEFAULT 1")
@@ -829,21 +833,20 @@ def order_menu_item(item_id: str):
     row = db.execute("SELECT * FROM menu_items WHERE id=? AND active=1", (item_id,)).fetchone()
     if row is None: return error("This menu item is no longer available.", 404)
     now = utc_now()
+    now_text = now.isoformat(timespec="seconds")
+    # The cooking timer starts only after an Admin accepts the order.
     existing = db.execute(
-        "SELECT * FROM meal_orders WHERE menu_item_id=? AND student_email=? AND status='preparing' ORDER BY ordered_at DESC LIMIT 1",
+        "SELECT * FROM meal_orders WHERE menu_item_id=? AND student_email=? AND approval_status='pending' ORDER BY ordered_at DESC LIMIT 1",
         (item_id, session["email"]),
     ).fetchone()
     total_portions = portions + (existing["portions"] if existing else 0)
-    batches = (total_portions + row["portions_per_batch"] - 1) // row["portions_per_batch"]
-    ready = now.timestamp() + batches * row["cook_minutes"] * 60
-    ready_at = datetime.fromtimestamp(ready, timezone.utc).isoformat(timespec="seconds")
     if existing:
         order_id = existing["id"]
-        db.execute("UPDATE meal_orders SET portions=?, ordered_at=?, ready_at=?, status='preparing' WHERE id=?", (total_portions, now.isoformat(timespec="seconds"), ready_at, order_id))
+        db.execute("UPDATE meal_orders SET portions=?, ordered_at=?, ready_at='', status='preparing' WHERE id=? AND approval_status='pending'", (total_portions, now_text, order_id))
     else:
         order_id = secrets.token_urlsafe(12)
-        db.execute("INSERT INTO meal_orders(id,menu_item_id,student_email,student_name,ordered_at,ready_at,status,portions) VALUES(?,?,?,?,?,?, 'preparing',?)", (order_id,item_id,session["email"],session["name"],now.isoformat(timespec="seconds"),ready_at,total_portions))
-    return jsonify({"ok":True,"order":{"id":order_id,"itemName":row["name"],"pickupLocation":row["pickup_location"],"orderedAt":now.isoformat(timespec="seconds"),"readyAt":ready_at,"status":"preparing","portions":total_portions,"batches":batches}}), 201
+        db.execute("INSERT INTO meal_orders(id,menu_item_id,student_email,student_name,ordered_at,ready_at,status,portions,approval_status) VALUES(?,?,?,?,?,'','preparing',?,'pending')", (order_id,item_id,session["email"],session["name"],now_text,total_portions))
+    return jsonify({"ok":True,"order":{"id":order_id,"itemName":row["name"],"pickupLocation":row["pickup_location"],"orderedAt":now_text,"readyAt":"","status":"pending","approvalStatus":"pending","portions":total_portions}}), 201
 
 
 @app.get("/api/orders")
@@ -852,9 +855,51 @@ def get_my_orders():
     if failure: return failure
     db = get_db()
     now = iso_now()
-    db.execute("UPDATE meal_orders SET status='ready' WHERE student_email=? AND status='preparing' AND julianday(ready_at)<=julianday(?)", (session["email"],now))
+    db.execute("UPDATE meal_orders SET status='ready' WHERE student_email=? AND approval_status='accepted' AND status='preparing' AND ready_at<>'' AND julianday(ready_at)<=julianday(?)", (session["email"],now))
     rows = db.execute("SELECT o.*,m.name AS item_name,m.pickup_location FROM meal_orders o JOIN menu_items m ON m.id=o.menu_item_id WHERE o.student_email=? ORDER BY o.ordered_at DESC LIMIT 100", (session["email"],)).fetchall()
-    return jsonify({"orders":[{"id":r["id"],"itemName":r["item_name"],"menuItemId":r["menu_item_id"],"pickupLocation":r["pickup_location"],"orderedAt":r["ordered_at"],"readyAt":r["ready_at"],"status":r["status"],"portions":r["portions"]} for r in rows]})
+    return jsonify({"orders":[{"id":r["id"],"itemName":r["item_name"],"menuItemId":r["menu_item_id"],"pickupLocation":r["pickup_location"],"orderedAt":r["ordered_at"],"readyAt":r["ready_at"],"status":r["status"],"approvalStatus":r["approval_status"],"portions":r["portions"]} for r in rows]})
+
+
+@app.get("/api/admin/orders")
+def get_admin_orders():
+    session, failure = current_session("admin")
+    if failure: return failure
+    db = get_db()
+    now = iso_now()
+    db.execute("UPDATE meal_orders SET status='ready' WHERE approval_status='accepted' AND status='preparing' AND ready_at<>'' AND julianday(ready_at)<=julianday(?)", (now,))
+    rows = db.execute("SELECT o.*,m.name AS item_name,m.pickup_location FROM meal_orders o JOIN menu_items m ON m.id=o.menu_item_id ORDER BY CASE o.approval_status WHEN 'pending' THEN 0 ELSE 1 END, o.ordered_at DESC LIMIT 200").fetchall()
+    return jsonify({"orders":[{"id":r["id"],"itemName":r["item_name"],"studentName":r["student_name"],"studentEmail":r["student_email"],"menuItemId":r["menu_item_id"],"pickupLocation":r["pickup_location"],"orderedAt":r["ordered_at"],"readyAt":r["ready_at"],"status":r["status"],"approvalStatus":r["approval_status"],"portions":r["portions"]} for r in rows],"pendingCount":sum(1 for r in rows if r["approval_status"]=="pending")})
+
+
+@app.post("/api/admin/orders/<order_id>/<decision>")
+def decide_meal_order(order_id: str, decision: str):
+    session, failure = current_session("admin")
+    if failure: return failure
+    if decision not in ("accept", "reject"): return error("Choose accept or reject.")
+    db = get_db()
+    try:
+        db.execute("BEGIN IMMEDIATE")
+        row = db.execute("SELECT o.*,m.cook_minutes,m.portions_per_batch FROM meal_orders o JOIN menu_items m ON m.id=o.menu_item_id WHERE o.id=?", (order_id,)).fetchone()
+        if row is None:
+            db.rollback()
+            return error("Order not found.",404)
+        if row["approval_status"] != "pending":
+            db.rollback()
+            return error("This order has already been reviewed.",409)
+        if decision == "accept":
+            batches = (row["portions"] + row["portions_per_batch"] - 1) // row["portions_per_batch"]
+            ready = utc_now().timestamp() + batches * row["cook_minutes"] * 60
+            ready_at = datetime.fromtimestamp(ready, timezone.utc).isoformat(timespec="seconds")
+            db.execute("UPDATE meal_orders SET approval_status='accepted',status='preparing',ordered_at=?,ready_at=? WHERE id=? AND approval_status='pending'", (iso_now(),ready_at,order_id))
+        else:
+            db.execute("UPDATE meal_orders SET approval_status='rejected',status='cancelled',ready_at='' WHERE id=? AND approval_status='pending'", (order_id,))
+        db.commit()
+        return jsonify({"ok":True,"decision":decision,"message":"Order accepted. Cooking timer started." if decision=="accept" else "Order rejected."})
+    except sqlite3.Error:
+        if db.in_transaction: db.rollback()
+        app.logger.exception("Admin order decision failed")
+        return error("Could not update this order. Please try again.",500)
+
 
 @app.post("/api/orders/<order_id>/collected")
 def mark_order_collected(order_id: str):
@@ -863,7 +908,9 @@ def mark_order_collected(order_id: str):
     db=get_db(); now=iso_now()
     row=db.execute("SELECT * FROM meal_orders WHERE id=? AND student_email=?",(order_id,session["email"])).fetchone()
     if row is None: return error("Order not found.",404)
-    if row["status"] == "preparing" and row["ready_at"] > now: return error("Your food is still being prepared.",409)
+    if row["approval_status"] != "accepted": return error("Only an accepted order can be collected.",409)
+    if row["status"] == "preparing" and (not row["ready_at"] or row["ready_at"] > now): return error("Your food is still being prepared.",409)
+    if row["status"] not in ("ready","preparing"): return error("This order cannot be marked as collected.",409)
     db.execute("UPDATE meal_orders SET status='collected' WHERE id=? AND student_email=?",(order_id,session["email"]))
     return jsonify({"ok":True})
 
