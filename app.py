@@ -16,7 +16,7 @@ DB_PATH = Path(os.environ.get("CAMPUS_FOOD_DB", BASE_DIR / "database.db"))
 ADMIN_EMAIL = os.environ.get("CAMPUS_ADMIN_EMAIL", os.environ.get("ADMIN_EMAIL", "")).strip().lower()
 ADMIN_PASSWORD = os.environ.get("CAMPUS_ADMIN_PASSWORD", os.environ.get("ADMIN_PASSWORD", ""))
 HOST_EMAIL = os.environ.get("CAMPUS_HOST_EMAIL", os.environ.get("HOST_EMAIL", "")).strip().lower()
-HOST_PASSWORD = os.environ.get("CAMPUS_HOST_PASSWORD", os.environ.get("HOST_PASSWORD", ""))
+HOST_CODE = os.environ.get("CAMPUS_HOST_CODE", os.environ.get("HOST_CODE", ""))
 
 app = Flask(__name__, static_folder=None)
 app.config["JSON_SORT_KEYS"] = False
@@ -472,9 +472,9 @@ def create_host_session():
     data = request.get_json(silent=True) or {}
     email = str(data.get("email", "")).strip().lower()
     password = str(data.get("password", ""))
-    if not HOST_EMAIL or not HOST_PASSWORD:
-        return error("Host sign-in is not configured. Set CAMPUS_HOST_EMAIL and CAMPUS_HOST_PASSWORD in the backend environment.", 503)
-    if not secrets.compare_digest(email, HOST_EMAIL) or not secrets.compare_digest(password, HOST_PASSWORD):
+    if not HOST_EMAIL or not HOST_CODE:
+        return error("Host sign-in is not configured. Set CAMPUS_HOST_EMAIL and CAMPUS_HOST_CODE in the backend environment.", 503)
+    if not secrets.compare_digest(email, HOST_EMAIL) or not secrets.compare_digest(password, HOST_CODE):
         return error("Host email or password is incorrect.", 403)
     token = secrets.token_urlsafe(40)
     now = iso_now()
