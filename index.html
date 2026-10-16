@@ -702,7 +702,7 @@
 
   // Use only curated dish-specific photos; unmatched dishes fall back to their food icon.
   const demoFoodPhotos = {
-    'Poha with peanuts':'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=1000&q=85',
+    'Poha with peanuts':'https://commons.wikimedia.org/wiki/Special:FilePath/Colourful_Poha.jpg?width=1000',
     'Idli with chutney':'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=1000&q=85',
     'Aloo paratha':'https://images.unsplash.com/photo-1606491956689-2ea866880c84?auto=format&fit=crop&w=1000&q=85',
     'Masala dosa':'https://images.unsplash.com/photo-1668236543090-82eba5ee5976?auto=format&fit=crop&w=1000&q=85',
@@ -763,7 +763,7 @@
   }
   function photoForFood(name) {
     const n = String(name || '').toLowerCase();
-    if (n.includes('poha') || n.includes('pohe')) return 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=1000&q=85';
+    if (n.includes('poha') || n.includes('pohe')) return 'https://commons.wikimedia.org/wiki/Special:FilePath/Colourful_Poha.jpg?width=1000';
     if (n.includes('idli')) return 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=1000&q=85';
     if (n.includes('dosa')) return 'https://images.unsplash.com/photo-1668236543090-82eba5ee5976?auto=format&fit=crop&w=1000&q=85';
     if (n.includes('paneer')) return 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=1000&q=85';
