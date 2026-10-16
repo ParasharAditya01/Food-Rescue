@@ -703,9 +703,9 @@
   // Use only curated dish-specific photos; unmatched dishes fall back to their food icon.
   const demoFoodPhotos = {
     'Poha with peanuts':'https://commons.wikimedia.org/wiki/Special:FilePath/Colourful_Poha.jpg?width=1000',
-    'Vegetable upma':'https://commons.wikimedia.org/wiki/Special:FilePath/Vegetable_Upma.JPG?width=1000',
+    'Vegetable upma':'https://commons.wikimedia.org/wiki/Special:FilePath/Vegetable%20Upma.JPG?width=1000',
     'Idli with chutney':'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=1000&q=85',
-    'Aloo paratha':'https://commons.wikimedia.org/wiki/Special:FilePath/Aloo_Parantha%28Stuffed_Indian_Bread%29.jpg?width=1000',
+    'Aloo paratha':'https://commons.wikimedia.org/wiki/Special:FilePath/Aloo_paratha_1.JPG?width=1000',
     'Masala dosa':'https://images.unsplash.com/photo-1668236543090-82eba5ee5976?auto=format&fit=crop&w=1000&q=85',
     'Veg thali':'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=1000&q=85',
     'Chole with roti':'https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=1000&q=85',
@@ -726,7 +726,21 @@
     'Banana':'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=1000&q=85',
     'Apple':'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=1000&q=85',
     'Orange':'https://images.unsplash.com/photo-1547514701-42782101795e?auto=format&fit=crop&w=1000&q=85',
-    'Guava':'https://images.unsplash.com/photo-1536511132770-e5058c7e8c46?auto=format&fit=crop&w=1000&q=85'
+    'Guava':'https://images.unsplash.com/photo-1536511132770-e5058c7e8c46?auto=format&fit=crop&w=1000&q=85',
+    'Rajma rice':'https://commons.wikimedia.org/wiki/Special:FilePath/Rajma_chawal.jpg?width=1000',
+    'Dal khichdi':'https://commons.wikimedia.org/wiki/Special:FilePath/Khichdi.jpg?width=1000',
+    'Chapati and mixed veg':'https://commons.wikimedia.org/wiki/Special:FilePath/Chapati.jpg?width=1000',
+    'Dal tadka and jeera rice':'https://commons.wikimedia.org/wiki/Special:FilePath/Dal_tadka.jpg?width=1000',
+    'Dhokla':'https://commons.wikimedia.org/wiki/Special:FilePath/Dhokla.jpg?width=1000',
+    'Veg cutlet':'https://commons.wikimedia.org/wiki/Special:FilePath/Vegetable_cutlet.jpg?width=1000',
+    'Gulab jamun':'https://commons.wikimedia.org/wiki/Special:FilePath/Gulab_jamun_(Gujarat).jpg?width=1000',
+    'Jalebi':'https://commons.wikimedia.org/wiki/Special:FilePath/Jalebi.jpg?width=1000',
+    'Fruit custard':'https://commons.wikimedia.org/wiki/Special:FilePath/Fruit_custard.jpg?width=1000',
+    'Buttermilk':'https://commons.wikimedia.org/wiki/Special:FilePath/Chaas.jpg?width=1000',
+    'Whole-wheat bread rolls':'https://commons.wikimedia.org/wiki/Special:FilePath/Bread_rolls.jpg?width=1000',
+    'Garlic bread':'https://commons.wikimedia.org/wiki/Special:FilePath/Garlic_bread.jpg?width=1000',
+    'Plain bun':'https://commons.wikimedia.org/wiki/Special:FilePath/Bun.jpg?width=1000',
+    'Seasonal fruit cup':'https://commons.wikimedia.org/wiki/Special:FilePath/Fruit_salad.jpg?width=1000'
   };
 
   async function api(path, options = {}) {
@@ -765,8 +779,8 @@
   function photoForFood(name) {
     const n = String(name || '').toLowerCase();
     if (n.includes('poha') || n.includes('pohe')) return 'https://commons.wikimedia.org/wiki/Special:FilePath/Colourful_Poha.jpg?width=1000';
-    if (n.includes('upma') || n.includes('uppuma')) return 'https://commons.wikimedia.org/wiki/Special:FilePath/Vegetable_Upma.JPG?width=1000';
-    if (n.includes('aloo paratha') || n.includes('aloo parantha')) return 'https://commons.wikimedia.org/wiki/Special:FilePath/Aloo_Parantha%28Stuffed_Indian_Bread%29.jpg?width=1000';
+    if (n.includes('upma') || n.includes('uppuma')) return 'https://commons.wikimedia.org/wiki/Special:FilePath/Vegetable%20Upma.JPG?width=1000';
+    if (n.includes('aloo paratha') || n.includes('aloo parantha')) return 'https://commons.wikimedia.org/wiki/Special:FilePath/Aloo_paratha_1.JPG?width=1000';
     if (n.includes('idli')) return 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=1000&q=85';
     if (n.includes('dosa')) return 'https://images.unsplash.com/photo-1668236543090-82eba5ee5976?auto=format&fit=crop&w=1000&q=85';
     if (n.includes('paneer')) return 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=1000&q=85';
