@@ -700,47 +700,49 @@
     ['Fruits','Banana','🍌'],['Fruits','Apple','🍎'],['Fruits','Orange','🍊'],['Fruits','Seasonal fruit cup','🍉'],['Fruits','Guava','🍐']
   ].map((item, index) => ({ demoId: `demo-${index+1}`, category:item[0], name:item[1], emoji:item[2], location:'Example campus pickup point' }));
 
-  // Use only curated dish-specific photos; unmatched dishes fall back to their food icon.
+  // Dish-specific image URLs. If an image fails, the card uses its matching food icon.
+  // Wikimedia filenames below were checked against their file descriptions.
   const demoFoodPhotos = {
-    'Poha with peanuts':'https://commons.wikimedia.org/wiki/Special:FilePath/Colourful_Poha.jpg?width=1000',
-    'Vegetable upma':'https://commons.wikimedia.org/wiki/Special:FilePath/Vegetable%20Upma.JPG?width=1000',
-    'Idli with chutney':'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=1000&q=85',
-    'Aloo paratha':'https://commons.wikimedia.org/wiki/Special:FilePath/Aloo_paratha_1.JPG?width=1000',
+    'Poha with peanuts':'https://commons.wikimedia.org/wiki/Special:FilePath/Pohe%202.jpg?width=1000',
+    'Vegetable upma':'https://commons.wikimedia.org/wiki/Special:FilePath/Rice%20Ravva%20Upma.jpg?width=1000',
+    'Idli with chutney':'https://commons.wikimedia.org/wiki/Special:FilePath/South%20Indian%20-%20Idly.jpg?width=1000',
+    'Aloo paratha':'https://commons.wikimedia.org/wiki/Special:FilePath/Aloo%20paratha%201.JPG?width=1000',
     'Masala dosa':'https://images.unsplash.com/photo-1668236543090-82eba5ee5976?auto=format&fit=crop&w=1000&q=85',
-    'Veg thali':'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=1000&q=85',
-    'Chole with roti':'https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=1000&q=85',
-    'Paneer pulao':'https://images.unsplash.com/photo-1563379091339-03246963d96c?auto=format&fit=crop&w=1000&q=85',
-    'Vegetable biryani':'https://images.unsplash.com/photo-1563379091339-03246963d96c?auto=format&fit=crop&w=1000&q=85',
-    'Paneer curry with rice':'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=1000&q=85',
-    'Veg noodles':'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=1000&q=85',
+    'Veg thali':'https://commons.wikimedia.org/wiki/Special:FilePath/Uttar%20Pradesh%20Thali.jpg?width=1000',
+    'Rajma rice':'https://commons.wikimedia.org/wiki/Special:FilePath/Rajma%20Rice%20-Punjabi.jpg?width=1000',
+    'Chole with roti':'https://commons.wikimedia.org/wiki/Special:FilePath/Rajma%20chapati.jpg?width=1000',
+    'Paneer pulao':'https://commons.wikimedia.org/wiki/Special:FilePath/BengaliPulao.JPG?width=1000',
+    'Dal khichdi':'https://commons.wikimedia.org/wiki/Special:FilePath/Khichdi.jpg?width=1000',
+    'Vegetable biryani':'https://commons.wikimedia.org/wiki/Special:FilePath/Vegetable%20Biryani.JPG?width=1000',
+    'Chapati and mixed veg':'https://commons.wikimedia.org/wiki/Special:FilePath/South%20Indian%20Chapati%20and%20Sabji%20with%20Sour%20Chutney.jpg?width=1000',
+    'Paneer curry with rice':'https://commons.wikimedia.org/wiki/Special:FilePath/Panner%20(Cottage%20Cheese)%20Curry%20Rice.jpg?width=1000',
+    'Dal tadka and jeera rice':'https://commons.wikimedia.org/wiki/Special:FilePath/Dal%20Fry%20Tadka%2C%20Cumin%20Rice%2C%20Roasted%20Papad%20on%20the%20side.jpg?width=1000',
+    'Veg noodles':'https://commons.wikimedia.org/wiki/Special:FilePath/Vegetable%20Noodles.jpg?width=1000',
     'Samosa':'https://images.unsplash.com/photo-1601050690117-94f5f6fa8bd7?auto=format&fit=crop&w=1000&q=85',
     'Vegetable sandwich':'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=1000&q=85',
     'Masala corn':'https://images.unsplash.com/photo-1551754655-cd27e38d2076?auto=format&fit=crop&w=1000&q=85',
+    'Dhokla':'https://commons.wikimedia.org/wiki/Special:FilePath/Dhokla.jpg?width=1000',
+    'Veg cutlet':'https://commons.wikimedia.org/wiki/Special:FilePath/Mix%20veg%20cutlet.jpg?width=1000',
+    'Gulab jamun':'https://commons.wikimedia.org/wiki/Special:FilePath/Gulab%20jamun%20(Gujarat).jpg?width=1000',
+    'Kheer cup':'https://commons.wikimedia.org/wiki/Special:FilePath/Kheer.jpg?width=1000',
     'Chocolate brownie':'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=1000&q=85',
+    'Jalebi':'https://commons.wikimedia.org/wiki/Special:FilePath/Jalebi.jpg?width=1000',
+    'Fruit custard':'https://commons.wikimedia.org/wiki/Special:FilePath/Fruit%20custard.jpg?width=1000',
     'Lemon water':'https://images.unsplash.com/photo-1513558161293-cdaf765edfd7?auto=format&fit=crop&w=1000&q=85',
     'Masala chai':'https://images.unsplash.com/photo-1571934811356-5cc061b6821f?auto=format&fit=crop&w=1000&q=85',
     'Cold coffee':'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=1000&q=85',
     'Fresh orange juice':'https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=1000&q=85',
+    'Buttermilk':'https://commons.wikimedia.org/wiki/Special:FilePath/Chaas.jpg?width=1000',
     'Butter croissant':'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=1000&q=85',
+    'Whole-wheat bread rolls':'https://commons.wikimedia.org/wiki/Special:FilePath/Bread%20rolls.jpg?width=1000',
     'Muffin':'https://images.unsplash.com/photo-1607958996333-41aef7caefaa?auto=format&fit=crop&w=1000&q=85',
+    'Garlic bread':'https://commons.wikimedia.org/wiki/Special:FilePath/Garlic%20bread.jpg?width=1000',
+    'Plain bun':'https://commons.wikimedia.org/wiki/Special:FilePath/Bun.jpg?width=1000',
     'Banana':'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=1000&q=85',
     'Apple':'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=1000&q=85',
     'Orange':'https://images.unsplash.com/photo-1547514701-42782101795e?auto=format&fit=crop&w=1000&q=85',
-    'Guava':'https://images.unsplash.com/photo-1536511132770-e5058c7e8c46?auto=format&fit=crop&w=1000&q=85',
-    'Rajma rice':'https://commons.wikimedia.org/wiki/Special:FilePath/Rajma_chawal.jpg?width=1000',
-    'Dal khichdi':'https://commons.wikimedia.org/wiki/Special:FilePath/Khichdi.jpg?width=1000',
-    'Chapati and mixed veg':'https://commons.wikimedia.org/wiki/Special:FilePath/Chapati.jpg?width=1000',
-    'Dal tadka and jeera rice':'https://commons.wikimedia.org/wiki/Special:FilePath/Dal_tadka.jpg?width=1000',
-    'Dhokla':'https://commons.wikimedia.org/wiki/Special:FilePath/Dhokla.jpg?width=1000',
-    'Veg cutlet':'https://commons.wikimedia.org/wiki/Special:FilePath/Vegetable_cutlet.jpg?width=1000',
-    'Gulab jamun':'https://commons.wikimedia.org/wiki/Special:FilePath/Gulab_jamun_(Gujarat).jpg?width=1000',
-    'Jalebi':'https://commons.wikimedia.org/wiki/Special:FilePath/Jalebi.jpg?width=1000',
-    'Fruit custard':'https://commons.wikimedia.org/wiki/Special:FilePath/Fruit_custard.jpg?width=1000',
-    'Buttermilk':'https://commons.wikimedia.org/wiki/Special:FilePath/Chaas.jpg?width=1000',
-    'Whole-wheat bread rolls':'https://commons.wikimedia.org/wiki/Special:FilePath/Bread_rolls.jpg?width=1000',
-    'Garlic bread':'https://commons.wikimedia.org/wiki/Special:FilePath/Garlic_bread.jpg?width=1000',
-    'Plain bun':'https://commons.wikimedia.org/wiki/Special:FilePath/Bun.jpg?width=1000',
-    'Seasonal fruit cup':'https://commons.wikimedia.org/wiki/Special:FilePath/Fruit_salad.jpg?width=1000'
+    'Seasonal fruit cup':'https://commons.wikimedia.org/wiki/Special:FilePath/Fruit%20salad.jpg?width=1000',
+    'Guava':'https://images.unsplash.com/photo-1536511132770-e5058c7e8c46?auto=format&fit=crop&w=1000&q=85'
   };
 
   async function api(path, options = {}) {
@@ -777,22 +779,11 @@
     return 'available';
   }
   function photoForFood(name) {
-    const n = String(name || '').toLowerCase();
-    if (n.includes('poha') || n.includes('pohe')) return 'https://commons.wikimedia.org/wiki/Special:FilePath/Colourful_Poha.jpg?width=1000';
-    if (n.includes('upma') || n.includes('uppuma')) return 'https://commons.wikimedia.org/wiki/Special:FilePath/Vegetable%20Upma.JPG?width=1000';
-    if (n.includes('aloo paratha') || n.includes('aloo parantha')) return 'https://commons.wikimedia.org/wiki/Special:FilePath/Aloo_paratha_1.JPG?width=1000';
-    if (n.includes('idli')) return 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=1000&q=85';
-    if (n.includes('dosa')) return 'https://images.unsplash.com/photo-1668236543090-82eba5ee5976?auto=format&fit=crop&w=1000&q=85';
-    if (n.includes('paneer')) return 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=1000&q=85';
-    if (n.includes('biryani') || n.includes('pulao')) return 'https://images.unsplash.com/photo-1563379091339-03246963d96c?auto=format&fit=crop&w=1000&q=85';
-    if (n.includes('samosa')) return 'https://images.unsplash.com/photo-1601050690117-94f5f6fa8bd7?auto=format&fit=crop&w=1000&q=85';
-    if (n.includes('noodle')) return 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=1000&q=85';
-    if (n.includes('sandwich')) return 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=1000&q=85';
-    if (n.includes('croissant')) return 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=1000&q=85';
-    if (n.includes('brownie')) return 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=1000&q=85';
-    if (n.includes('coffee') || n.includes('cappuccino') || n.includes('latte') || n.includes('americano') || n.includes('mocha')) return 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=1000&q=85';
-    if (n.includes('orange juice') || n === 'juice') return 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=1000&q=85';
-    return '';
+    const key = String(name || '').trim().toLowerCase();
+    const exactEntry = Object.entries(demoFoodPhotos).find(([dish]) => dish.toLowerCase() === key);
+    // Do not guess from broad keywords (for example, paneer curry vs paneer pulao).
+    // Unmatched real listings deliberately use their own icon instead of a wrong photo.
+    return exactEntry ? exactEntry[1] : '';
   }
 
   function render() {
