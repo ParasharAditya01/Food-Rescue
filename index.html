@@ -811,8 +811,29 @@
       msg.textContent=items.length?'Menu items prepared by the Admin. New orders require Admin approval before cooking starts.':'The Admin has not published any menu items yet.';
       menu.innerHTML=items.map(item=>{
         const ordered=list.some(o=>o.menuItemId===item.id&&o.status!=='collected'&&o.status!=='cancelled'&&o.approvalStatus!=='rejected');
+        const productPhotos={
+          'sample-cafe-cappuccino':'https://images.unsplash.com/photo-1570968915860-54d5c301fa9f?auto=format&fit=crop&w=1000&q=85',
+          'sample-cafe-latte':'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=1000&q=85',
+          'sample-cafe-americano':'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1000&q=85',
+          'sample-cafe-mocha':'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?auto=format&fit=crop&w=1000&q=85',
+          'sample-cafe-frappe':'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?auto=format&fit=crop&w=1000&q=85',
+          'sample-cafe-matcha':'https://images.unsplash.com/photo-1515823064-d6e0c04616a7?auto=format&fit=crop&w=1000&q=85',
+          'sample-bakery-croissant':'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=1000&q=85',
+          'sample-bakery-brownie':'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=1000&q=85',
+          'sample-taj-paneer-pepper':'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?auto=format&fit=crop&w=1000&q=85',
+          'sample-taj-crispy-corn':'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=1000&q=85',
+          'sample-taj-chicken-dim-sum':'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=1000&q=85',
+          'sample-taj-veg-dim-sum':'https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?auto=format&fit=crop&w=1000&q=85',
+          'sample-taj-cheese-board':'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=1000&q=85',
+          'sample-indian-paneer':'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=1000&q=85',
+          'sample-indian-biryani':'https://images.unsplash.com/photo-1563379091339-03246963d96c?auto=format&fit=crop&w=1000&q=85',
+          'sample-indian-dosa':'https://images.unsplash.com/photo-1668236543090-82eba5ee5976?auto=format&fit=crop&w=1000&q=85',
+          'sample-sandwich':'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=1000&q=85',
+          'sample-salad':'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1000&q=85'
+        };
+        const photo=productPhotos[item.id];
         const emoji=item.category==='Drinks'?'🥤':item.category==='Breakfast'?'🥞':item.category==='Lunch'?'🍛':item.category==='Dinner'?'🍲':'🍽️';
-        return `<article class="food-card"><div class="card-visual"><div class="food-emoji">${emoji}</div></div><div class="card-body"><div class="food-category-label">${escapeHtml(item.category)}</div><h3 class="food-title">${escapeHtml(item.name)}</h3><div class="listing-extra"><span class="listing-price">${item.pricePerPortion===null||item.pricePerPortion===undefined?'Price not set':Number(item.pricePerPortion)===0?'Free':'₹'+Number(item.pricePerPortion).toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:2})+' / portion'}</span><span class="listing-price">${escapeHtml(item.servingSize||'Portion size not set')}</span></div><p class="host-note">${escapeHtml(item.description||'Prepared to order')}</p><div class="card-meta"><span>⏱ ${Number(item.cookMinutes)} min / batch · up to ${Number(item.portionsPerBatch)||1} portions</span><span>⌖ ${escapeHtml(item.pickupLocation)}</span></div>${currentUser.role==='student'?`<div class="field" style="margin-top:14px"><label for="portions-${escapeHtml(item.id)}">Number of portions</label><input id="portions-${escapeHtml(item.id)}" data-portion-count type="number" min="1" max="99" step="1" value="1" required></div><div class="card-actions"><button class="primary" data-order-menu="${escapeHtml(item.id)}">${ordered?'Add more portions':'Order food'}</button></div>`:'<p class="host-note">Admin view — students can place orders.</p>'}</div></article>`;
+        const visual=photo?`<img class="food-dish-image" src="${photo}" alt="${escapeHtml(item.name)}" loading="lazy" onerror="this.remove();this.nextElementSibling.hidden=false"><div class="food-emoji-fallback" hidden>${emoji}</div>`:`<div class="food-emoji">${emoji}</div>`;
       }).join('');
       if(currentUser.role==='student'){
         orders.innerHTML=list.length?list.map(o=>{
