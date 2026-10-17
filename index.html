@@ -419,18 +419,18 @@
   .category-heading h2{font:400 clamp(31px,3.5vw,46px)/1.05 Georgia,'Times New Roman',serif;letter-spacing:-1.2px;margin:9px 0 0}
   .category-heading p{font-size:12px;color:#746f65;line-height:1.7;max-width:390px;margin:0}
   .category-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}
-  .category-tile{position:relative;isolation:isolate;display:flex;align-items:end;justify-content:space-between;gap:8px;min-height:190px;padding:17px;border:0;text-align:left;color:white;overflow:hidden;background:#5c594e;cursor:pointer;transition:transform .25s,box-shadow .25s;box-shadow:0 8px 22px #2d281c0c}
-  .category-tile:before{content:"";position:absolute;inset:0;z-index:-2;background-image:var(--tile-image);background-size:cover;background-position:center;transition:transform .6s}
+  .category-tile{position:relative;isolation:isolate;display:flex;align-items:end;justify-content:space-between;gap:8px;min-height:230px;padding:21px;border:1px solid #d2bd8d55;border-radius:5px;text-align:left;color:white;overflow:hidden;background:#243c2d;cursor:pointer;transition:transform .35s,box-shadow .35s;box-shadow:0 12px 30px #18271b20}
+  .category-tile:before{content:"";position:absolute;inset:0;z-index:-2;background-image:var(--tile-image);background-size:cover;background-position:center 52%;filter:saturate(.92) contrast(1.04);transform:scale(1.01);transition:transform .8s cubic-bezier(.2,.7,.2,1),filter .5s}
   /* Keep Dinner visually distinct and legible even if its remote photo fails to load. */
-  .dinner-tile{background-color:#66513c;background-image:linear-gradient(135deg,#66513c,#282b21)}
-  .dinner-tile:before{background-color:#66513c;background-image:var(--tile-image),linear-gradient(135deg,#8b6848,#292d22);background-size:cover;background-position:center;background-repeat:no-repeat}
+  .dinner-tile{background-color:#243c2d;background-image:linear-gradient(135deg,#243c2d,#171f19)}
+  .dinner-tile:before{background-color:#243c2d;background-image:var(--tile-image);background-size:cover;background-position:center 52%;background-repeat:no-repeat}
   .dinner-tile .category-icon{background:#17171170}
-  .category-tile:after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,#17171108 15%,#171711b8 100%)}
-  .category-tile:hover,.category-tile.active{transform:translateY(-4px);box-shadow:0 16px 34px #2d281c24}
-  .category-tile:hover:before{transform:scale(1.06)}
-  .category-tile.active{outline:2px solid #9b8055;outline-offset:-5px}
-  .category-tile strong{font:400 25px/1.05 Georgia,'Times New Roman',serif;letter-spacing:-.4px}
-  .category-tile small{display:block;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;margin-top:7px;color:#f2e9d8}
+  .category-tile:after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(12,20,14,.02) 12%,rgba(12,20,14,.10) 42%,rgba(10,22,14,.88) 100%),linear-gradient(90deg,rgba(12,20,14,.15),transparent 70%);box-shadow:inset 0 0 0 1px #f5e8c51a}
+  .category-tile:hover,.category-tile.active{transform:translateY(-5px);box-shadow:0 22px 42px #18271b35}
+  .category-tile:hover:before{transform:scale(1.07);filter:saturate(1.05) contrast(1.06)}
+  .category-tile.active{outline:2px solid #c5a45d;outline-offset:-5px}
+  .category-tile strong{font:400 29px/1.05 Georgia,'Times New Roman',serif;letter-spacing:-.45px;text-shadow:0 2px 14px #0008}
+  .category-tile small{display:block;font-size:9px;letter-spacing:1.7px;text-transform:uppercase;margin-top:9px;color:#f3e8d0}
   .category-arrow{display:grid;place-items:center;flex:0 0 31px;width:31px;height:31px;border:1px solid #ffffff80;border-radius:50%;font-size:16px;transition:transform .2s}
   .category-icon{position:absolute;top:14px;left:15px;display:grid;place-items:center;width:42px;height:42px;border:1px solid #ffffff85;border-radius:50%;background:#17171145;backdrop-filter:blur(5px);font-size:23px;box-shadow:0 5px 18px #0002}
   .category-tile:hover .category-arrow{transform:translate(2px,-2px)}
@@ -574,8 +574,8 @@
       <div class="category-heading"><div><div class="section-kicker">Explore by craving</div><h2 id="categoryTitle">What are you in the mood for?</h2></div><p>Choose a food collection to find available portions around campus. Every category shows current listings and pickup details.</p></div>
       <div class="category-grid" id="categoryGrid">
         <button class="category-tile" type="button" data-category="Breakfast" style="--tile-image:url('https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80')"><span><strong>Breakfast</strong><small>Start the day</small></span><span class="category-arrow">↗</span></button>
-        <button class="category-tile" type="button" data-category="Lunch" style="--tile-image:url('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=85')"><span><strong>Lunch</strong><small>Midday favourites</small></span><span class="category-arrow">↗</span></button>
-        <button class="category-tile dinner-tile" type="button" data-category="Dinner" style="--tile-image:url('https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?auto=format&fit=crop&w=1000&q=85')"><span class="category-icon" aria-hidden="true">🍲</span><span><strong>Dinner</strong><small>Evening plates</small></span><span class="category-arrow">↗</span></button>
+        <button class="category-tile" type="button" data-category="Lunch" style="--tile-image:url('https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=1400&q=90')"><span><strong>Lunch</strong><small>Midday favourites</small></span><span class="category-arrow">↗</span></button>
+        <button class="category-tile dinner-tile" type="button" data-category="Dinner" style="--tile-image:url('https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=1400&q=90')"><span><strong>Dinner</strong><small>Evening plates</small></span><span class="category-arrow">↗</span></button>
         <button class="category-tile" type="button" data-category="Snacks" style="--tile-image:url('https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=800&q=80')"><span><strong>Snacks</strong><small>Small bites</small></span><span class="category-arrow">↗</span></button>
         <button class="category-tile" type="button" data-category="Sweets & Desserts" style="--tile-image:url('https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=800&q=80')"><span><strong>Sweets &amp; Desserts</strong><small>A little treat</small></span><span class="category-arrow">↗</span></button>
         <button class="category-tile" type="button" data-category="Drinks" style="--tile-image:url('https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=800&q=85')"><span class="category-icon" aria-hidden="true">🥤</span><span><strong>Drinks</strong><small>Freshen up</small></span><span class="category-arrow">↗</span></button>
