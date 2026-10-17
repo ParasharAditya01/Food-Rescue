@@ -481,6 +481,86 @@
   }
   @media(max-width:380px){.footer-main{grid-template-columns:1fr}.footer-about{grid-column:auto}}
 
+
+/* Premium forest / ivory / antique-gold art direction + full-screen scroll snapping */
+:root{
+  --bg:#f5f0e5;--ink:#1d2b22;--muted:#7b8174;--green:#214b35;--lime:#c5a45d;
+  --line:#e2d8c4;--white:#fffdf7;--orange:#bd8b4b;--shadow:0 22px 60px rgba(28,48,34,.10);
+  --gold:#c5a45d;--forest:#10271c;--ivory:#f5f0e5;
+}
+html{scroll-behavior:smooth;scroll-snap-type:y mandatory;scroll-padding-top:76px;background:var(--ivory)}
+body{background:var(--ivory);color:var(--ink)}
+.topbar{background:rgba(16,39,28,.97);border-bottom:1px solid rgba(197,164,93,.28);backdrop-filter:blur(18px)}
+.brand-mark{background:linear-gradient(145deg,#e2c986,#b38d43);color:#173523;box-shadow:0 0 0 5px #c5a45d18}
+.nav a:hover{color:#e1c782}
+.top-action,.top-auth-actions .top-action{background:linear-gradient(135deg,#d7bc78,#b28b43);border-color:#b28b43;color:#182d20;box-shadow:0 7px 18px #c5a45d22}
+.top-action:hover,.top-auth-actions .top-action:hover{background:linear-gradient(135deg,#e3ce94,#c5a45d)}
+.top-auth-login{background:#f8f3e8;border-color:#d8c89f;color:#254a34}
+.hero{min-height:calc(100svh - 76px);display:flex;align-items:center;background:radial-gradient(ellipse at 82% 28%,#c5a45d18,transparent 34%),linear-gradient(125deg,#10271c 0%,#183b29 55%,#10271c 100%);padding-top:54px;padding-bottom:60px;scroll-snap-align:start;scroll-snap-stop:always}
+.hero:before{background:radial-gradient(circle,#c5a45d1c,transparent 68%)}
+.eyebrow{color:#d8bd79}.pulse{background:#d8bd79;box-shadow:0 0 0 5px #c5a45d22}
+.hero h1 em{color:#d9bd78}
+.btn-primary{background:linear-gradient(135deg,#e1ca8c,#c5a45d);color:#173323}
+.btn-primary:hover{box-shadow:0 12px 25px #c5a45d2a}
+.orbit{border-color:#c5a45d55;box-shadow:0 0 28px #c5a45d12}.orbit.outer-orbit{border-color:#c5a45d35}
+.orbit:before{background:#d9bd78;box-shadow:0 0 22px #c5a45d70}
+.plate{background:linear-gradient(145deg,#f7f0db,#d8c18a);box-shadow:inset 0 0 0 12px #ffffff66,0 25px 90px #c5a45d2c}
+.plate-inner{background:#fffaf0;box-shadow:inset 0 0 0 2px #d8c89f}
+.plate-inner:after{color:#b28b43}
+.float-chip{background:#fffaf0;color:#203a2a}
+.chip-icon{background:#f0e5c8}
+.main{max-width:1380px}
+.category-section,#listings,#meal-orders,#how-it-works,#safety,.site-footer{scroll-snap-align:start;scroll-snap-stop:always}
+.category-section{min-height:calc(100svh - 76px);display:flex;flex-direction:column;justify-content:center;padding-top:38px;padding-bottom:40px}
+.impact{border-color:#e4d8bd;background:#fffdf7;box-shadow:0 18px 45px #243d2b0c}
+.impact-icon{background:#f0e7d2;color:#71592b}
+.section-kicker{color:#8a6a2d}
+.section-head h2,.category-heading h2{color:#1c3023}
+.search-wrap input,.filter-select{background:#fffdf7;border-color:#e2d8c4}
+.search-wrap input:focus,input:focus,select:focus{border-color:#b79a58;box-shadow:0 0 0 3px #c5a45d20}
+.add-button,.card-actions button.primary,.food-gate-cta,.confirm-submit{background:var(--green);border-color:var(--green)}
+.add-button:hover,.card-actions button.primary:hover,.food-gate-cta:hover{background:#153b27}
+.cards{gap:22px}
+.food-card{border-color:#e5dac3;background:#fffdf7;border-radius:18px;box-shadow:0 7px 25px #1c30230a}
+.food-card:hover{box-shadow:0 25px 55px #1c30231c}
+.card-visual{height:clamp(190px,24vw,275px);background:#e8dfca}
+.food-dish-image{object-fit:cover;filter:saturate(.92) contrast(1.03);transition:transform .7s cubic-bezier(.2,.7,.2,1),filter .7s}
+.food-card:hover .food-dish-image{transform:scale(1.055);filter:saturate(1.04) contrast(1.04)}
+.food-emoji-fallback{background:linear-gradient(135deg,#f1e7ce,#e0d2ad)}
+.status-pill{background:#fffaf0ed;color:#254632;border:1px solid #e9dfca}
+.quantity,.listing-price{background:#f0e7d2;color:#695329}
+.category-tile{border-color:#e3d6ba}
+.category-tile:after{background:linear-gradient(180deg,transparent 10%,rgba(13,31,21,.84) 100%)}
+.how-section{background:linear-gradient(135deg,#e9e0ca,#f7f1e5);border:1px solid #e1d2ad}
+.how-section:after{color:#e0d1ad}
+.step{background:#fffaf0d9;border-color:#fffdf7}
+.step-num{background:linear-gradient(135deg,#315e40,#173b28)}
+.safety{background:#fbf3df;border-color:#e8d8b3;color:#76633e}
+.safety strong{color:#5e4b27}
+.site-footer,footer{background:#10271c;color:#c6c7b5;border-top:1px solid #c5a45d30}
+.footer-brand span,.footer-back-top{color:#d8bd79}
+.footer-links a:hover,.footer-links button:hover{color:#e2c782}
+.host-section{background:#fffdf7!important;border-color:#e2d8c4!important}
+.category-tile{box-shadow:0 12px 28px #182c2012}
+.food-login-gate{background:linear-gradient(135deg,#f2ead7,#fffdf7 58%,#e9e0ca);border-color:#e0d0aa}
+.food-gate-icon{background:#eee2c3;color:#31553a}
+.food-gate-eyebrow{color:#80642e}
+.food-gate-cta{box-shadow:0 8px 18px #214b3520}
+.confirm-card{background:#fffdf7}
+.confirm-card input{background:#fbf8ef;border-color:#e2d8c4}
+#listings{padding-top:28px;padding-bottom:42px}
+#meal-orders{min-height:calc(100svh - 76px);display:flex;flex-direction:column;justify-content:center}
+#how-it-works{min-height:calc(100svh - 76px);display:flex;flex-direction:column;justify-content:center}
+.site-footer{scroll-snap-align:end}
+@media(max-width:760px){
+ html{scroll-snap-type:y proximity}
+ .hero{min-height:calc(100svh - 64px);padding-top:36px;padding-bottom:42px}
+ .category-section,#meal-orders,#how-it-works{min-height:auto;padding-top:30px;padding-bottom:30px}
+ .cards{gap:14px}
+ .card-visual{height:190px}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto;scroll-snap-type:y proximity}.food-dish-image{transition:none}}
+
 </style>
 </head>
 <body>
@@ -710,8 +790,8 @@
     'Masala dosa':'https://images.unsplash.com/photo-1668236543090-82eba5ee5976?auto=format&fit=crop&w=1000&q=85',
     'Veg thali':'https://commons.wikimedia.org/wiki/Special:FilePath/Uttar%20Pradesh%20Thali.jpg?width=1000',
     'Rajma rice':'https://commons.wikimedia.org/wiki/Special:FilePath/Rajma%20Rice%20-Punjabi.jpg?width=1000',
-    'Chole with roti':'https://commons.wikimedia.org/wiki/Special:FilePath/Rajma%20chapati.jpg?width=1000',
-    'Paneer pulao':'https://commons.wikimedia.org/wiki/Special:FilePath/BengaliPulao.JPG?width=1000',
+    'Chole with roti':'https://images.unsplash.com/photo-1626132647523-66f5bf380027?auto=format&fit=crop&w=1000&q=85',
+    'Paneer pulao':'https://images.unsplash.com/photo-1596797038530-2c107229654b?auto=format&fit=crop&w=1000&q=85',
     'Dal khichdi':'https://commons.wikimedia.org/wiki/Special:FilePath/Khichdi.jpg?width=1000',
     'Vegetable biryani':'https://commons.wikimedia.org/wiki/Special:FilePath/Vegetable%20Biryani.JPG?width=1000',
     'Chapati and mixed veg':'https://commons.wikimedia.org/wiki/Special:FilePath/South%20Indian%20Chapati%20and%20Sabji%20with%20Sour%20Chutney.jpg?width=1000',
