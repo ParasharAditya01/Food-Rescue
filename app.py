@@ -850,9 +850,51 @@ def mark_order_collected(order_id: str):
 
 @app.errorhandler(404)
 def not_found(_error):
+    # Keep API errors machine-readable for the frontend; show a designed page for browser routes.
     if request.path.startswith("/api/"):
         return jsonify({"error": "API endpoint not found."}), 404
-    return "Not found", 404
+    page = """<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102b22">
+  <title>Page not found | Campus Food Rescue</title>
+  <style>
+    :root{color-scheme:dark;--forest:#102b22;--deep:#091b16;--ivory:#f5f0e5;--muted:#c5cfc7;--gold:#d6b56d}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;display:grid;place-items:center;padding:28px;background:radial-gradient(ellipse at 50% 0%,#234638 0%,var(--forest) 46%,var(--deep) 100%);color:var(--ivory);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    main{width:min(100%,720px);text-align:center;padding:clamp(30px,7vw,76px) clamp(20px,5vw,56px);border:1px solid rgba(214,181,109,.38);border-radius:28px;background:rgba(7,24,18,.48);box-shadow:0 28px 90px rgba(0,0,0,.28);position:relative;overflow:hidden}
+    main:before{content:"";position:absolute;inset:10px;border:1px solid rgba(245,240,229,.08);border-radius:20px;pointer-events:none}
+    .eyebrow{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);font-weight:700}
+    .number{font-family:Georgia,"Times New Roman",serif;font-size:clamp(100px,24vw,190px);line-height:.95;letter-spacing:-.08em;margin:22px 0 18px;color:var(--ivory);text-shadow:0 8px 45px rgba(214,181,109,.12)}
+    h1{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:clamp(28px,5vw,42px);margin:0 0 14px}
+    p{max-width:440px;margin:0 auto;color:var(--muted);font-size:15px;line-height:1.8}
+    .actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:30px}
+    a,button{min-height:48px;padding:0 22px;border-radius:999px;font:600 13px inherit;letter-spacing:.02em;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;transition:transform .2s,background .2s,border-color .2s}
+    a:hover,button:hover{transform:translateY(-2px)}
+    .primary{background:var(--gold);color:#14271e;border:1px solid var(--gold)}
+    .secondary{background:transparent;color:var(--ivory);border:1px solid rgba(245,240,229,.3)}
+    .foot{margin-top:34px;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#93a79a}
+    @media(max-width:420px){main{border-radius:22px}.actions{flex-direction:column}a,button{width:100%}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important}}
+  </style>
+</head>
+<body>
+  <main>
+    <div class="eyebrow">Campus Food Rescue · Lost in the network</div>
+    <div class="number" aria-label="404">404</div>
+    <h1>This page isn't on the menu.</h1>
+    <p>The page may have moved, or the address may be incorrect. Let's get you back to discovering good food and reducing waste.</p>
+    <div class="actions">
+      <a class="primary" href="/">Back to homepage <span aria-hidden="true">&nbsp;↗</span></a>
+      <button class="secondary" type="button" onclick="if(history.length>1){history.back()}else{location.href='/'}">Go back</button>
+    </div>
+    <div class="foot">Good food. Good vibes. Less waste.</div>
+  </main>
+</body>
+</html>"""
+    return page, 404
 
 
 @app.errorhandler(500)
