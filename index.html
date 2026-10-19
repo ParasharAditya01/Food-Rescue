@@ -1290,5 +1290,61 @@
 })();
 
 </script>
+
+<script>
+(() => {
+  const base = 'Campus Food Rescue';
+  const titles = {
+    home: base + ' | Good Food, Less Waste',
+    listings: 'Surplus Food Listings | Campus Food Rescue',
+    'meal-orders': 'Campus Café Menu & Orders | Campus Food Rescue',
+    'how-it-works': 'How It Works | Campus Food Rescue',
+    auth: 'Sign Up or Log In | Campus Food Rescue',
+    success: 'Welcome to the Network | Campus Food Rescue',
+    hostLogin: 'Host Sign In | Campus Food Rescue',
+    hostDashboard: 'Host Control Panel | Campus Food Rescue',
+    listingForm: 'Publish a Food Listing | Campus Food Rescue',
+    reservation: 'Confirm Reservation | Campus Food Rescue'
+  };
+  function isShown(el) {
+    if (!el) return false;
+    const style = getComputedStyle(el);
+    return style.display !== 'none' && style.visibility !== 'hidden' &&
+      (el.classList.contains('visible') || el.classList.contains('open') ||
+       style.display === 'flex' || style.display === 'block');
+  }
+  function updatePageTitle() {
+    let title = titles.home;
+    if (isShown(document.getElementById('authSuccess'))) title = titles.success;
+    else if (isShown(document.getElementById('authBackdrop'))) title = titles.auth;
+    else if (isShown(document.getElementById('hostDashboardOverlay'))) title = titles.hostDashboard;
+    else if (isShown(document.getElementById('hostLoginOverlay'))) title = titles.hostLogin;
+    else if (isShown(document.getElementById('modalBackdrop'))) title = titles.listingForm;
+    else if (isShown(document.getElementById('confirmBackdrop'))) title = titles.reservation;
+    else {
+      const hash = (location.hash || '').slice(1);
+      if (titles[hash]) title = titles[hash];
+      else {
+        const sections = ['home', 'listings', 'meal-orders', 'how-it-works']
+          .map(id => document.getElementById(id)).filter(Boolean);
+        const visible = sections
+          .map(el => ({el, rect: el.getBoundingClientRect()}))
+          .filter(x => x.rect.bottom > 100 && x.rect.top < innerHeight * 0.72)
+          .sort((a, b) => Math.abs(a.rect.top - 100) - Math.abs(b.rect.top - 100))[0];
+        if (visible && titles[visible.el.id]) title = titles[visible.el.id];
+      }
+    }
+    document.title = title;
+  }
+  const observer = new MutationObserver(updatePageTitle);
+  observer.observe(document.documentElement, {subtree:true, attributes:true, attributeFilter:['style','class','hidden']});
+  addEventListener('hashchange', updatePageTitle);
+  addEventListener('scroll', updatePageTitle, {passive:true});
+  addEventListener('resize', updatePageTitle);
+  document.addEventListener('DOMContentLoaded', updatePageTitle);
+  updatePageTitle();
+})();
+</script>
+
 </body>
 </html>
