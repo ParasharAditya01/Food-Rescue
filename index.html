@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#101b16" />
 <title>Campus Food Rescue | Good Food, Less Waste</title>
+<meta name="description" content="Discover campus surplus food, reserve available portions, and order from the campus menu with Campus Food Rescue. Good food, less waste." />
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
   :root{--bg:#f4f6ef;--ink:#17231c;--muted:#728076;--green:#246b4b;--lime:#c8f169;--line:#e2e8de;--white:#fff;--orange:#f4a261;--shadow:0 18px 45px rgba(22,47,32,.08)}
@@ -1332,6 +1333,22 @@
     listingForm: 'Publish a Food Listing | Campus Food Rescue',
     reservation: 'Confirm Reservation | Campus Food Rescue'
   };
+  const descriptions = {
+    home: 'Discover campus surplus food, reserve available portions, and order from the campus menu with Campus Food Rescue. Good food, less waste.',
+    listings: 'Browse available surplus food on campus, check quantities and pickup deadlines, and reserve portions before they are gone.',
+    'meal-orders': 'Explore the campus café menu, review portion sizes and prices, and place food orders with Campus Food Rescue.',
+    'how-it-works': 'Learn how Campus Food Rescue connects campus food providers and students to make surplus food easier to find and reduce waste.',
+    auth: 'Create a Campus Food Rescue account or log in to browse campus food listings, reserve portions, and access menu ordering.',
+    success: 'Your Campus Food Rescue account is ready. Continue to the campus food network to explore listings and menu options.',
+    hostLogin: 'Secure host sign-in for the Campus Food Rescue host control panel.',
+    hostDashboard: 'Host control panel for reviewing campus food network activity, user accounts, listings, and reservations.',
+    listingForm: 'Publish a campus surplus-food listing with portions, pickup location, and collection deadline.',
+    reservation: 'Review and confirm your campus food reservation details with Campus Food Rescue.'
+  };
+  const descriptionMeta = document.querySelector('meta[name="description"]');
+  function updateDescription(key) {
+    if (descriptionMeta && descriptions[key]) descriptionMeta.setAttribute('content', descriptions[key]);
+  }
   function isShown(el) {
     if (!el) return false;
     const style = getComputedStyle(el);
@@ -1361,6 +1378,27 @@
       }
     }
     document.title = title;
+    let descriptionKey = 'home';
+    if (isShown(document.getElementById('authSuccess'))) descriptionKey = 'success';
+    else if (isShown(document.getElementById('authBackdrop'))) descriptionKey = 'auth';
+    else if (isShown(document.getElementById('hostDashboardOverlay'))) descriptionKey = 'hostDashboard';
+    else if (isShown(document.getElementById('hostLoginOverlay'))) descriptionKey = 'hostLogin';
+    else if (isShown(document.getElementById('modalBackdrop'))) descriptionKey = 'listingForm';
+    else if (isShown(document.getElementById('confirmBackdrop'))) descriptionKey = 'reservation';
+    else {
+      const hash = (location.hash || '').slice(1);
+      if (descriptions[hash]) descriptionKey = hash;
+      else {
+        const sections = ['home', 'listings', 'meal-orders', 'how-it-works']
+          .map(id => document.getElementById(id)).filter(Boolean);
+        const visible = sections
+          .map(el => ({el, rect: el.getBoundingClientRect()}))
+          .filter(x => x.rect.bottom > 100 && x.rect.top < innerHeight * 0.72)
+          .sort((a, b) => Math.abs(a.rect.top - 100) - Math.abs(b.rect.top - 100))[0];
+        if (visible && descriptions[visible.el.id]) descriptionKey = visible.el.id;
+      }
+    }
+    updateDescription(descriptionKey);
   }
   const observer = new MutationObserver(updatePageTitle);
   observer.observe(document.documentElement, {subtree:true, attributes:true, attributeFilter:['style','class','hidden']});
