@@ -481,9 +481,36 @@
   }
   @media(max-width:380px){.footer-main{grid-template-columns:1fr}.footer-about{grid-column:auto}}
 
+  .auth-success{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse at 50% 10%,#294b35 0%,#14251b 52%,#0d1711 100%);color:#f7f4e9;text-align:center}
+  .auth-success.visible{display:flex;animation:fade .25s ease}
+  .auth-success-card{width:min(100%,540px);padding:clamp(28px,6vw,56px);border:1px solid #d9c98b45;border-radius:28px;background:#f7f4e9;color:#1c3022;box-shadow:0 28px 100px #0005;animation:rise .45s both}
+  .auth-success-mark{width:76px;height:76px;display:grid;place-items:center;margin:0 auto 24px;border-radius:50%;background:#e5efd9;color:#286343;font-size:38px;box-shadow:0 0 0 9px #e5efd94a}
+  .auth-success-kicker{font-size:10px;font-weight:800;letter-spacing:2px;color:#63805e}
+  .auth-success-card h2{font:800 clamp(30px,6vw,46px)/1.1 Manrope,sans-serif;letter-spacing:-1.8px;margin:13px 0}
+  .auth-success-card h2 span{color:#39734b}
+  .auth-success-card p{max-width:390px;margin:0 auto;color:#697669;font-size:14px;line-height:1.8}
+  .auth-success-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:28px}
+  .auth-success-actions button{min-height:48px;padding:0 22px;border-radius:12px;font:700 13px 'DM Sans',sans-serif;cursor:pointer}
+  .auth-success-primary{border:1px solid #246b4b;background:#246b4b;color:#fff}
+  .auth-success-secondary{border:1px solid #d5dfd0;background:transparent;color:#2d5439}
+  .auth-success-card small{display:block;margin-top:24px;color:#879184;font-size:10px;letter-spacing:.5px}
+  @media(prefers-reduced-motion:reduce){.auth-success.visible,.auth-success-card{animation:none}}
 </style>
 </head>
 <body>
+<div class="auth-success" id="authSuccess" role="dialog" aria-modal="true" aria-labelledby="authSuccessTitle">
+  <div class="auth-success-card">
+    <div class="auth-success-mark" aria-hidden="true">✓</div>
+    <div class="auth-success-kicker">CAMPUS FOOD RESCUE</div>
+    <h2 id="authSuccessTitle">You're in.<br><span>Welcome back.</span></h2>
+    <p id="authSuccessMessage">Your campus community is ready when you are. Let's make good food go further.</p>
+    <div class="auth-success-actions">
+      <button class="auth-success-primary" id="authSuccessContinue" type="button">Continue to the network ↗</button>
+      <button class="auth-success-secondary" id="authSuccessHome" type="button">Back to homepage</button>
+    </div>
+    <small>GOOD FOOD. GOOD VIBES. LESS WASTE.</small>
+  </div>
+</div>
 <div class="auth-backdrop" id="authBackdrop" role="dialog" aria-modal="true" aria-labelledby="authTitle">
   <div class="auth-layout">
     <aside class="auth-showcase" aria-label="Campus Food Rescue introduction">
@@ -1054,7 +1081,15 @@
       $('authBackdrop').style.display='none'; $('mainApp').classList.remove('auth-locked'); updateRoleUI(); await refreshListings();
       if (currentUser.role === 'admin') await refreshAdminNotifications();
       await refreshMenuAndOrders();
-      showToast(currentUser.role==='admin'?'Admin access granted.':'You can now browse and reserve food.');
+      const justSignedUp = authMode === 'signup';
+      $('authSuccessTitle').innerHTML = justSignedUp ? 'Thank you for<br><span>joining us.</span>' : 'Welcome<br><span>back.</span>';
+      $('authSuccessMessage').textContent = justSignedUp
+        ? 'Your account is ready. Thanks for joining the campus community and helping good food go further.'
+        : 'You are now signed in. Your campus community is ready when you are.';
+      $('authSuccessContinue').textContent = currentUser.role === 'admin' ? 'Continue to admin dashboard ↗' : 'Continue to the network ↗';
+      $('authSuccess').classList.add('visible');
+      $('authSuccessContinue').focus();
+
     } catch (error) {
       err.textContent=error.message; err.classList.add('show');
       const message=String(error.message||'').toLowerCase();
@@ -1065,7 +1100,10 @@
       }
     } finally { $('authSubmit').disabled=false; }
   });
-  $('confirmForm').addEventListener('submit', submitReservationConfirmation);
+  function closeAuthSuccess() { $('authSuccess').classList.remove('visible'); if (currentUser && currentUser.role === 'admin') $('adminNotifications').scrollIntoView({behavior:'smooth',block:'start'}); else window.scrollTo({top:0,behavior:'smooth'}); }
+  $('authSuccessContinue').addEventListener('click',closeAuthSuccess);
+  $('authSuccessHome').addEventListener('click',closeAuthSuccess);
+    $('confirmForm').addEventListener('submit', submitReservationConfirmation);
   $('cancelConfirm').addEventListener('click', closeConfirm);
   $('confirmBackdrop').addEventListener('click', e => { if (e.target === $('confirmBackdrop')) closeConfirm(); });
   $('signOut').addEventListener('click',async()=>{
