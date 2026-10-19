@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#101b16" />
-<title>Campus Food Rescue</title>
+<title>Campus Food Rescue | Good Food, Less Waste</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
   :root{--bg:#f4f6ef;--ink:#17231c;--muted:#728076;--green:#246b4b;--lime:#c8f169;--line:#e2e8de;--white:#fff;--orange:#f4a261;--shadow:0 18px 45px rgba(22,47,32,.08)}
@@ -1281,6 +1281,43 @@
   if (footerShare) footerShare.addEventListener('click', () => $('navAdd')?.click());
   const footerYear = $('footerYear');
   if (footerYear) footerYear.textContent = new Date().getFullYear();
+
+  // Give each major view its own descriptive browser-tab title.
+  function updateDocumentTitle() {
+    const visible = id => {
+      const el = document.getElementById(id);
+      if (!el) return false;
+      const style = getComputedStyle(el);
+      return style.display !== 'none' && style.visibility !== 'hidden' && !el.hidden;
+    };
+    let title = 'Campus Food Rescue | Good Food, Less Waste';
+    if (visible('hostDashboardOverlay')) title = 'Host Control Panel | Campus Food Rescue';
+    else if (visible('hostLoginOverlay')) title = 'Host Sign In | Campus Food Rescue';
+    else if (visible('authSuccess')) title = (document.getElementById('authSuccessTitle')?.textContent || '').toLowerCase().includes('thank you')
+      ? 'Welcome to the Network | Campus Food Rescue' : 'Welcome Back | Campus Food Rescue';
+    else if (visible('authBackdrop')) title = (typeof authMode !== 'undefined' && authMode === 'login')
+      ? 'Log In | Campus Food Rescue' : 'Create Your Account | Campus Food Rescue';
+    else if (visible('modalBackdrop')) title = 'Share Surplus Food | Campus Food Rescue';
+    else if (visible('confirmBackdrop')) title = 'Confirm Reservation | Campus Food Rescue';
+    else {
+      const hash = (window.location.hash || '#home').slice(1);
+      const sectionTitles = {
+        home: 'Home | Campus Food Rescue',
+        'food-categories': 'Explore Food Categories | Campus Food Rescue',
+        listings: 'Find Available Food | Campus Food Rescue',
+        'meal-orders': 'Campus Menu & Orders | Campus Food Rescue',
+        'how-it-works': 'How It Works | Campus Food Rescue',
+        safety: 'Food Safety | Campus Food Rescue'
+      };
+      title = sectionTitles[hash] || 'Campus Food Rescue | Good Food, Less Waste';
+    }
+    document.title = title;
+  }
+  const titleObserver = new MutationObserver(updateDocumentTitle);
+  titleObserver.observe(document.body, {subtree:true, childList:true, attributes:true, attributeFilter:['style','class','hidden']});
+  window.addEventListener('hashchange', updateDocumentTitle);
+  document.addEventListener('DOMContentLoaded', updateDocumentTitle);
+  updateDocumentTitle();
 
   // Restore a Host session on reload if its token is still valid.
   if(hostToken){openHostDashboard().catch(()=>{});}
