@@ -582,7 +582,15 @@
   @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
 
 
-  /* Restore the hero's previous warm ivory/beige palette from the user's reference screenshot */
+  /* Improve header contrast: keep the dark forest background and make all branding/navigation readable */
+  .topbar{background:#101b16!important;color:#fbf8f0!important}
+  .brand,.brand>a,.brand span{color:#fbf8f0!important}
+  .brand span small{color:#d6c08a!important}
+  .brand-mark{background:#d6c08a!important;color:#17231c!important;box-shadow:0 0 0 5px #d6c08a22!important}
+  .nav{color:#f3f0e7!important}
+  .nav a,.nav a:visited{color:#f3f0e7!important;opacity:1!important}
+  .nav a:hover,.nav a:focus-visible{color:#d6c08a!important}
+/* Restore the hero's previous warm ivory/beige palette from the user's reference screenshot */
   .hero{background:#e8e1ce;color:#17231c}
   .hero h1 em,.eyebrow,.hero-spark{color:#806b3e}
   .hero p{color:#687064}
