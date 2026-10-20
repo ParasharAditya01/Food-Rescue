@@ -645,6 +645,9 @@
 .top-auth-actions #openRegistration:hover{background:linear-gradient(145deg,#fffaf0 0%,#eddfb8 100%)!important;transform:translateY(-1px)!important;box-shadow:0 7px 17px rgba(10,35,22,.22),inset 0 1px 0 rgba(255,255,255,.95)!important}
 .top-auth-actions #openRegistration:active{transform:translateY(0)!important}
 @media(max-width:650px){.top-auth-actions #openRegistration{width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;border-radius:13px!important}}
+
+/* Keep drawer links above every overlay and ensure touch clicks reach them */
+#mainNavigation{z-index:1202!important;pointer-events:auto!important}#mainNavigation a{position:relative;z-index:1203!important;pointer-events:auto!important;touch-action:manipulation;cursor:pointer} .nav-drawer-backdrop{z-index:1200!important} .nav-drawer-backdrop.visible{pointer-events:auto!important}
 </style>
 </head>
 <body>
@@ -1455,6 +1458,6 @@
 </script>
 
 
-<script>(function(){const t=document.getElementById('mobileMenuToggle'),n=document.getElementById('mainNavigation');if(t&&n){const backdrop=document.createElement('div');backdrop.className='nav-drawer-backdrop';backdrop.setAttribute('aria-hidden','true');document.body.appendChild(backdrop);const close=()=>{n.classList.remove('mobile-open');backdrop.classList.remove('visible');t.setAttribute('aria-expanded','false');t.setAttribute('aria-label','Open navigation menu');document.body.style.overflow='';};const open=()=>{n.classList.add('mobile-open');backdrop.classList.add('visible');t.setAttribute('aria-expanded','true');t.setAttribute('aria-label','Close navigation menu');document.body.style.overflow='hidden';};t.addEventListener('click',()=>n.classList.contains('mobile-open')?close():open());backdrop.addEventListener('click',close);n.querySelectorAll('a').forEach(a=>a.addEventListener('click',close));document.addEventListener('keydown',e=>{if(e.key==='Escape')close();});}const y=document.getElementById('footerYear');if(y)y.textContent=String(new Date().getFullYear());})();</script>
+<script>(function(){const t=document.getElementById('mobileMenuToggle'),n=document.getElementById('mainNavigation');if(t&&n){const backdrop=document.createElement('div');backdrop.className='nav-drawer-backdrop';backdrop.setAttribute('aria-hidden','true');document.body.appendChild(backdrop);const close=()=>{n.classList.remove('mobile-open');backdrop.classList.remove('visible');t.setAttribute('aria-expanded','false');t.setAttribute('aria-label','Open navigation menu');document.body.style.overflow='';};const open=()=>{n.classList.add('mobile-open');backdrop.classList.add('visible');t.setAttribute('aria-expanded','true');t.setAttribute('aria-label','Close navigation menu');document.body.style.overflow='hidden';};t.addEventListener('click',()=>n.classList.contains('mobile-open')?close():open());backdrop.addEventListener('click',close);n.querySelectorAll('a').forEach(a=>a.addEventListener('click',e=>{const href=a.getAttribute('href')||'';if(href.startsWith('#')){const target=document.getElementById(href.slice(1));if(target){e.preventDefault();close();if(location.hash!==href)history.replaceState(null,'',href);window.setTimeout(()=>target.scrollIntoView({behavior:'smooth',block:'start'}),40);return;}}close();}));document.addEventListener('keydown',e=>{if(e.key==='Escape')close();});}const y=document.getElementById('footerYear');if(y)y.textContent=String(new Date().getFullYear());})();</script>
 </body>
 </html>
