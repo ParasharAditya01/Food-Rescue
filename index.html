@@ -648,6 +648,16 @@
 
 /* Keep drawer links above every overlay and ensure touch clicks reach them */
 #mainNavigation{z-index:1202!important;pointer-events:auto!important}#mainNavigation a{position:relative;z-index:1203!important;pointer-events:auto!important;touch-action:manipulation;cursor:pointer} .nav-drawer-backdrop{z-index:1200!important} .nav-drawer-backdrop.visible{pointer-events:auto!important}
+
+/* Navigation reliability fix: keep the header/drawer above its backdrop */
+.topbar{position:sticky!important;top:0!important;z-index:3000!important;isolation:isolate}
+#mainNavigation{position:fixed!important;z-index:3002!important;pointer-events:auto!important}
+#mainNavigation a{position:relative!important;z-index:3003!important;display:flex!important;align-items:center!important;min-height:54px!important;pointer-events:auto!important;touch-action:manipulation!important;cursor:pointer!important}
+.nav-drawer-backdrop{z-index:2990!important;pointer-events:none!important}
+.nav-drawer-backdrop.visible{pointer-events:auto!important}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+#home,#food-categories,#listings,#meal-orders,#how-it-works,#safety,#faq,#privacy-policy{scroll-margin-top:88px}
+@media(max-width:650px){.topbar{z-index:3000!important}#mainNavigation{z-index:3002!important}.nav-drawer-backdrop{z-index:2990!important}}
 </style>
 </head>
 <body>
