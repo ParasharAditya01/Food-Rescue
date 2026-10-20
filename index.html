@@ -1470,5 +1470,21 @@ html{scroll-behavior:smooth;scroll-padding-top:84px}
 
 
 <script>(function(){const t=document.getElementById('mobileMenuToggle'),n=document.getElementById('mainNavigation');if(t&&n){const backdrop=document.createElement('div');backdrop.className='nav-drawer-backdrop';backdrop.setAttribute('aria-hidden','true');document.body.appendChild(backdrop);const close=()=>{n.classList.remove('mobile-open');backdrop.classList.remove('visible');t.setAttribute('aria-expanded','false');t.setAttribute('aria-label','Open navigation menu');document.body.style.overflow='';};const open=()=>{n.classList.add('mobile-open');backdrop.classList.add('visible');t.setAttribute('aria-expanded','true');t.setAttribute('aria-label','Close navigation menu');document.body.style.overflow='hidden';};t.addEventListener('click',()=>n.classList.contains('mobile-open')?close():open());backdrop.addEventListener('click',close);n.querySelectorAll('a').forEach(a=>a.addEventListener('click',e=>{const href=a.getAttribute('href')||'';if(href.startsWith('#')){const target=document.getElementById(href.slice(1));if(target){e.preventDefault();close();if(location.hash!==href)history.replaceState(null,'',href);window.setTimeout(()=>target.scrollIntoView({behavior:'smooth',block:'start'}),40);return;}}close();}));document.addEventListener('keydown',e=>{if(e.key==='Escape')close();});}const y=document.getElementById('footerYear');if(y)y.textContent=String(new Date().getFullYear());})();</script>
+<script>
+(function(){
+  const header=document.querySelector('.topbar');
+  if(!header)return;
+  const overlayIds=['authBackdrop','authSuccess','hostLoginOverlay','hostDashboardOverlay'];
+  const isVisible=el=>{if(!el)return false;const st=getComputedStyle(el);return st.display!=='none'&&st.visibility!=='hidden'&&Number(st.opacity||1)>0;};
+  const update=()=>{const modalOpen=overlayIds.some(id=>isVisible(document.getElementById(id)));header.classList.toggle('auth-page-active',modalOpen);};
+  const observer=new MutationObserver(update);
+  overlayIds.forEach(id=>{const el=document.getElementById(id);if(el)observer.observe(el,{attributes:true,attributeFilter:['style','class','aria-hidden']});});
+  document.addEventListener('click',()=>requestAnimationFrame(update),true);
+  update();
+})();
+</script>
+<style>
+.topbar.auth-page-active{display:none!important}
+</style>
 </body>
 </html>
