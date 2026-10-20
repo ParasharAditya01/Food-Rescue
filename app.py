@@ -319,7 +319,7 @@ def robots_txt():
 
 @app.get("/sitemap.xml")
 def sitemap_xml():
-    paths = ["/", "/#food-categories", "/#listings", "/#meal-orders", "/#how-it-works", "/#safety", "/#faq", "/#privacy-policy"]
+    paths = ["/"]
     entries = "".join(f"<url><loc>https://food-rescue-p920.onrender.com{path}</loc></url>" for path in paths)
     body = '<?xml version="1.0" encoding="UTF-8"?>' + '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + entries + '</urlset>'
     return app.response_class(body, mimetype="application/xml")
