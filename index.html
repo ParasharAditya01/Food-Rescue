@@ -659,22 +659,6 @@ html{scroll-behavior:smooth;scroll-padding-top:84px}
 #home,#food-categories,#listings,#meal-orders,#how-it-works,#safety,#faq,#privacy-policy{scroll-margin-top:88px}
 @media(max-width:650px){.topbar{z-index:3000!important}#mainNavigation{z-index:3002!important}.nav-drawer-backdrop{z-index:2990!important}}
 
-/* Balanced premium header: brand left, account control centered, menu right */
-@media(min-width:651px){
- .topbar{display:grid!important;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)!important;align-items:center!important;column-gap:24px!important}
- .topbar .brand{grid-column:1;justify-self:start;margin:0!important}
- .topbar .mobile-menu-toggle{grid-column:3;grid-row:1;justify-self:end;margin:0!important;order:3}
- .topbar .top-auth-actions{grid-column:2;grid-row:1;justify-self:center;margin:0!important;order:2}
-}
-@media(max-width:650px){
- .topbar{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;gap:12px!important;padding:10px 16px!important;min-height:68px!important;height:68px!important}
- .topbar .brand{flex:1 1 auto!important;min-width:0!important;margin:0!important}
- .topbar .brand strong{font-size:15px!important;letter-spacing:-.2px}
- .topbar .brand small{font-size:8px!important;letter-spacing:1.1px!important}
- .topbar .top-auth-actions{flex:0 0 auto!important;margin:0 0 0 auto!important;order:2!important}
- .topbar .mobile-menu-toggle{flex:0 0 42px!important;width:42px!important;height:42px!important;margin:0!important;order:3!important;border:1px solid rgba(220,205,160,.55)!important;border-radius:13px!important;background:rgba(255,255,255,.045)!important}
- .top-auth-actions #openRegistration{width:42px!important;height:42px!important;min-width:42px!important;min-height:42px!important;border-radius:13px!important}
-}
 </style>
 </head>
 <body>
