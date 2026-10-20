@@ -1486,7 +1486,10 @@ html{scroll-behavior:smooth;scroll-padding-top:84px}
 <style>
 .topbar.auth-page-active{display:none!important}
 html.login-page-active,html.login-page-active body{height:100%;overflow:hidden!important;overscroll-behavior:none}
-html.login-page-active body{position:fixed;width:100%;inset:0}
+html.login-page-active body{position:fixed;width:100%;inset:0;touch-action:none}
+html.login-page-active #authBackdrop{position:fixed!important;inset:0!important;height:100vh;height:100dvh;min-height:0;overflow:hidden!important;overscroll-behavior:none;touch-action:none}
+html.login-page-active #authBackdrop .auth-card{max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y}
+html.login-page-active #authBackdrop .auth-card::-webkit-scrollbar{width:0}
 </style>
 </body>
 </html>
