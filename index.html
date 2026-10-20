@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#101b16" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2716%27 fill=%27%23101b16%27/%3E%3Ctext x=%2732%27 y=%2746%27 text-anchor=%27middle%27 font-size=%2748%27 fill=%27%23c8f169%27%3E✳%3C/text%3E%3C/svg%3E" />
 <title>Campus Food Rescue | Good Food, Less Waste</title>
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="Campus Food Rescue" />
@@ -621,6 +622,11 @@
   .hero .btn-secondary:hover{background:#fff9e9}
   .hero .btn-primary{background:#244b38;color:#fbf8f0}
   .hero .btn-primary:hover{background:#172f23}
+
+  html,body{max-width:100%;overflow-x:clip}img,video,svg,canvas{max-width:100%}input,select,textarea,button{max-width:100%}a{overflow-wrap:anywhere}
+  .mobile-menu-toggle{display:none;border:1px solid #ffffff35;background:transparent;color:#fff;border-radius:10px;padding:9px 12px;font-weight:700}
+  @media(max-width:760px){.topbar{height:auto;min-height:68px;flex-wrap:wrap;gap:10px;padding:12px 16px}.brand{max-width:calc(100% - 100px)}.mobile-menu-toggle{display:inline-flex;align-items:center;gap:7px;margin-left:auto}.topbar .nav{display:none!important;order:10;width:100%;max-width:100%;overflow:visible;white-space:normal;flex-direction:column;align-items:stretch;gap:0;padding:6px 0;border-top:1px solid #ffffff20}.topbar .nav.mobile-open{display:flex!important}.topbar .nav a{display:block;padding:12px 8px;border-radius:8px}.topbar .nav a:hover{background:#ffffff12}.hero h1{letter-spacing:-1.8px;font-size:clamp(38px,10vw,58px)}.hero-grid{grid-template-columns:minmax(0,1fr);gap:22px}.hero-art{min-height:280px;overflow:hidden}.form-grid{grid-template-columns:minmax(0,1fr)}.field.full{grid-column:auto}.host-section{max-width:100%;overflow-x:auto}.host-table{min-width:600px}.toast{left:12px;right:12px;bottom:14px;justify-content:center}}
+  @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
@@ -702,7 +708,10 @@
 <div class="app" id="mainApp">
   <header class="topbar">
     <a href="#home" class="brand" style="text-decoration:none;color:inherit"><div class="brand-mark">✳</div><span>campus<span><small>FOOD RESCUE NETWORK</small></span></span></a>
-    <nav class="nav" aria-label="Main navigation"><a href="#home">Home</a><a href="#food-categories">Categories</a><a href="#listings">Find food</a><a href="#meal-orders">Order from menu</a><a href="#how-it-works">How it works</a><a href="#safety">Food safety</a></nav>
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-expanded="false" aria-controls="mainNavigation" aria-label="Open navigation menu">☰ <span>Menu</span></button>
+    <nav class="nav" id="mainNavigation" aria-label="Main navigation"><a href="#home">Home</a><a href="#food-categories">Categories</a><a href="#listings">Find food</a><a href="#meal-orders">Order from menu</a><a href="#how-it-works">How it works</a><a href="#safety">Food safety</a>
+      <a href="#faq">FAQs</a>
+      <a href="#privacy-policy">Privacy policy</a></nav>
     <div class="session-bar" id="sessionBar"><span>Logged in as <strong id="sessionRole"></strong></span><button class="signout-btn" id="signOut">Sign out</button></div><button class="top-action" id="navAdd">+ Post surplus</button><div class="top-auth-actions"><button class="top-auth-login" id="headerLogIn" type="button">Log in</button><button class="top-action" id="openRegistration" type="button">Sign up ↗</button></div>
   </header>
   <section class="hero" id="home">
@@ -778,7 +787,11 @@
     <section class="how-section" id="how-it-works"><div class="section-kicker">Simple by design</div><h2>Good food moves in three steps.</h2><div class="steps"><article class="step"><div class="step-num">01</div><h3>Share the surplus</h3><p>Canteen staff add a food listing with portions, pickup location, and a clear collection deadline.</p></article><article class="step"><div class="step-num">02</div><h3>Find what you need</h3><p>Students and campus community members browse available food and check the pickup details.</p></article><article class="step"><div class="step-num">03</div><h3>Reserve. Collect. Repeat.</h3><p>Reserve a listing, collect it on time, and help make better use of food already prepared.</p></article></div></section>
     <div class="safety" id="safety"><span style="font-size:21px">ⓘ</span><div><strong>Food safety comes first.</strong>This prototype coordinates listings only. Food providers are responsible for safe preparation, storage, allergen information, and suitability for distribution. Only share food that has been handled and stored appropriately, and follow campus policies.</div></div>
   </main>
-  <footer class="site-footer">
+  
+<section id="faq" style="padding:clamp(36px,6vw,76px) clamp(18px,5vw,72px);background:#fff"><div style="max-width:1100px;margin:auto"><p class="eyebrow" style="color:#7e704d">Need to know</p><h2 style="font:800 clamp(28px,4vw,42px)/1.15 Manrope,sans-serif;margin:12px 0 24px">Frequently asked questions</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:14px"><details style="border:1px solid #e2e8de;border-radius:12px;padding:17px"><summary style="font-weight:700;cursor:pointer">Is every displayed food item available?</summary><p style="color:#728076;line-height:1.7">Items marked demo or sample are illustrative only and cannot be booked. Check status and deadline before reserving.</p></details><details style="border:1px solid #e2e8de;border-radius:12px;padding:17px"><summary style="font-weight:700;cursor:pointer">How do I reserve surplus food?</summary><p style="color:#728076;line-height:1.7">Sign in as a student, select an available listing, and follow the reservation prompts. Availability depends on portions and deadline.</p></details><details style="border:1px solid #e2e8de;border-radius:12px;padding:17px"><summary style="font-weight:700;cursor:pointer">How do I order from the menu?</summary><p style="color:#728076;line-height:1.7">Choose a menu item and portion quantity, then review preparation time and pickup details.</p></details><details style="border:1px solid #e2e8de;border-radius:12px;padding:17px"><summary style="font-weight:700;cursor:pointer">What if something goes wrong?</summary><p style="color:#728076;line-height:1.7">Read the on-screen error message and retry where appropriate. Do not rely on demo listings for real food availability.</p></details></div></div></section>
+<section id="privacy-policy" style="padding:clamp(36px,6vw,70px) clamp(18px,5vw,72px);background:#f4f6ef"><div style="max-width:900px;margin:auto"><p class="eyebrow" style="color:#7e704d">Transparency</p><h2 style="font:800 clamp(28px,4vw,40px)/1.15 Manrope,sans-serif;margin:12px 0">Privacy policy</h2><p style="line-height:1.8;color:#5e6d61">Campus Food Rescue uses account details such as name and email to support sign-in, reservations and orders. Information submitted through the website may be stored so these features work. Do not submit passwords for other services or sensitive personal information.</p><p style="line-height:1.8;color:#5e6d61">The website is hosted by Render. External services may process technical information when enabled. Google Analytics is not considered active unless a valid measurement ID is configured and tracking is verified. Cloudflare Turnstile is not considered active unless configured and verified on the server.</p><p style="line-height:1.8;color:#5e6d61">This policy must be reviewed before public production use to confirm retention periods, legal basis and contact details.</p></div></section>
+<section id="community-feedback" style="padding:clamp(30px,5vw,55px) clamp(18px,5vw,72px);background:#101b16;color:#fff"><div style="max-width:1000px;margin:auto"><p class="eyebrow">Community feedback</p><h2 style="font:800 clamp(26px,4vw,38px)/1.15 Manrope,sans-serif;margin:12px 0">Built for the campus community.</h2><p style="max-width:680px;color:#c6d1c8;line-height:1.8">We’ll publish testimonials here after receiving permission from real students or campus partners. We do not display fabricated reviews.</p></div></section>
+<footer class="site-footer">
   <div class="footer-main">
     <div class="footer-about">
       <a href="#home" class="footer-brand" aria-label="Campus Food Rescue home">campus <span>✳</span> food rescue</a>
@@ -799,7 +812,7 @@
       <button type="button" id="footerShare">Share surplus food +</button>
     </div>
   </div>
-  <div class="footer-bottom"><span>© <span id="footerYear">2026</span> Campus Food Rescue</span><span>Built by Aditya Parashar · Share more. Waste less.</span></div>
+  <div class="footer-bottom"><span>© <span id="footerYear"></span> Campus Food Rescue</span><span>Built by Aditya Parashar · Share more. Waste less.</span></div>
 </footer>
 </div>
 
@@ -1423,5 +1436,7 @@
 })();
 </script>
 
+
+<script>(function(){const t=document.getElementById('mobileMenuToggle'),n=document.getElementById('mainNavigation');if(t&&n){const close=()=>{n.classList.remove('mobile-open');t.setAttribute('aria-expanded','false');t.setAttribute('aria-label','Open navigation menu');t.innerHTML='☰ <span>Menu</span>';};t.addEventListener('click',()=>{const open=!n.classList.contains('mobile-open');n.classList.toggle('mobile-open',open);t.setAttribute('aria-expanded',String(open));t.setAttribute('aria-label',open?'Close navigation menu':'Open navigation menu');t.innerHTML=open?'✕ <span>Close</span>':'☰ <span>Menu</span>';});n.querySelectorAll('a').forEach(a=>a.addEventListener('click',close));window.addEventListener('resize',()=>{if(window.innerWidth>760)close();});}const y=document.getElementById('footerYear');if(y)y.textContent=String(new Date().getFullYear());})();</script>
 </body>
 </html>
