@@ -311,6 +311,20 @@ def current_host():
     return session, None
 
 
+@app.get("/robots.txt")
+def robots_txt():
+    body = "User-agent: *\\nAllow: /\\nDisallow: /api/\\nSitemap: https://food-rescue-p920.onrender.com/sitemap.xml\\n"
+    return app.response_class(body, mimetype="text/plain")
+
+
+@app.get("/sitemap.xml")
+def sitemap_xml():
+    paths = ["/", "/#food-categories", "/#listings", "/#meal-orders", "/#how-it-works", "/#safety", "/#faq", "/#privacy-policy"]
+    entries = "".join(f"<url><loc>https://food-rescue-p920.onrender.com{path}</loc></url>" for path in paths)
+    body = '<?xml version="1.0" encoding="UTF-8"?>' + '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + entries + '</urlset>'
+    return app.response_class(body, mimetype="application/xml")
+
+
 @app.get("/")
 def index():
     return send_from_directory(BASE_DIR, "index.html")
