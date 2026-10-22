@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import hashlib
 import secrets
 import sqlite3
 from datetime import datetime, timezone
@@ -101,6 +102,15 @@ CREATE TABLE IF NOT EXISTS meal_orders (
     portions INTEGER NOT NULL DEFAULT 1 CHECK(portions BETWEEN 1 AND 99)
 );
 CREATE INDEX IF NOT EXISTS idx_meal_orders_student ON meal_orders(student_email, ordered_at);
+CREATE TABLE IF NOT EXISTS temporary_admins (
+    email TEXT PRIMARY KEY,
+    password_hash TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    expires_at TEXT NOT NULL,
+    created_by TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active','expired','revoked'))
+);
+CREATE INDEX IF NOT EXISTS idx_temporary_admins_expiry ON temporary_admins(status, expires_at);
 """
 
 
@@ -283,6 +293,34 @@ def error(message: str, status: int = 400):
     return jsonify({"error": message}), status
 
 
+def hash_temporary_password(password: str) -> str:
+    salt = secrets.token_hex(16)
+    digest = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt.encode("ascii"), 200_000).hex()
+    return salt + "$" + digest
+
+
+def verify_temporary_password(password: str, stored: str) -> bool:
+    try:
+        salt, expected = stored.split("$", 1)
+        actual = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt.encode("ascii"), 200_000).hex()
+        return secrets.compare_digest(actual, expected)
+    except (ValueError, TypeError):
+        return False
+
+
+def expire_temporary_admin(db: sqlite3.Connection, email: str, status: str = "expired") -> None:
+    db.execute("DELETE FROM sessions WHERE lower(email)=lower(?)", (email,))
+    db.execute("DELETE FROM account_roles WHERE lower(email)=lower(?)", (email,))
+    db.execute("UPDATE temporary_admins SET status=? WHERE lower(email)=lower(?)", (status, email))
+
+
+def expire_due_temporary_admins(db: sqlite3.Connection) -> None:
+    now = iso_now()
+    rows = db.execute("SELECT email FROM temporary_admins WHERE status='active' AND expires_at<=?", (now,)).fetchall()
+    for row in rows:
+        expire_temporary_admin(db, row["email"], "expired")
+
+
 def current_session(required_role: str | None = None):
     header = request.headers.get("Authorization", "")
     token = header[7:].strip() if header.lower().startswith("bearer ") else ""
@@ -292,6 +330,12 @@ def current_session(required_role: str | None = None):
     session = db.execute("SELECT * FROM sessions WHERE token = ?", (token,)).fetchone()
     if session is None:
         return None, error("Your session is no longer valid. Register again.", 401)
+    expire_due_temporary_admins(db)
+    temp_admin = db.execute("SELECT status,expires_at FROM temporary_admins WHERE lower(email)=lower(?)", (session["email"],)).fetchone()
+    if temp_admin is not None:
+        if temp_admin["status"] != "active" or temp_admin["expires_at"] <= iso_now():
+            expire_temporary_admin(db, session["email"], "expired")
+            return None, error("This temporary Admin account has expired or been revoked. Ask the Host to generate a new one.", 401)
     db.execute("UPDATE sessions SET last_seen = ? WHERE token = ?", (iso_now(), token))
     if required_role and session["role"] != required_role:
         return None, error(f"Only {required_role}s can perform this action.", 403)
@@ -360,7 +404,17 @@ def create_session():
         return error("That email is reserved for Host access. Use the Host login.")
 
     db = get_db()
+    expire_due_temporary_admins(db)
     account = db.execute("SELECT role FROM account_roles WHERE email = ?", (email,)).fetchone()
+    temp_admin = db.execute("SELECT * FROM temporary_admins WHERE lower(email)=lower(?)", (email,)).fetchone()
+    is_temporary_admin = bool(temp_admin and temp_admin["status"] == "active" and temp_admin["expires_at"] > iso_now())
+    if temp_admin is not None and not is_temporary_admin:
+        expire_temporary_admin(db, email, "expired")
+        return error("This temporary Admin account has expired. Ask the Host to generate a new one.", 403)
+    if temp_admin is not None and action != "login":
+        return error("Temporary Admin credentials can only be used to log in.", 403)
+    if is_temporary_admin and role != "admin":
+        return error("This temporary account is restricted to Admin sign-in.", 403)
 
     # Recover legacy registrations from sessions if the account registry is missing a row.
     if account is None:
@@ -380,22 +434,26 @@ def create_session():
     if action == "signup" and account is not None:
         return error("This email is already registered. Please choose Log in instead of Sign up.", 409)
 
-    if action == "login" and account is None:
+    if action == "login" and account is None and not is_temporary_admin:
         return error("No account exists for this email yet. Please choose Sign up first.", 404)
 
     if role == "admin":
-        if not ADMIN_PASSWORD:
-            return error("Admin sign-in is not configured. Set CAMPUS_ADMIN_PASSWORD in the backend environment.", 503)
-        configured_admin = bool(ADMIN_EMAIL and secrets.compare_digest(email, ADMIN_EMAIL))
-        host_authorized_admin = bool(account and account["role"] == "admin")
-        if not configured_admin and not host_authorized_admin:
-            return error("This email has not been authorized as Admin by the Host.", 403)
-        if not secrets.compare_digest(password, ADMIN_PASSWORD):
-            return error("Admin email or password is incorrect.", 403)
+        if is_temporary_admin:
+            if not verify_temporary_password(password, temp_admin["password_hash"]):
+                return error("Temporary Admin email or password is incorrect.", 403)
+        else:
+            if not ADMIN_PASSWORD:
+                return error("Admin sign-in is not configured. Set CAMPUS_ADMIN_PASSWORD in the backend environment.", 503)
+            configured_admin = bool(ADMIN_EMAIL and secrets.compare_digest(email, ADMIN_EMAIL))
+            host_authorized_admin = bool(account and account["role"] == "admin")
+            if not configured_admin and not host_authorized_admin:
+                return error("This email has not been authorized as Admin by the Host.", 403)
+            if not secrets.compare_digest(password, ADMIN_PASSWORD):
+                return error("Admin email or password is incorrect.", 403)
     elif ADMIN_EMAIL and secrets.compare_digest(email, ADMIN_EMAIL):
         return error("This email is reserved for Admin sign-in. Choose Admin and enter the admin password.", 403)
 
-    if account is not None and account["role"] != role:
+    if account is not None and account["role"] != role and not is_temporary_admin:
         return error(
             "This email is registered with a different role. Contact the Host if the role needs to be changed.",
             403,
@@ -431,6 +489,27 @@ def create_host_session():
         (token, HOST_EMAIL, now, now),
     )
     return jsonify({"token": token, "host": {"name": "Host", "role": "host"}}), 201
+
+
+@app.post("/api/host/temporary-admin")
+def host_create_temporary_admin():
+    host, failure = current_host()
+    if failure:
+        return failure
+    db = get_db()
+    expire_due_temporary_admins(db)
+    for row in db.execute("SELECT email FROM temporary_admins WHERE status='active'").fetchall():
+        expire_temporary_admin(db, row["email"], "revoked")
+    email = f"temporary-admin-{secrets.token_hex(5)}@campusfoodrescue.local"
+    password = secrets.token_urlsafe(15)
+    now_dt = utc_now()
+    now = now_dt.isoformat(timespec="seconds")
+    expires_at = datetime.fromtimestamp(now_dt.timestamp() + 600, timezone.utc).isoformat(timespec="seconds")
+    db.execute(
+        "INSERT INTO temporary_admins(email,password_hash,created_at,expires_at,created_by,status) VALUES(?,?,?,?,?,'active')",
+        (email, hash_temporary_password(password), now, expires_at, host["email"]),
+    )
+    return jsonify({"email": email, "password": password, "role": "admin", "createdAt": now, "expiresAt": expires_at, "expiresInSeconds": 600}), 201
 
 
 @app.get("/api/host/overview")
