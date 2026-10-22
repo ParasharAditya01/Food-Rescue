@@ -731,6 +731,12 @@ html{scroll-behavior:smooth;scroll-padding-top:84px}
   <div class="host-card">
     <div class="host-head"><div><h2 id="hostDashboardTitle">Host Control Panel</h2><p class="host-note" id="hostDashboardSub">Full website overview</p></div><div class="host-actions"><button class="host-btn secondary" id="hostRefresh">Refresh data</button><button class="host-btn danger" id="hostSignOut">Host sign out</button></div></div>
     <div class="host-error" id="hostDashboardError" role="alert"></div>
+    <section class="host-section" style="border:1px solid var(--line);background:#fffdf7">
+      <h3>Temporary Admin access (10 minutes)</h3>
+      <p class="host-note">Generate a separate Admin login for a short task. Save the credentials securely; generating a replacement revokes the previous temporary Admin account.</p>
+      <button class="host-btn" id="createTemporaryAdmin" type="button">Generate 10-minute Admin login</button>
+      <div id="temporaryAdminCredentials" class="host-note" role="status" style="margin-top:12px;overflow-wrap:anywhere"></div>
+    </section>
     <div class="host-grid" id="hostStats"></div>
     <section class="host-section"><h3>Accounts & live activity</h3><p class="host-note">“Active” means the browser has checked in within the last 3 minutes. The app is a prototype and does not verify student identity by email.</p><div id="hostUsers"></div></section>
     <section class="host-section"><h3>Published food listings</h3><div id="hostListings"></div></section>
@@ -1348,6 +1354,19 @@ html{scroll-behavior:smooth;scroll-padding-top:84px}
     finally{$('hostLoginSubmit').disabled=false;}
   });
   $('hostRefresh').addEventListener('click',loadHostDashboard);
+  $('createTemporaryAdmin').addEventListener('click',async()=>{
+    const button=$('createTemporaryAdmin'); const output=$('temporaryAdminCredentials');
+    button.disabled=true; button.textContent='Generating...'; output.textContent='';
+    try{
+      const d=await hostApi('/api/host/temporary-admin',{method:'POST',body:JSON.stringify({})});
+      output.innerHTML='<strong>Temporary Admin credentials — valid for 10 minutes from creation</strong><br>Email: <code>'+hostEscape(d.email)+'</code><br>Password: <code>'+hostEscape(d.password)+'</code><br>Expires: '+hostEscape(hostTime(d.expiresAt))+'<br><button class="host-btn secondary" id="copyTemporaryAdminCredentials" type="button" style="margin-top:8px">Copy credentials</button>';
+      $('copyTemporaryAdminCredentials').addEventListener('click',()=>{
+        const value='Email: '+d.email+'\nPassword: '+d.password+'\nExpires: '+d.expiresAt;
+        if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(value).then(()=>{$('copyTemporaryAdminCredentials').textContent='Copied';}).catch(()=>{});}
+      });
+    }catch(err){output.textContent=err.message;}
+    finally{button.disabled=false;button.textContent='Generate 10-minute Admin login';}
+  });
   $('hostSignOut').addEventListener('click',async()=>{try{await hostApi('/api/host/session',{method:'DELETE'});}catch(_){}hostToken='';sessionStorage.removeItem('cfr_host_token');$('hostDashboardOverlay').style.display='none';});
   $('hostDashboardOverlay').addEventListener('click',async e=>{
     const role=e.target.closest('select[data-role-email]');
